@@ -21,18 +21,19 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .authorizeHttpRequests(authorize ->
-                        authorize
-                                .requestMatchers("/api/user/login").permitAll()
+                .authorizeHttpRequests(conf ->
+                        conf
+                                .requestMatchers("/user/login").permitAll()
+                                .requestMatchers("/assets/**").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .formLogin(formLogin ->
-                        formLogin
-                                .loginPage("/api/user/login")
+                .formLogin(conf ->
+                        conf
+                                .loginPage("/user/login")
                 )
-                .oauth2Login(oauth2Login ->
-                        oauth2Login
-                                .loginPage("/api/user/login")
+                .oauth2Login(conf ->
+                        conf
+                                .loginPage("/user/login")
                                 .successHandler(authenticationSuccessHandler())
                 )
                 .build();

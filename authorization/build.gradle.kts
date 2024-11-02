@@ -24,6 +24,7 @@ repositories {
 }
 
 dependencies {
+	implementation("org.jetbrains:annotations:24.0.0")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
