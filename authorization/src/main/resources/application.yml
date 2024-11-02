@@ -1,3 +1,6 @@
 spring:
   application:
     name: authorization
+  data:
+    mongodb:
+      uri: mongodb://localhost/qauthorization
