@@ -32,6 +32,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.session:spring-session-data-redis")
+	implementation("com.alibaba.fastjson2:fastjson2:2.0.53")
+	implementation("com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.53")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
