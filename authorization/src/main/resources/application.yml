@@ -8,6 +8,9 @@ spring:
     mongodb:
       uri: mongodb://localhost/qauthorization
   security:
+    jwt:
+      key: abc-def
+      expire: 7
     oauth2:
       authorizationserver:
         client:

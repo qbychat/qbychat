@@ -3,10 +3,12 @@
 </script>
 
 <template>
-
+<h1> {{ $t('message.hello') }}</h1>
 </template>
 
 <script>
+import {loadLanguageAsync} from "@/main.js";
+
 export default {
   created() {
     this.setInitialLanguage();
@@ -14,11 +16,7 @@ export default {
   methods: {
     setInitialLanguage() {
       const browserLanguage = navigator.language;
-      console.log(browserLanguage);
-      const supportedLanguages = ['en-US', 'zh-CN'];
-      const defaultLanguage = 'en-US';
-
-      this.$i18n.locale = supportedLanguages.includes(browserLanguage) ? browserLanguage : defaultLanguage;
+      loadLanguageAsync(browserLanguage)
     },
   },
 };

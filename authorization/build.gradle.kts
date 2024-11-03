@@ -24,6 +24,8 @@ repositories {
 }
 
 dependencies {
+	implementation("cn.hutool:hutool-core:5.8.32")
+	implementation("com.auth0:java-jwt:4.3.0")
 	implementation("org.jetbrains:annotations:24.0.0")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
