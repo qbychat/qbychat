@@ -37,12 +37,19 @@
             </mdui-text-field>
             <div>
                 <mdui-button
-                        class="w-100 btn btn-lg btn-primary btn-block animate__animated animate__fadeInLeft animate__delay-1s"
+                        class="w-100 btn btn-lg btn-primary btn-block animate__animated animate__bounceIn animate__delay-1s"
                         type="submit" th:text="#{login.button}">
                     Sign in
                 </mdui-button>
                 <mdui-button
-                        class="w-100 btn btn-light btn-block animate__animated animate__fadeInRight animate__delay-1s"
+                        th:text="#{register.link}"
+                        th:href="@{/user/register}"
+                        variant="outlined"
+                        class="animate__animated animate__bounceIn animate__delay-1s">
+                    Register
+                </mdui-button>
+                <mdui-button
+                        class="w-100 btn btn-light btn-block animate__animated animate__bounceIn animate__delay-1s"
                         href="/oauth2/authorization/google-idp"
                         role="link" style="margin-top: 10px">
                     <img src="/assets/img/google.png" th:src="@{/assets/img/google.png}" width="20"
@@ -50,7 +57,7 @@
                     <div th:text="#{login.google}">Sign in with Google</div>
                 </mdui-button>
                 <mdui-button
-                        class="w-100 btn btn-light btn-block animate__animated animate__fadeInLeft animate__delay-1s"
+                        class="w-100 btn btn-light btn-block animate__animated animate__bounceIn animate__delay-1s"
                         href="/oauth2/authorization/github-idp"
                         role="link" style="margin-top: 10px">
                     <img src="/assets/img/github.png" th:src="@{/assets/img/github.png}" width="24"

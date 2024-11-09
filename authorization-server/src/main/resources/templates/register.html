@@ -28,7 +28,14 @@
             <mdui-text-field th:label="#{login.password}" label="Password" class="animate__animated animate__backInUp animate__delay-1s">
                 <mdui-button-icon slot="icon" icon="password"></mdui-button-icon>
             </mdui-text-field>
-            <mdui-button th:text="#{register.button}" type="submit" class="animate__animated animate__backInUp animate__delay-1s">Register</mdui-button>
+            <mdui-button th:text="#{register.button}" type="submit" class="animate__animated animate__bounceIn animate__delay-1s">Register</mdui-button>
+            <mdui-button
+                    th:text="#{login.link}"
+                    th:href="@{/user/login}"
+                    variant="outlined"
+                    class="animate__animated animate__bounceIn animate__delay-1s">
+                Login
+            </mdui-button>
         </form>
     </mdui-card>
 </div>
