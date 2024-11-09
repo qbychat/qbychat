@@ -13,8 +13,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-@Service
 @Log4j2
+@Service
 public class AccountServiceImpl implements AccountService {
     @Resource
     AccountRepository accountRepository;
@@ -32,16 +32,15 @@ public class AccountServiceImpl implements AccountService {
             accountRepository.save(account);
             log.info("Admin account created.");
             log.info("Username: {}", account.getUsername());
-            log.info("Password: {}", account.getPassword());
+            log.info("Password: {}", "admin");
         }
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Account account = accountRepository.findByUsername(username).orElseGet(() -> accountRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username)));
-        return User.withUsername(username)
+        return User.withUserDetails(account)
                 .roles(account.getRoles().stream().map(Enum::name).toList().toArray(new String[0]))
-                .password(account.getPassword())
                 .accountLocked(account.isLocked())
                 .build();
     }

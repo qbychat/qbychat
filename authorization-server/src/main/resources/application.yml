@@ -1,0 +1,43 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: authorization-server
+  data:
+    mongodb:
+      uri: mongodb://localhost/qby-authorization-server
+  security:
+    oauth2:
+      authorizationserver:
+        jwk:
+          rsa:
+            id: 7ebd2080-02e5-4c77-bb77-e0247b93ece6
+            # openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048
+            # openssl rsa -pubout -in private_key.pem -out public_key.pem
+            public: |
+              -----BEGIN PUBLIC KEY-----
+              KEY CONTENT
+              -----END PUBLIC KEY-----
+            private: |
+              -----BEGIN PRIVATE KEY-----
+              KEY CONTENT
+              -----END PRIVATE KEY-----
+      client:
+        registration:
+          google-idp:
+            provider: google
+            client-id: ${GOOGLE_CLIENT_ID:google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:google-client-secret}
+            scope: openid, https://www.googleapis.com/auth/userinfo.profile, https://www.googleapis.com/auth/userinfo.email
+            client-name: Sign in with Google
+          github-idp:
+            provider: github
+            client-id: ${GITHUB_CLIENT_ID:github-client-id}
+            client-secret: ${GITHUB_CLIENT_SECRET:github-client-secret}
+            scope: user:email, read:user
+            client-name: Sign in with GitHub
+        provider:
+          google:
+            user-name-attribute: email
+          github:
+            user-name-attribute: login

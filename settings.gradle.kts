@@ -1,3 +1,4 @@
-rootProject.name = "QbyChat"
-include("authorization-server")
-include("client")
+rootProject.name = "qbychat"
+
+include(":authorization-server")
+include(":client")
