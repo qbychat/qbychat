@@ -1,42 +1,52 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html lang="en" class="mdui-theme-auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"/>
+    <meta name="renderer" content="webkit"/>
+    <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
+    <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
     <title th:text="#{login.title}">qbychat - Login</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link rel="stylesheet" href="/assets/css/signin.css" th:href="@{/assets/css/signin.css}" />
+    <link rel="stylesheet" href="/assets/css/signin.css" th:href="@{/assets/css/signin.css}"/>
 </head>
 <body>
-<div class="container">
-    <form class="form-signin w-100 m-auto" method="post" th:action="@{/user/login}">
-        <div th:if="${param.error}" th:text="#{login.error}" class="alert alert-danger" role="alert">
-            Invalid username or password.
-        </div>
-        <div th:if="${param.logout}" th:text="#{login.logout}" class="alert alert-success" role="alert">
-            You have been logged out.
-        </div>
-        <h1 class="h3 mb-3 fw-normal" th:text="#{login.headline}">Please sign in</h1>
-        <div class="form-floating">
-            <input type="text" id="username" name="username" class="form-control" required autofocus>
-            <label for="username" th:text="#{login.username}">Username</label>
-        </div>
-        <div class="form-floating">
-            <input type="password" id="password" name="password" class="form-control" required>
-            <label for="password" th:text="#{login.password}">Password</label>
-        </div>
-        <div>
-            <button class="w-100 btn btn-lg btn-primary btn-block" type="submit" th:text="#{login.button}">Sign in</button>
-            <a class="w-100 btn btn-light btn-block bg-white" href="/oauth2/authorization/google-idp" role="link" style="margin-top: 10px">
-                <img src="/assets/img/google.png" th:src="@{/assets/img/google.png}" width="20" style="margin-right: 5px;" alt="Sign in with Google">
-                <label th:text="#{login.google}">Sign in with Google</label>
-            </a>
-            <a class="w-100 btn btn-light btn-block bg-white" href="/oauth2/authorization/github-idp" role="link" style="margin-top: 10px">
-                <img src="/assets/img/github.png" th:src="@{/assets/img/github.png}" width="24" style="margin-right: 5px;" alt="Sign in with Github">
-                <label th:text="#{login.github}">Sign in with GitHub</label>
-            </a>
-        </div>
-    </form>
+<div class="container animate__animated animate__fadeInDown">
+    <mdui-card>
+        <form class="form-signin w-100 m-auto" method="post" th:action="@{/user/login}">
+            <div th:if="${param.error}" th:text="#{login.error}" class="alert alert-danger animate__animated animate__fadeIn animate__delay-1s" role="alert">
+                Invalid username or password.
+            </div>
+            <div th:if="${param.logout}" th:text="#{login.logout}" class="alert alert-success animate__animated animate__fadeIn animate__delay-1s" role="alert">
+                You have been logged out.
+            </div>
+            <h1 class="h3 mb-3 fw-normal animate__animated animate__fadeInUp animate__delay-1s" th:text="#{login.headline}">Please sign in</h1>
+            <mdui-text-field th:label="#{login.username}" type="text" id="username" name="username"
+                             class="form-control animate__animated animate__fadeInUp animate__delay-1s">Username
+            </mdui-text-field>
+            <mdui-text-field th:label="#{login.password}" type="password" id="password" name="password"
+                             class="form-control animate__animated animate__fadeInUp animate__delay-1s">Password
+            </mdui-text-field>
+            <div>
+                <mdui-button class="w-100 btn btn-lg btn-primary btn-block animate__animated animate__fadeInLeft animate__delay-1s" type="submit" th:text="#{login.button}">Sign
+                    in
+                </mdui-button>
+                <mdui-button class="w-100 btn btn-light btn-block animate__animated animate__fadeInRight animate__delay-1s" href="/oauth2/authorization/google-idp"
+                             role="link" style="margin-top: 10px">
+                    <img src="/assets/img/google.png" th:src="@{/assets/img/google.png}" width="20"
+                         style="margin-right: 5px;" alt="Sign in with Google">
+                    <div th:text="#{login.google}">Sign in with Google</div>
+                </mdui-button>
+                <mdui-button class="w-100 btn btn-light btn-block animate__animated animate__fadeInLeft animate__delay-1s" href="/oauth2/authorization/github-idp"
+                             role="link" style="margin-top: 10px">
+                    <img src="/assets/img/github.png" th:src="@{/assets/img/github.png}" width="24"
+                         style="margin-right: 5px;" alt="Sign in with Github">
+                    <div th:text="#{login.github}">Sign in with GitHub</div>
+                </mdui-button>
+            </div>
+        </form>
+    </mdui-card>
 </div>
 </body>
 </html>
