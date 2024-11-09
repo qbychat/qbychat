@@ -6,6 +6,7 @@
     <meta name="renderer" content="webkit"/>
     <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
     <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
 
     <title th:text="#{login.title}">qbychat - Login</title>
@@ -15,31 +16,43 @@
 <div class="container animate__animated animate__fadeInDown">
     <mdui-card>
         <form class="form-signin w-100 m-auto" method="post" th:action="@{/user/login}">
-            <div th:if="${param.error}" th:text="#{login.error}" class="alert alert-danger animate__animated animate__fadeIn animate__delay-1s" role="alert">
+            <div th:if="${param.error}" th:text="#{login.error}"
+                 class="alert alert-danger animate__animated animate__fadeIn animate__delay-1s" role="alert">
                 Invalid username or password.
             </div>
-            <div th:if="${param.logout}" th:text="#{login.logout}" class="alert alert-success animate__animated animate__fadeIn animate__delay-1s" role="alert">
+            <div th:if="${param.logout}" th:text="#{login.logout}"
+                 class="alert alert-success animate__animated animate__fadeIn animate__delay-1s" role="alert">
                 You have been logged out.
             </div>
-            <h1 class="h3 mb-3 fw-normal animate__animated animate__fadeInUp animate__delay-1s" th:text="#{login.headline}">Please sign in</h1>
-            <mdui-text-field th:label="#{login.username}" type="text" id="username" name="username"
-                             class="form-control animate__animated animate__fadeInUp animate__delay-1s">Username
+            <h1 class="h3 mb-3 fw-normal animate__animated animate__fadeInUp animate__delay-1s"
+                th:text="#{login.headline}">Please sign in</h1>
+            <mdui-text-field th:label="#{login.username-or-email}" label="Username" type="text" id="username"
+                             name="username"
+                             class="form-control animate__animated animate__fadeInUp animate__delay-1s">
+                <mdui-button-icon slot="icon" icon="account_circle"></mdui-button-icon>
             </mdui-text-field>
-            <mdui-text-field th:label="#{login.password}" type="password" id="password" name="password"
-                             class="form-control animate__animated animate__fadeInUp animate__delay-1s">Password
+            <mdui-text-field th:label="#{login.password}" label="Password" type="password" id="password" name="password"
+                             class="form-control animate__animated animate__fadeInUp animate__delay-1s">
+                <mdui-button-icon slot="icon" icon="password"></mdui-button-icon>
             </mdui-text-field>
             <div>
-                <mdui-button class="w-100 btn btn-lg btn-primary btn-block animate__animated animate__fadeInLeft animate__delay-1s" type="submit" th:text="#{login.button}">Sign
-                    in
+                <mdui-button
+                        class="w-100 btn btn-lg btn-primary btn-block animate__animated animate__fadeInLeft animate__delay-1s"
+                        type="submit" th:text="#{login.button}">
+                    Sign in
                 </mdui-button>
-                <mdui-button class="w-100 btn btn-light btn-block animate__animated animate__fadeInRight animate__delay-1s" href="/oauth2/authorization/google-idp"
-                             role="link" style="margin-top: 10px">
+                <mdui-button
+                        class="w-100 btn btn-light btn-block animate__animated animate__fadeInRight animate__delay-1s"
+                        href="/oauth2/authorization/google-idp"
+                        role="link" style="margin-top: 10px">
                     <img src="/assets/img/google.png" th:src="@{/assets/img/google.png}" width="20"
                          style="margin-right: 5px;" alt="Sign in with Google">
                     <div th:text="#{login.google}">Sign in with Google</div>
                 </mdui-button>
-                <mdui-button class="w-100 btn btn-light btn-block animate__animated animate__fadeInLeft animate__delay-1s" href="/oauth2/authorization/github-idp"
-                             role="link" style="margin-top: 10px">
+                <mdui-button
+                        class="w-100 btn btn-light btn-block animate__animated animate__fadeInLeft animate__delay-1s"
+                        href="/oauth2/authorization/github-idp"
+                        role="link" style="margin-top: 10px">
                     <img src="/assets/img/github.png" th:src="@{/assets/img/github.png}" width="24"
                          style="margin-right: 5px;" alt="Sign in with Github">
                     <div th:text="#{login.github}">Sign in with GitHub</div>

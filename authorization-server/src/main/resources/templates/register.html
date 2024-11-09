@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" class="mdui-theme-auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"/>
+    <meta name="renderer" content="webkit"/>
+    <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
+    <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <title th:text="#{register.title}">Register</title>
+
+    <link rel="stylesheet" href="/assets/css/register.css" th:href="@{/assets/css/register.css}"/>
+</head>
+<body>
+<div class="container animate__animated animate__fadeInDown">
+    <mdui-card>
+        <form th:action="@{/register}" method="post" class="form-register">
+            <h1 class="h3 mb-3 fw-normal animate__animated animate__fadeInUp animate__delay-1s"
+                th:text="#{register.headline}">Register</h1>
+
+            <mdui-text-field th:label="#{register.username}" label="Username" class="animate__animated animate__backInUp animate__delay-1s">
+                <mdui-button-icon slot="icon" icon="account_circle"></mdui-button-icon>
+            </mdui-text-field>
+            <mdui-text-field th:label="#{register.email}" label="Email" class="animate__animated animate__backInUp animate__delay-1s">
+                <mdui-button-icon slot="icon" icon="email"></mdui-button-icon>
+            </mdui-text-field>
+            <mdui-text-field th:label="#{login.password}" label="Password" class="animate__animated animate__backInUp animate__delay-1s">
+                <mdui-button-icon slot="icon" icon="password"></mdui-button-icon>
+            </mdui-text-field>
+            <mdui-button th:text="#{register.button}" type="submit" class="animate__animated animate__backInUp animate__delay-1s">Register</mdui-button>
+        </form>
+    </mdui-card>
+</div>
+</body>
+</html>
