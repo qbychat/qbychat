@@ -19,13 +19,13 @@
             <h1 class="h3 mb-3 fw-normal animate__animated animate__fadeInUp animate__delay-1s"
                 th:text="#{register.headline}">Register</h1>
 
-            <mdui-text-field th:label="#{register.username}" label="Username" class="animate__animated animate__backInUp animate__delay-1s">
+            <mdui-text-field th:label="#{register.username}" label="Username" class="animate__animated animate__backInUp animate__delay-1s" name="username" required>
                 <mdui-button-icon slot="icon" icon="account_circle"></mdui-button-icon>
             </mdui-text-field>
-            <mdui-text-field th:label="#{register.email}" label="Email" class="animate__animated animate__backInUp animate__delay-1s">
+            <mdui-text-field th:label="#{register.email}" type="email" label="Email" class="animate__animated animate__backInUp animate__delay-1s" name="email" required>
                 <mdui-button-icon slot="icon" icon="email"></mdui-button-icon>
             </mdui-text-field>
-            <mdui-text-field th:label="#{login.password}" label="Password" class="animate__animated animate__backInUp animate__delay-1s">
+            <mdui-text-field th:label="#{login.password}" label="Password" type="password" class="animate__animated animate__backInUp animate__delay-1s" name="password" required>
                 <mdui-button-icon slot="icon" icon="password"></mdui-button-icon>
             </mdui-text-field>
             <mdui-button th:text="#{register.button}" type="submit" class="animate__animated animate__bounceIn animate__delay-1s">Register</mdui-button>

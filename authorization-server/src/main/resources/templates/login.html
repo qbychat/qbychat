@@ -28,11 +28,11 @@
                 th:text="#{login.headline}">Please sign in</h1>
             <mdui-text-field th:label="#{login.username-or-email}" label="Username" type="text" id="username"
                              name="username"
-                             class="form-control animate__animated animate__fadeInUp animate__delay-1s">
+                             class="form-control animate__animated animate__fadeInUp animate__delay-1s" required>
                 <mdui-button-icon slot="icon" icon="account_circle"></mdui-button-icon>
             </mdui-text-field>
             <mdui-text-field th:label="#{login.password}" label="Password" type="password" id="password" name="password"
-                             class="form-control animate__animated animate__fadeInUp animate__delay-1s">
+                             class="form-control animate__animated animate__fadeInUp animate__delay-1s" required>
                 <mdui-button-icon slot="icon" icon="password"></mdui-button-icon>
             </mdui-text-field>
             <div>
