@@ -20,7 +20,7 @@ public class ExtraErrorController implements ErrorController {
             model.addAttribute("errorTitle", "Error");
             model.addAttribute("errorMessage", errorMessage);
         }
-        return "error";
+        return "error0";
     }
 
     private String getErrorMessage(HttpServletRequest request) {

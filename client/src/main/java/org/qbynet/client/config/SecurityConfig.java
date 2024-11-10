@@ -16,16 +16,18 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    ClientRegistrationRepository clientRegistrationRepository) throws Exception {
         http
-                .authorizeHttpRequests(authorize ->
-                        authorize
+                .authorizeHttpRequests(conf ->
+                        conf
                                 .requestMatchers("/jwks", "/logged-out", "/oauth2/**").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2Login ->
-                        oauth2Login.loginPage("/oauth2/authorization/web-chat-oidc"))
+                .oauth2Login(conf ->
+                        conf.loginPage("/oauth2/authorization/web-chat-oidc")
+                )
                 .oauth2Client(withDefaults())
-                .logout(logout ->
-                        logout.logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository)));
+                .logout(conf -> conf
+                        .logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository))
+                );
         return http.build();
     }
 

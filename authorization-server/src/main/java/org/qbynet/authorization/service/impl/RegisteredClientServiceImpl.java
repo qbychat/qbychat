@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.qbynet.authorization.repository.RegisteredClientObjectRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -20,6 +21,9 @@ public class RegisteredClientServiceImpl implements RegisteredClientRepository {
     @Resource
     RegisteredClientObjectRepository registeredClientObjectRepository;
 
+    @Value("${qbychat.client.web.address}")
+    String webClientAddress;
+
     @PostConstruct
     private void init() {
         if (registeredClientObjectRepository.count() != 0) {
@@ -33,9 +37,9 @@ public class RegisteredClientServiceImpl implements RegisteredClientRepository {
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/web-chat-oidc")
-                .redirectUri("http://127.0.0.1:8080/authorized")
-                .postLogoutRedirectUri("http://127.0.0.1:8080/logged-out")
+                .redirectUri(webClientAddress + "/login/oauth2/code/web-chat-oidc")
+                .redirectUri(webClientAddress + "/authorized")
+                .postLogoutRedirectUri(webClientAddress + "/logged-out")
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
                 .scope("message.read")
