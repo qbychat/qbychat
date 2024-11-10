@@ -4,6 +4,7 @@ import org.qbynet.authorization.federation.FederatedIdentityAuthenticationSucces
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,7 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
-@Configuration
+@EnableWebSecurity
+@Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
 
     @Bean
@@ -21,16 +23,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(conf -> conf
-                        .requestMatchers("/assets/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/assets/**", "/favicon.ico", "/.well-known/**").permitAll()
                         .requestMatchers("/user/login", "/user/register", "/user/confirm").anonymous()
                         .anyRequest().authenticated()
                 )
                 .formLogin(conf -> conf
                         .loginPage("/user/login")
-                        .loginProcessingUrl("/user/login")
                 )
                 .logout(conf -> conf
                         .logoutUrl("/user/logout")

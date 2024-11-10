@@ -1,6 +1,7 @@
 package org.qbynet.authorization.controller;
 
 import jakarta.annotation.Resource;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.qbynet.authorization.entity.Account;
@@ -62,8 +63,7 @@ public class UserController {
     }
 
     @GetMapping("logout")
-    public String logout(HttpSession session, HttpServletRequest request) throws Exception {
-        session.invalidate();
+    public String logout(HttpServletRequest request) throws ServletException {
         request.logout();
         return "redirect:/user/login?logout";
     }
