@@ -25,7 +25,7 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(conf -> conf
                         .requestMatchers("/assets/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/user/login", "/user/register").anonymous()
+                        .requestMatchers("/user/login", "/user/register", "/user/confirm").anonymous()
                         .anyRequest().authenticated()
                 )
                 .formLogin(conf -> conf

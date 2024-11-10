@@ -41,3 +41,9 @@ spring:
             user-name-attribute: email
           github:
             user-name-attribute: login
+
+qbychat:
+  user:
+    register:
+      # Is confirm email required
+      confirm: true

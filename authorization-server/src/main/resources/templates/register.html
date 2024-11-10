@@ -18,7 +18,9 @@
         <form th:action="@{/user/register}" method="post" class="form-register">
             <h1 class="h3 mb-3 fw-normal animate__animated animate__fadeInUp animate__delay-1s"
                 th:text="#{register.headline}">Register</h1>
-
+            <div th:if="${param.error}" class="alert alert-danger animate__animated animate__bounceIn animate__delay-1s">
+                <p th:text="#{register.error}">Username or email always exists</p>
+            </div>
             <mdui-text-field th:label="#{register.username}" label="Username" class="animate__animated animate__backInUp animate__delay-1s" name="username" required>
                 <mdui-button-icon slot="icon" icon="account_circle"></mdui-button-icon>
             </mdui-text-field>
@@ -35,6 +37,13 @@
                     variant="outlined"
                     class="animate__animated animate__bounceIn animate__delay-1s">
                 Login
+            </mdui-button>
+            <mdui-button
+                    th:text="#{register.confirm.link}"
+                    th:href="@{/user/confirm}"
+                    variant="outlined"
+                    class="animate__animated animate__bounceIn animate__delay-1s">
+                Go Verify
             </mdui-button>
         </form>
     </mdui-card>

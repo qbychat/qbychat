@@ -5,7 +5,9 @@ import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.qbynet.authorization.entity.Account;
 import org.qbynet.authorization.entity.Role;
+import org.qbynet.authorization.entity.Verify;
 import org.qbynet.authorization.repository.AccountRepository;
+import org.qbynet.authorization.repository.VerifyRepository;
 import org.qbynet.authorization.service.AccountService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,11 +15,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
+
 @Log4j2
 @Service
 public class AccountServiceImpl implements AccountService {
     @Resource
     AccountRepository accountRepository;
+
+    @Resource
+    VerifyRepository verifyRepository;
 
     @Resource
     PasswordEncoder passwordEncoder;
@@ -60,5 +67,46 @@ public class AccountServiceImpl implements AccountService {
             account.addRole(Role.ADMIN);
         }
         return accountRepository.save(account);
+    }
+
+    @Override
+    public boolean recordVerify(String username, String password, String email) {
+        if (accountRepository.existsByEmailOrUsername(email, username) || verifyRepository.existsByEmailOrUsername(email, username)) {
+            return false; // exists
+        }
+        Verify verify = new Verify();
+        verify.setUsername(username);
+        verify.setPassword(passwordEncoder.encode(password));
+        verify.setEmail(email);
+        verify.setToken(generateVerificationCode());
+        log.info("Verification to {} is created", verify.getEmail());
+        verifyRepository.save(verify);
+        // todo send email
+        return true;
+    }
+
+    @Override
+    public Account doVerify(String email, String token) {
+        Verify verify = verifyRepository.findByEmailAndToken(email, token).orElse(null);
+        if (verify == null) {
+            return null;
+        }
+        Account account = new Account();
+        account.setUsername(verify.getUsername());
+        account.setEmail(verify.getEmail());
+        account.setPassword(verify.getPassword());
+        log.info("User {} was registered", account.getUsername());
+        return accountRepository.save(account);
+    }
+
+    private String generateVerificationCode() {
+        Random random = new Random();
+        StringBuilder code = new StringBuilder();
+
+        for (int i = 0; i < 6; i++) {
+            code.append(random.nextInt(10));
+        }
+
+        return code.toString();
     }
 }

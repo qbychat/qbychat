@@ -8,4 +8,8 @@ public interface AccountService extends UserDetailsService {
     Account findAccountByUsernameOrEmail(String value);
 
     Account register(String username, String password, String email, boolean isAdmin);
+
+    boolean recordVerify(String username, String password, String email);
+
+    Account doVerify(String email, String token);
 }
