@@ -1,8 +1,8 @@
 plugins {
     java
     war
-    id("org.springframework.boot") version "3.3.5"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot") version "3.3.5" apply false
+    id("io.spring.dependency-management") version "1.1.6" apply false
 }
 
 group = "org.qbynet"
@@ -25,9 +25,8 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.security:spring-security-test")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation("org.jetbrains:annotations:24.0.0")
+    implementation("com.alibaba.fastjson2:fastjson2:2.0.53")
 }
 
 tasks.withType<Test> {

@@ -100,6 +100,7 @@ public class AccountServiceImpl implements AccountService {
         account.setUsername(verify.getUsername());
         account.setEmail(verify.getEmail());
         account.setPassword(verify.getPassword());
+        verifyRepository.delete(verify);
         log.info("User {} was registered", account.getUsername());
         return accountRepository.save(account);
     }

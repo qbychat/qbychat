@@ -33,13 +33,14 @@ public class UserController {
     }
 
     @PostMapping("register")
-    public String confirmRegister(@RequestParam String username, @RequestParam String password, @RequestParam String email) {
+    public String confirmRegister(Model model, @RequestParam String username, @RequestParam String password, @RequestParam String email) {
         if (confirmEmailNeeded) {
             if (accountService.recordVerify(username, password, email)) {
                 return "redirect:/user/confirm?email=" + email;
             }
             return "redirect:/user/register?error";
         }
+        model.addAttribute("email", email);
         return "register-success";
     }
 
@@ -56,6 +57,7 @@ public class UserController {
             model.addAttribute("hasError", true);
             return "confirm-email";
         }
+        model.addAttribute("email", email);
         return "register-success";
     }
 

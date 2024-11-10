@@ -1,18 +1,11 @@
 plugins {
     java
     war
-    id("org.springframework.boot") version "3.3.5"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
 }
 
 group = "org.qbynet"
-version = "0.0.1-SNAPSHOT"
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
 
 configurations {
     compileOnly {
@@ -25,7 +18,6 @@ repositories {
 }
 
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2:2.0.53")
     implementation("com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.53")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
