@@ -9,6 +9,7 @@ import org.qbynet.authorization.entity.Verify;
 import org.qbynet.authorization.repository.AccountRepository;
 import org.qbynet.authorization.repository.VerifyRepository;
 import org.qbynet.authorization.service.AccountService;
+import org.qbynet.authorization.service.MailService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,6 +21,9 @@ import java.util.Random;
 @Log4j2
 @Service
 public class AccountServiceImpl implements AccountService {
+    @Resource
+    MailService mailService;
+
     @Resource
     AccountRepository accountRepository;
 
@@ -78,10 +82,11 @@ public class AccountServiceImpl implements AccountService {
         verify.setUsername(username);
         verify.setPassword(passwordEncoder.encode(password));
         verify.setEmail(email);
-        verify.setToken(generateVerificationCode());
+        String token = generateVerificationCode();
+        verify.setToken(token);
         log.info("Verification to {} is created", verify.getEmail());
         verifyRepository.save(verify);
-        // todo send email
+        mailService.sendConfirmToken(email, token);
         return true;
     }
 
