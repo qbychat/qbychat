@@ -21,8 +21,8 @@ public class SecurityConfig {
                                 .requestMatchers("/jwks", "/logged-out", "/oauth2/**").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .oauth2Login(conf ->
-                        conf.loginPage("/oauth2/authorization/web-chat-oidc")
+                .oauth2Login(conf -> conf
+                        .loginPage("/oauth2/authorization/web-chat-oidc")
                 )
                 .oauth2Client(withDefaults())
                 .logout(conf -> conf

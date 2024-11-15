@@ -7,7 +7,7 @@ spring:
         registration:
           web-chat-oidc:
             provider: spring
-            client-id: web-chat-oidc
+            client-id: web-chat
             client-secret: secret
             authorization-grant-type: authorization_code
             redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/{registrationId}"

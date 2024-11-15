@@ -31,7 +31,7 @@ public class RegisteredClientServiceImpl implements RegisteredClientRepository {
         }
         log.info("Add default clients to MongoDB...");
         RegisteredClient webClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("web-chat-oidc")
+                .clientId("web-chat")
                 .clientSecret("{noop}secret")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)

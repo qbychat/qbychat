@@ -22,7 +22,6 @@ spring:
             fallback: false
   security:
     oauth2:
-
       authorizationserver:
         jwk:
           rsa:
