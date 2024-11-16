@@ -8,7 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface ClientRepository extends MongoRepository<Client, String> {
-    Optional<Client> findByOriginClientId(String clientId);
-
-    Optional<Client> findByOriginId(String originId);
+    Optional<Client> findByClientId(String clientId);
 }

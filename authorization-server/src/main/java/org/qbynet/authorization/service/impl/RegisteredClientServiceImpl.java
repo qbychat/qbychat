@@ -14,7 +14,6 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Log4j2
@@ -54,17 +53,7 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
 
     @Override
     public void save(RegisteredClient registeredClient) {
-        Optional<Client> byOriginId = clientRepository.findByOriginId(registeredClient.getId());
-        Client theClient;
-        if (byOriginId.isPresent()) {
-            theClient = byOriginId.get();
-            theClient.setOrigin(registeredClient);
-        } else {
-            theClient = new Client();
-            theClient.setOrigin(registeredClient);
-            theClient.setOwner(null); // internal
-        }
-        clientRepository.save(theClient);
+        clientRepository.save(Client.from(registeredClient));
     }
 
     @Override
@@ -74,11 +63,11 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
 
     @Override
     public RegisteredClient findById(String id) {
-        return clientRepository.findByOriginId(id).map(Client::getOrigin).orElse(null);
+        return clientRepository.findById(id).map(Client::asRegisteredClient).orElse(null);
     }
 
     @Override
     public RegisteredClient findByClientId(String clientId) {
-        return clientRepository.findByOriginClientId(clientId).map(Client::getOrigin).orElse(null);
+        return clientRepository.findByClientId(clientId).map(Client::asRegisteredClient).orElse(null);
     }
 }
