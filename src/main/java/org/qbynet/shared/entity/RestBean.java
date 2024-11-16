@@ -1,4 +1,4 @@
-package org.qbychat.shared.entity;
+package org.qbynet.shared.entity;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;

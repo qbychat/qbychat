@@ -1,3 +1,3 @@
 # QbyChat
 
-WIP
+Simplicity is not crudeness
