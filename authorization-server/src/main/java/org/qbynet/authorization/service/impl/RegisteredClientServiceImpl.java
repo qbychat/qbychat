@@ -3,30 +3,32 @@ package org.qbynet.authorization.service.impl;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
-import org.qbynet.authorization.repository.RegisteredClientObjectRepository;
+import org.qbynet.authorization.entity.Client;
+import org.qbynet.authorization.repository.ClientRepository;
+import org.qbynet.authorization.service.RegisteredClientService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Log4j2
 @Service
-public class RegisteredClientServiceImpl implements RegisteredClientRepository {
+public class RegisteredClientServiceImpl implements RegisteredClientService {
     @Resource
-    RegisteredClientObjectRepository registeredClientObjectRepository;
+    ClientRepository clientRepository;
 
     @Value("${qbychat.client.web.address}")
     String webClientAddress;
 
     @PostConstruct
     private void init() {
-        if (registeredClientObjectRepository.count() != 0) {
+        if (clientRepository.count() != 0) {
             return;
         }
         log.info("Add default clients to MongoDB...");
@@ -52,16 +54,31 @@ public class RegisteredClientServiceImpl implements RegisteredClientRepository {
 
     @Override
     public void save(RegisteredClient registeredClient) {
-        registeredClientObjectRepository.save(registeredClient);
+        Optional<Client> byOriginId = clientRepository.findByOriginId(registeredClient.getId());
+        Client theClient;
+        if (byOriginId.isPresent()) {
+            theClient = byOriginId.get();
+            theClient.setOrigin(registeredClient);
+        } else {
+            theClient = new Client();
+            theClient.setOrigin(registeredClient);
+            theClient.setOwner(null); // internal
+        }
+        clientRepository.save(theClient);
+    }
+
+    @Override
+    public Client save(Client client) {
+        return clientRepository.save(client);
     }
 
     @Override
     public RegisteredClient findById(String id) {
-        return registeredClientObjectRepository.findById(id).orElse(null);
+        return clientRepository.findByOriginId(id).map(Client::getOrigin).orElse(null);
     }
 
     @Override
     public RegisteredClient findByClientId(String clientId) {
-        return registeredClientObjectRepository.findByClientId(clientId).orElse(null);
+        return clientRepository.findByOriginClientId(clientId).map(Client::getOrigin).orElse(null);
     }
 }

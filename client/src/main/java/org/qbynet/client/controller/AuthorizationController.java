@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class AuthorizationController {
     @GetMapping(value = "/authorize", params = "grant_type=authorization_code")
     public String authorizationCodeGrant(Model model,
-                                         @RegisteredOAuth2AuthorizedClient("messaging-client-authorization-code")
+                                         @RegisteredOAuth2AuthorizedClient("qbychat-web-authorization-code")
                                          OAuth2AuthorizedClient authorizedClient) {
         log.info(authorizedClient.getAccessToken()); // todo
         return "index";

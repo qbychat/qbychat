@@ -1,6 +1,8 @@
 spring:
   application:
     name: client
+  thymeleaf:
+    cache: false
   security:
     oauth2:
       client:
@@ -13,6 +15,14 @@ spring:
             redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/{registrationId}"
             scope: openid, profile
             client-name: QbyChat web
+          qbychat-web-authorization-code:
+            provider: spring
+            client-id: web-chat
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://127.0.0.1:8080/authorized"
+            scope: message.read,message.write
+            client-name: messaging-client-authorization-code
         provider:
           spring:
             issuer-uri: http://localhost:9000
