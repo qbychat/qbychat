@@ -7,6 +7,7 @@ import org.qbynet.authorization.entity.Client;
 import org.qbynet.authorization.repository.ClientRepository;
 import org.qbynet.authorization.service.RegisteredClientService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -22,6 +23,9 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
     @Resource
     ClientRepository clientRepository;
 
+    @Resource
+    PasswordEncoder passwordEncoder;
+
     @Value("${qbychat.client.web.address}")
     String webClientAddress;
 
@@ -33,7 +37,7 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
         log.info("Add default clients to MongoDB...");
         RegisteredClient webClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("web-chat")
-                .clientSecret("{noop}secret")
+                .clientSecret(passwordEncoder.encode("secret"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)

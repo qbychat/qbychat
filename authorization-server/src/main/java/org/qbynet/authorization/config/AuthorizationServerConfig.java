@@ -47,6 +47,7 @@ public class AuthorizationServerConfig {
 
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
                 new OAuth2AuthorizationServerConfigurer();
+        http.csrf((conf) -> conf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()));
         http
                 .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
                 .with(authorizationServerConfigurer, conf -> conf
@@ -74,7 +75,6 @@ public class AuthorizationServerConfig {
                                 new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
                         )
                 );
-        ;
         return http.build();
     }
 
