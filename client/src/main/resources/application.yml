@@ -1,6 +1,9 @@
 spring:
   application:
     name: client
+  data:
+    mongodb:
+      uri: mongodb://localhost/qbychat-client
   thymeleaf:
     cache: false
   security:
