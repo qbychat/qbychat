@@ -15,6 +15,7 @@
  */
 package org.qbynet.authorization.controller;
 
+import jakarta.annotation.Resource;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
@@ -33,14 +34,10 @@ import java.util.*;
 
 @Controller
 public class AuthorizationConsentController {
-	private final RegisteredClientRepository registeredClientRepository;
-	private final OAuth2AuthorizationConsentService authorizationConsentService;
-
-	public AuthorizationConsentController(RegisteredClientRepository registeredClientRepository,
-                                          OAuth2AuthorizationConsentService authorizationConsentService) {
-		this.registeredClientRepository = registeredClientRepository;
-		this.authorizationConsentService = authorizationConsentService;
-	}
+	@Resource
+	RegisteredClientRepository registeredClientRepository;
+	@Resource
+	OAuth2AuthorizationConsentService authorizationConsentService;
 
 	@GetMapping(value = "/oauth2/consent")
 	public String consent(Principal principal, Model model,
