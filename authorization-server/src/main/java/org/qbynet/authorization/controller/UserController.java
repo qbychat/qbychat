@@ -1,9 +1,6 @@
 package org.qbynet.authorization.controller;
 
 import jakarta.annotation.Resource;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.qbynet.authorization.entity.Account;
 import org.qbynet.authorization.service.AccountService;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,11 +57,5 @@ public class UserController {
         }
         model.addAttribute("email", email);
         return "register-success";
-    }
-
-    @GetMapping("logout")
-    public String logout(HttpServletRequest request) throws ServletException {
-        request.logout();
-        return "redirect:/user/login?logout";
     }
 }
