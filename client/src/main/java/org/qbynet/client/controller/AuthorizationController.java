@@ -14,7 +14,10 @@ public class AuthorizationController {
     public String authorizationCodeGrant(Model model,
                                          @RegisteredOAuth2AuthorizedClient("qbychat-web-authorization-code")
                                          OAuth2AuthorizedClient authorizedClient) {
-        log.info(authorizedClient.getAccessToken()); // todo
+        String token = authorizedClient.getAccessToken().getTokenValue();
+        model.addAttribute("access_token", token);
+        // todo
+        log.info(token);
         return "index";
     }
 }

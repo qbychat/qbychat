@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface OAuth2AuthorizationConsentRepository extends MongoRepository<OAuth2AuthorizationConsent, String> {
-    Optional<OAuth2AuthorizationConsent> findByRegisteredClientIdAndPrincipalName(String clientId, String principalName);
+    Optional<OAuth2AuthorizationConsent> findFirstByRegisteredClientIdAndPrincipalName(String clientId, String principalName);
 }

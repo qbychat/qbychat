@@ -1,0 +1,14 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: chat-resource
+  data:
+    mongodb:
+      uri: mongodb://localhost/qby-chat-resourceer
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri:  http://localhost:9000/oauth2/jwks

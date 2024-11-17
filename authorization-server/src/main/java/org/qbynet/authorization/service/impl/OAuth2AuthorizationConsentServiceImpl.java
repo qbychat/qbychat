@@ -23,6 +23,6 @@ public class OAuth2AuthorizationConsentServiceImpl implements OAuth2Authorizatio
 
     @Override
     public OAuth2AuthorizationConsent findById(String registeredClientId, String principalName) {
-        return oAuth2AuthorizationConsentRepository.findByRegisteredClientIdAndPrincipalName(registeredClientId, principalName).orElse(null);
+        return oAuth2AuthorizationConsentRepository.findFirstByRegisteredClientIdAndPrincipalName(registeredClientId, principalName).orElse(null);
     }
 }
