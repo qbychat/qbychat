@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/authorization-server" />
+            <option value="$PROJECT_DIR$/chat-resource" />
             <option value="$PROJECT_DIR$/client" />
           </set>
         </option>
