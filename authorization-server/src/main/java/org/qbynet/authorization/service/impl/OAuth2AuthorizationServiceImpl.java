@@ -8,8 +8,9 @@ import org.qbynet.authorization.repository.OAuth2AuthorizationRepository;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.stereotype.Service;
 
-//@Service
+@Service
 public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationService {
     @Resource
     OAuth2AuthorizationRepository authorizationRepository;
@@ -35,7 +36,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
     @Override
     public OAuth2Authorization findByToken(String token, OAuth2TokenType tokenType) {
-        for (OAuth2Authorization authorization : authorizationRepository.findAll().stream().map(it -> it.convent(jsonClientRepository.findByClientId(it.getRegisteredClientId()).orElseThrow().asRegisteredClient())).toList()) {
+        for (OAuth2Authorization authorization : authorizationRepository.findAll().stream().map(it -> it.convent(jsonClientRepository.findById(it.getRegisteredClientId()).orElseThrow().asRegisteredClient())).toList()) {
             if (authorization.getToken(token) != null) {
                 return authorization;
             }
