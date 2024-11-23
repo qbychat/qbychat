@@ -6,8 +6,6 @@ import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.annotation.Resource;
 import org.qbynet.authorization.authentication.DeviceClientAuthenticationConverter;
 import org.qbynet.authorization.authentication.DeviceClientAuthenticationProvider;
-import org.qbynet.authorization.federation.FederatedIdentityAuthenticationSuccessHandler;
-import org.qbynet.authorization.federation.FederatedIdentityIdTokenCustomizer;
 import org.qbynet.authorization.jose.Jwks;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,10 +25,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
-import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
-import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -102,15 +97,7 @@ public class SecurityConfig {
                         .logoutUrl("/user/logout")
                         .logoutSuccessUrl("/user/login?logout")
                 )
-                .oauth2Login(conf -> conf
-                        .loginPage("/user/login")
-                        .successHandler(authenticationSuccessHandler())
-                )
                 .build();
-    }
-
-    private AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new FederatedIdentityAuthenticationSuccessHandler();
     }
 
     @Bean
@@ -127,11 +114,6 @@ public class SecurityConfig {
     public JWKSource<SecurityContext> jwkSource() throws Exception {
         JWKSet jwkSet = new JWKSet(jwks.getRSAKey());
         return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
-    }
-
-    @Bean
-    public OAuth2TokenCustomizer<JwtEncodingContext> idTokenCustomizer() {
-        return new FederatedIdentityIdTokenCustomizer();
     }
 
     @Bean

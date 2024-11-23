@@ -16,8 +16,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(conf -> conf
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2ResourceServer ->
-                        oauth2ResourceServer.jwt(Customizer.withDefaults())
+                .oauth2ResourceServer(conf -> conf
+                        .jwt(Customizer.withDefaults())
                 )
                 .build();
     }
