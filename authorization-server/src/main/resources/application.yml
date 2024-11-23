@@ -61,6 +61,3 @@ qbychat:
     register:
       # Is confirm email required
       confirm: true
-  client:
-    web:
-      address: http://127.0.0.1:8080

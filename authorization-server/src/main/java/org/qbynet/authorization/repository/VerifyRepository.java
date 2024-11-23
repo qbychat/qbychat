@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface VerifyRepository extends KeyValueRepository<Verify, String> {
     Optional<Verify> findByEmailAndToken(String email, String token);
 
-    boolean existsByEmailOrUsername(String email, String username);
+    boolean existsByEmail(String email);
 }

@@ -37,34 +37,29 @@ public class AccountServiceImpl implements AccountService {
     private void init() {
         if (accountRepository.count() == 0) {
             Account account = new Account();
-            account.setUsername("admin");
+            account.setEmail("admin");
             account.setPassword(passwordEncoder.encode("admin")); // todo random password
             account.addRole(Role.ADMIN);
             accountRepository.save(account);
             log.info("Admin account created.");
-            log.info("Username: {}", account.getUsername());
+            log.info("email: {}", account.getEmail());
             log.info("Password: {}", "admin");
         }
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Account account = accountRepository.findByUsername(username).orElseGet(() -> accountRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username)));
-        return User.withUserDetails(account)
+        Account account = accountRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        return User.withUsername(account.getId())
+                .password(account.getPassword())
                 .roles(account.getRoles().stream().map(Enum::name).toList().toArray(new String[0]))
                 .accountLocked(account.isLocked())
                 .build();
     }
 
     @Override
-    public Account findAccountByUsernameOrEmail(String value) {
-        return accountRepository.findByUsername(value).orElseGet(() -> accountRepository.findByEmail(value).orElse(null));
-    }
-
-    @Override
-    public Account register(String username, String password, String email, boolean isAdmin) {
+    public Account register(String password, String email, boolean isAdmin) {
         Account account = new Account();
-        account.setUsername(username);
         account.setPassword(passwordEncoder.encode(password));
         account.setEmail(email);
         if (isAdmin) {
@@ -74,14 +69,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean recordVerify(String username, String password, String email) {
-        if (accountRepository.existsByEmailOrUsername(email, username) || verifyRepository.existsByEmailOrUsername(email, username)) {
+    public boolean recordVerify(String password, String email) {
+        if (accountRepository.existsByEmail(email) || verifyRepository.existsByEmail(email)) {
             return false; // exists
         }
         Verify verify = new Verify();
-        verify.setUsername(username);
-        verify.setPassword(passwordEncoder.encode(password));
         verify.setEmail(email);
+        verify.setPassword(passwordEncoder.encode(password));
         String token = generateVerificationCode();
         verify.setToken(token);
         log.info("Verification to {} is created", verify.getEmail());
@@ -97,11 +91,10 @@ public class AccountServiceImpl implements AccountService {
             return null;
         }
         Account account = new Account();
-        account.setUsername(verify.getUsername());
         account.setEmail(verify.getEmail());
         account.setPassword(verify.getPassword());
         verifyRepository.delete(verify);
-        log.info("User {} was registered", account.getUsername());
+        log.info("User {} was registered", account.getEmail());
         return accountRepository.save(account);
     }
 

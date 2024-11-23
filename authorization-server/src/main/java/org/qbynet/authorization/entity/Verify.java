@@ -13,8 +13,6 @@ public class Verify {
     @Indexed
     private String token;
 
-    @Indexed
-    private String username;
     private String password;
     @Indexed
     private String email;

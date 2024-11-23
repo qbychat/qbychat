@@ -20,7 +20,7 @@ import java.util.Set;
 
 @Data
 @Document
-public class Client implements Serializable {
+public class JsonClient implements Serializable {
     @Id
     private String id;
     @DBRef
@@ -48,22 +48,22 @@ public class Client implements Serializable {
 
     private InternalTokenSettings tokenSettings;
 
-    public static Client from(RegisteredClient registeredClient, Account optionalOwner) {
-        Client client = new Client();
-        client.setId(registeredClient.getId());
-        client.setClientId(registeredClient.getClientId());
-        client.setClientSecret(registeredClient.getClientSecret());
-        client.setClientSecretExpiresAt(registeredClient.getClientSecretExpiresAt());
-        client.setClientName(registeredClient.getClientName());
-        client.setClientAuthenticationMethods(registeredClient.getClientAuthenticationMethods());
-        client.setAuthorizationGrantTypes(registeredClient.getAuthorizationGrantTypes());
-        client.setRedirectUris(registeredClient.getRedirectUris());
-        client.setPostLogoutRedirectUris(registeredClient.getPostLogoutRedirectUris());
-        client.setScopes(registeredClient.getScopes());
-        client.setClientSettings(registeredClient.getClientSettings());
+    public static JsonClient from(RegisteredClient registeredClient, Account optionalOwner) {
+        JsonClient jsonClient = new JsonClient();
+        jsonClient.setId(registeredClient.getId());
+        jsonClient.setClientId(registeredClient.getClientId());
+        jsonClient.setClientSecret(registeredClient.getClientSecret());
+        jsonClient.setClientSecretExpiresAt(registeredClient.getClientSecretExpiresAt());
+        jsonClient.setClientName(registeredClient.getClientName());
+        jsonClient.setClientAuthenticationMethods(registeredClient.getClientAuthenticationMethods());
+        jsonClient.setAuthorizationGrantTypes(registeredClient.getAuthorizationGrantTypes());
+        jsonClient.setRedirectUris(registeredClient.getRedirectUris());
+        jsonClient.setPostLogoutRedirectUris(registeredClient.getPostLogoutRedirectUris());
+        jsonClient.setScopes(registeredClient.getScopes());
+        jsonClient.setClientSettings(registeredClient.getClientSettings());
 
         TokenSettings originTokenSettings = registeredClient.getTokenSettings();
-        client.setTokenSettings(InternalTokenSettings.builder()
+        jsonClient.setTokenSettings(InternalTokenSettings.builder()
                 .accessTokenTimeToLive(originTokenSettings.getAccessTokenTimeToLive())
                 .accessTokenFormat(originTokenSettings.getAccessTokenFormat())
                 .deviceCodeTimeToLive(originTokenSettings.getDeviceCodeTimeToLive())
@@ -74,11 +74,11 @@ public class Client implements Serializable {
                 .authorizationCodeTimeToLive(originTokenSettings.getAuthorizationCodeTimeToLive())
                 .build());
 
-        client.setOwner(optionalOwner);
-        return client;
+        jsonClient.setOwner(optionalOwner);
+        return jsonClient;
     }
 
-    public static Client from(RegisteredClient registeredClient) {
+    public static JsonClient from(RegisteredClient registeredClient) {
         return from(registeredClient, null);
     }
 

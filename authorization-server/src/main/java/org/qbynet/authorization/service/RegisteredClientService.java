@@ -1,8 +1,8 @@
 package org.qbynet.authorization.service;
 
-import org.qbynet.authorization.entity.Client;
+import org.qbynet.authorization.entity.JsonClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
 public interface RegisteredClientService extends RegisteredClientRepository {
-    Client save(Client client);
+    JsonClient save(JsonClient jsonClient);
 }

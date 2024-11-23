@@ -3,10 +3,9 @@ package org.qbynet.authorization.service.impl;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
-import org.qbynet.authorization.entity.Client;
-import org.qbynet.authorization.repository.ClientRepository;
+import org.qbynet.authorization.entity.JsonClient;
+import org.qbynet.authorization.repository.JsonClientRepository;
 import org.qbynet.authorization.service.RegisteredClientService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -21,30 +20,28 @@ import java.util.UUID;
 @Service
 public class RegisteredClientServiceImpl implements RegisteredClientService {
     @Resource
-    ClientRepository clientRepository;
+    JsonClientRepository jsonClientRepository;
 
     @Resource
     PasswordEncoder passwordEncoder;
 
-    @Value("${qbychat.client.web.address}")
-    String webClientAddress;
-
     @PostConstruct
     private void init() {
-        if (clientRepository.count() != 0) {
+        if (jsonClientRepository.count() != 0) {
             return;
         }
         log.info("Add default clients to MongoDB...");
-        RegisteredClient webClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("web-chat")
+        RegisteredClient hoppscotch = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("hoppscotch")
                 .clientSecret(passwordEncoder.encode("secret"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
+                .authorizationGrantType(AuthorizationGrantType.TOKEN_EXCHANGE)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .redirectUri(webClientAddress + "/login/oauth2/code/web-chat-oidc")
-                .redirectUri(webClientAddress + "/authorized")
-                .postLogoutRedirectUri(webClientAddress + "/logged-out")
+                .redirectUri("https://hoppscotch.io/oauth")
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
                 .scope("message.read")
@@ -52,26 +49,26 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
                 .scope("user.read")
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
-        save(webClient);
+        save(hoppscotch);
     }
 
     @Override
     public void save(RegisteredClient registeredClient) {
-        clientRepository.save(Client.from(registeredClient));
+        jsonClientRepository.save(JsonClient.from(registeredClient));
     }
 
     @Override
-    public Client save(Client client) {
-        return clientRepository.save(client);
+    public JsonClient save(JsonClient jsonClient) {
+        return jsonClientRepository.save(jsonClient);
     }
 
     @Override
     public RegisteredClient findById(String id) {
-        return clientRepository.findById(id).map(Client::asRegisteredClient).orElse(null);
+        return jsonClientRepository.findById(id).map(JsonClient::asRegisteredClient).orElse(null);
     }
 
     @Override
     public RegisteredClient findByClientId(String clientId) {
-        return clientRepository.findByClientId(clientId).map(Client::asRegisteredClient).orElse(null);
+        return jsonClientRepository.findByClientId(clientId).map(JsonClient::asRegisteredClient).orElse(null);
     }
 }
