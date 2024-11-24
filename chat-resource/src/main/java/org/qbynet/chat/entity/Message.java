@@ -31,4 +31,6 @@ public class Message {
 
     private Instant sentAt = Instant.now();
     private Instant editAt = null; // null = never edited
+
+    private boolean deleted = false;
 }
