@@ -16,6 +16,8 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":"))
+
     implementation("org.springframework.security:spring-security-data")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")

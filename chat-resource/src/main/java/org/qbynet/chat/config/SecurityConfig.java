@@ -12,7 +12,6 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .securityMatcher("/test/**")
                 .authorizeHttpRequests(conf -> conf
                         .anyRequest().authenticated()
                 )
