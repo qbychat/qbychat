@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.*;
 
 @Data
-@Document
+@Document(value = "oauthAuthorization")
 @NoArgsConstructor
 @AllArgsConstructor
 public class JsonAuthorization {
@@ -70,9 +70,55 @@ public class JsonAuthorization {
                 .authorizationGrantType(authorizationGrantType)
                 .authorizedScopes(authorizedScopes)
                 .attributes((it) -> it.putAll(attributes));
-        tokens.forEach(token -> builder.token((OAuth2Token) token.token));
+        tokens.forEach(token -> builder.token(token.conventToOriginToken()));
         return builder.build();
     }
+
+//    @Setter
+//    @Getter
+//    @SuppressWarnings("unchecked")
+//    @EqualsAndHashCode(callSuper = true)
+//    public static class InternalOAuth2Authorization extends OAuth2Authorization {
+//        public static InternalOAuth2Authorization fromOrigin(OAuth2Authorization source) {
+//            // process source with reflect
+//            return moveValue(source);
+//        }
+//
+//        @SneakyThrows
+//        private static InternalOAuth2Authorization moveValue(OAuth2Authorization source) {
+//            InternalOAuth2Authorization target = new InternalOAuth2Authorization();
+//            Class<? extends OAuth2Authorization> sourceClass = source.getClass();
+//            Class<? extends InternalOAuth2Authorization> targetClass = target.getClass();
+//
+//            for (Field sourceField : sourceClass.getDeclaredFields()) {
+//                sourceField.setAccessible(true);
+//                if (sourceField.getName().equals("serialVersionUID")) {
+//                    continue;
+//                }
+//                Object o = sourceField.get(source);
+//
+//                Field targetField = targetClass.getSuperclass().getDeclaredField(sourceField.getName());
+//                targetField.setAccessible(true);
+//                targetField.set(target, o);
+//            }
+//            return target;
+//        }
+//
+//        @Override
+//        public <T extends OAuth2Token> Token<T> getToken(Class<T> tokenType) {
+//            Class<T> realTokenType = tokenType;
+//            if (tokenType.equals(OAuth2AccessToken.class)) {
+//                realTokenType = (Class<T>) InternalOAuth2AccessToken.class;
+//            } else if (tokenType.equals(OAuth2RefreshToken.class)) {
+//                realTokenType = (Class<T>) InternalOAuth2RefreshToken.class;
+//            } else if (tokenType.equals(OAuth2AuthorizationCode.class)) {
+//                realTokenType = (Class<T>) InternalOAuth2AuthorizationCode.class;
+//            } else if (tokenType.equals(OidcIdToken.class)) {
+//                realTokenType = (Class<T>) InternalOidcIdToken.class;
+//            }
+//            return super.getToken(realTokenType);
+//        }
+//    }
 
     @Setter
     @EqualsAndHashCode(callSuper = true)
@@ -129,7 +175,6 @@ public class JsonAuthorization {
     }
 
     @Data
-    @SuppressWarnings("unused")
     public static class InternalToken {
         private Object token;
         private Map<String, Object> metadata;
@@ -146,6 +191,20 @@ public class JsonAuthorization {
             }
             this.token = token;
             this.metadata = metadata;
+        }
+
+        public OAuth2Token conventToOriginToken() {
+            OAuth2Token result = null;
+            if (token instanceof InternalOAuth2RefreshToken refreshToken) {
+                result = new OAuth2RefreshToken(refreshToken.getTokenValue(), refreshToken.getIssuedAt(), refreshToken.getExpiresAt());
+            } else if (token instanceof InternalOAuth2AccessToken accessToken) {
+                result = new OAuth2AccessToken(accessToken.getTokenType(), accessToken.getTokenValue(), accessToken.getIssuedAt(), accessToken.getExpiresAt(), accessToken.getScopes());
+            } else if (token instanceof InternalOAuth2AuthorizationCode code) {
+                result = new OAuth2AuthorizationCode(code.getTokenValue(), code.getIssuedAt(), code.getExpiresAt());
+            } else if (token instanceof InternalOidcIdToken oidcIdToken) {
+                result = new OidcIdToken(oidcIdToken.getTokenValue(), oidcIdToken.getIssuedAt(), oidcIdToken.getExpiresAt(), oidcIdToken.getClaims());
+            }
+            return result;
         }
     }
 

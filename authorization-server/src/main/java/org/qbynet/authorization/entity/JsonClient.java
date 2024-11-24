@@ -19,7 +19,7 @@ import java.time.Instant;
 import java.util.Set;
 
 @Data
-@Document
+@Document(value = "oauthClient")
 public class JsonClient implements Serializable {
     @Id
     private String id;

@@ -6,7 +6,7 @@ spring:
     name: chat-resource
   data:
     mongodb:
-      uri: mongodb://localhost/qby-chat-resourceer
+      uri: mongodb://localhost/qby-chat
   security:
     oauth2:
       resourceserver:
