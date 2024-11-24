@@ -14,7 +14,7 @@ public class User {
     private String remoteId; // id from OAuth2 Authorization server
 
     private String username = null; // the name for user details link http://resource-server/view/u/<username>
-    private String nickname; // the name for everyone
+    private String nickname = ""; // the name for everyone
     private String bio = null; // a short text to describe yourself
 
     private Instant registerTime = Instant.now();
