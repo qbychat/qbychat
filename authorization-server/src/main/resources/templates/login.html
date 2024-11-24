@@ -26,10 +26,10 @@
             </div>
             <h1 class="h3 mb-3 fw-normal animate__animated animate__fadeInUp animate__delay-1s"
                 th:text="#{login.headline}">Please sign in</h1>
-            <mdui-text-field id="username" label="Email" th:label="#{login.email}" type="text"
+            <mdui-text-field id="username" label="Email" th:label="#{login.email}" type="email"
                              name="username"
                              class="form-control animate__animated animate__fadeInUp animate__delay-1s" required>
-                <mdui-button-icon slot="icon" icon="account_circle"></mdui-button-icon>
+                <mdui-button-icon icon="email" slot="icon"></mdui-button-icon>
             </mdui-text-field>
             <mdui-text-field th:label="#{login.password}" label="Password" type="password" id="password" name="password"
                              class="form-control animate__animated animate__fadeInUp animate__delay-1s" required>
@@ -48,22 +48,6 @@
                         class="animate__animated animate__bounceIn animate__delay-1s">
                     Register
                 </mdui-button>
-                <!--                <mdui-button-->
-                <!--                        class="w-100 btn btn-light btn-block animate__animated animate__bounceIn animate__delay-1s"-->
-                <!--                        href="/oauth2/authorization/google-idp"-->
-                <!--                        role="link" style="margin-top: 10px">-->
-                <!--                    <img src="/assets/img/google.png" th:src="@{/assets/img/google.png}" width="20"-->
-                <!--                         style="margin-right: 5px;" alt="Sign in with Google">-->
-                <!--                    <div th:text="#{login.google}">Sign in with Google</div>-->
-                <!--                </mdui-button>-->
-                <!--                <mdui-button-->
-                <!--                        class="w-100 btn btn-light btn-block animate__animated animate__bounceIn animate__delay-1s"-->
-                <!--                        href="/oauth2/authorization/github-idp"-->
-                <!--                        role="link" style="margin-top: 10px">-->
-                <!--                    <img src="/assets/img/github.png" th:src="@{/assets/img/github.png}" width="24"-->
-                <!--                         style="margin-right: 5px;" alt="Sign in with Github">-->
-                <!--                    <div th:text="#{login.github}">Sign in with GitHub</div>-->
-                <!--                </mdui-button>-->
             </div>
         </form>
     </mdui-card>

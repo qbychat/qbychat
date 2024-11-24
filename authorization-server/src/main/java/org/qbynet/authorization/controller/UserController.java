@@ -26,20 +26,35 @@ public class UserController {
     }
 
     @GetMapping("register")
-    public String register() {
+    public String register(Model model) {
+        if (!accountService.hasAdmin()) {
+            model.addAttribute("hasAdminAccount", false);
+            return "guide";
+        }
         return "register";
     }
 
     @PostMapping("register")
     public String confirmRegister(Model model, @RequestParam String password, @RequestParam String email) {
         if (confirmEmailNeeded) {
-            if (accountService.recordVerify(password, email)) {
+            if (accountService.recordVerify(email, password)) {
                 return "redirect:/user/confirm?email=" + email;
             }
             return "redirect:/user/register?error";
         }
+        accountService.register(email, password, false);
         model.addAttribute("email", email);
         return "register-success";
+    }
+
+    @PostMapping("register/admin")
+    public String confirmRegisterAdmin(Model model, @RequestParam String email, @RequestParam String password) {
+        model.addAttribute("hasAdminAccount", true);
+        if (!accountService.hasAdmin()) {
+            accountService.register(email, password, true);
+            return "guide";
+        }
+        return "redirect:/user/register";
     }
 
     @GetMapping("confirm")

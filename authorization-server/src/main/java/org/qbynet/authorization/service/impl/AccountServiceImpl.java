@@ -1,6 +1,5 @@
 package org.qbynet.authorization.service.impl;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.qbynet.authorization.entity.Account;
@@ -33,20 +32,6 @@ public class AccountServiceImpl implements AccountService {
     @Resource
     PasswordEncoder passwordEncoder;
 
-    @PostConstruct
-    private void init() {
-        if (accountRepository.count() == 0) {
-            Account account = new Account();
-            account.setEmail("admin");
-            account.setPassword(passwordEncoder.encode("admin")); // todo random password
-            account.addRole(Role.ADMIN);
-            accountRepository.save(account);
-            log.info("Admin account created.");
-            log.info("email: {}", account.getEmail());
-            log.info("Password: {}", "admin");
-        }
-    }
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
@@ -58,18 +43,19 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account register(String password, String email, boolean isAdmin) {
+    public Account register(String email, String password, boolean isAdmin) {
         Account account = new Account();
         account.setPassword(passwordEncoder.encode(password));
         account.setEmail(email);
         if (isAdmin) {
             account.addRole(Role.ADMIN);
         }
+        log.info("Account {} was registered. (roles={})", account.getEmail(), account.getRoles());
         return accountRepository.save(account);
     }
 
     @Override
-    public boolean recordVerify(String password, String email) {
+    public boolean recordVerify(String email, String password) {
         if (accountRepository.existsByEmail(email) || verifyRepository.existsByEmail(email)) {
             return false; // exists
         }
@@ -96,6 +82,11 @@ public class AccountServiceImpl implements AccountService {
         verifyRepository.delete(verify);
         log.info("User {} was registered", account.getEmail());
         return accountRepository.save(account);
+    }
+
+    @Override
+    public boolean hasAdmin() {
+        return accountRepository.existsByRolesContains(Role.ADMIN);
     }
 
     private String generateVerificationCode() {

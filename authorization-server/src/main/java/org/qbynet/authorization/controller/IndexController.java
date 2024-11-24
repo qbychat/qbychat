@@ -9,10 +9,4 @@ public class IndexController {
     public String index() {
         return "index";
     }
-
-    @GetMapping("favicon.ico")
-    public String favicon() {
-        // todo favicon
-        return "redirect:https://spring.io/favicon-32x32.png";
-    }
 }

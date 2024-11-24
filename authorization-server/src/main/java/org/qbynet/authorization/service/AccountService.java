@@ -5,9 +5,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface AccountService extends UserDetailsService {
 
-    Account register(String password, String email, boolean isAdmin);
+    Account register(String email, String password, boolean isAdmin);
 
-    boolean recordVerify(String password, String email);
+    boolean recordVerify(String email, String password);
 
     Account doVerify(String email, String token);
+
+    boolean hasAdmin();
 }

@@ -36,6 +36,7 @@ import java.util.*;
 public class AuthorizationConsentController {
 	@Resource
 	RegisteredClientRepository registeredClientRepository;
+
 	@Resource
 	OAuth2AuthorizationConsentService authorizationConsentService;
 

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html class="mdui-theme-auto" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{guide.title}">Guide to QbyChat</title>
+    <link href="https://unpkg.com/mdui@2/mdui.css" rel="stylesheet">
+    <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1>Getting start with qbychat</h1>
+    <mdui-list>
+        <mdui-collapse accordion value="step1">
+            <mdui-collapse-item value="step1">
+                <mdui-list-item icon="near_me" slot="header" th:text="#{guide.admin.register}">Step 1 - Set up an admin
+                    account
+                </mdui-list-item>
+                <div style="margin-left: 2.5rem" th:if="${!hasAdminAccount}">
+                    <form method="post" style="max-width: 30%" th:action="@{/user/register/admin}">
+                        <mdui-text-field icon="email" label="Email" name="email"
+                                         th:label="#{register.email}" type="email"></mdui-text-field>
+                        <mdui-text-field icon="password" label="Password" name="password"
+                                         th:label="#{login.password}" type="password"></mdui-text-field>
+                        <mdui-button style="margin-top: 5px;" th:label="#{register.button}" type="submit">Register
+                        </mdui-button>
+                    </form>
+                </div>
+                <div style="margin-left: 2.5rem" th:if="${hasAdminAccount}">
+                    <mdui-list-item th:text="#{guide.completed}">You have completed this step</mdui-list-item>
+                    <mdui-button th:href="@{/user/login}" th:text="#{login.link}">Login</mdui-button>
+                </div>
+            </mdui-collapse-item>
+            <mdui-collapse-item value="step2">
+                <mdui-list-item icon="near_me" slot="header" th:text="#{guide.client}">Step 2 - Choose a qbychat
+                    client
+                </mdui-list-item>
+                <div style="margin-left: 2.5rem">
+                    <mdui-list-item>Work in Progress</mdui-list-item>
+                </div>
+                z
+            </mdui-collapse-item>
+            <mdui-collapse-item value="step3">
+                <mdui-list-item icon="near_me" slot="header" th:text="#{guide.finish}">Step 3 - Start chatting
+                </mdui-list-item>
+                <div style="margin-left: 2.5rem">
+                    <mdui-list-item th:text="#{guide.finish.content}"></mdui-list-item>
+                </div>
+            </mdui-collapse-item>
+        </mdui-collapse>
+    </mdui-list>
+</div>
+</body>
+</html>
