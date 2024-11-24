@@ -16,9 +16,9 @@ public class Conversation {
 
     private String name;
     private String description;
-    private Type type;
+    private ConversationType type;
     private String link; // http://resource-server/view/c/<link>
-    private Instant createAt = Instant.now();
+    private Instant createdAt = Instant.now();
 
     private List<MemberPermission> defaultPermissions = List.of(MemberPermission.MEMBER_DEFAULT);
     private boolean memberVerificationNeeded = false;
@@ -31,12 +31,5 @@ public class Conversation {
 
     public List<MemberPermission> getDefaultPermissions() {
         return MemberPermission.calculate(defaultPermissions);
-    }
-
-    public enum Type {
-        GROUP,
-        CHANNEL, // only admin can view messages
-        PRIVATE_MESSAGE,
-        SECRETED_CHAT
     }
 }

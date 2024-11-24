@@ -17,7 +17,7 @@ public class LinkPreview {
     private String title;
     private String description;
     @DBRef
-    private Media icon = null;
+    private Media image = null;
 
     private Instant timestamp = Instant.now();
 }

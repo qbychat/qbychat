@@ -27,7 +27,7 @@ public class Message {
     private String language;
 
     @DBRef
-    private List<Media> medias;
+    private List<Media> medias = List.of();
 
     private Instant sentAt = Instant.now();
     private Instant editAt = null; // null = never edited
