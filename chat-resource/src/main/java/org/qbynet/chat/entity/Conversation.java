@@ -26,6 +26,8 @@ public class Conversation {
     private boolean noForward = false; // can members forward messages? (include admins)
     private boolean hideMembers = false; // can normal members view the member list?
 
+    private int autoDeleteTimer = -1; // How long do we delete all messages? (Unit: days)
+
     @DBRef
     private Member owner = null; // private message and secreted chat have no owner
 

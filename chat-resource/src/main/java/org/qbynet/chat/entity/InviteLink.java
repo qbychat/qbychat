@@ -13,8 +13,6 @@ public class InviteLink {
 
     @DBRef
     private Member createBy;
-    @DBRef
-    private Conversation conversation;
 
     private String link;
 }

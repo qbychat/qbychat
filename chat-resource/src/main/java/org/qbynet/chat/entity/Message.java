@@ -17,6 +17,8 @@ public class Message {
     @DBRef
     private Member sender; // set to null to send messages anonymous
     private String content;
+    @DBRef
+    private Sticker sticker;
 
     @DBRef
     private Message reply;
@@ -32,5 +34,8 @@ public class Message {
     private Instant sentAt = Instant.now();
     private Instant editAt = null; // null = never edited
 
-    private boolean deleted = false;
+    private MessageType type = MessageType.TEXT_MESSAGE;
+
+    private Instant expiresAt = null; // set to Instant.now() to delete message
+    private boolean encrypted = false;
 }

@@ -7,15 +7,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Document
-public class Media {
+public class FavoriteSticker {
     @Id
     private String id;
 
     @DBRef
-    private User uploader = null; // null = create by system
+    private User user;
 
-    private String name;
-    private String hash;
-
-    private String contentType;
+    @DBRef
+    private StickerPack stickerPack;
 }
