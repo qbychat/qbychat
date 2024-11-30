@@ -89,6 +89,11 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.existsByRolesContains(Role.ADMIN);
     }
 
+    @Override
+    public Account findById(String id) {
+        return accountRepository.findById(id).orElse(null);
+    }
+
     private String generateVerificationCode() {
         Random random = new Random();
         StringBuilder code = new StringBuilder();

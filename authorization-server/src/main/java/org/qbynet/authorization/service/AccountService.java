@@ -12,4 +12,6 @@ public interface AccountService extends UserDetailsService {
     Account doVerify(String email, String token);
 
     boolean hasAdmin();
+
+    Account findById(String id);
 }
