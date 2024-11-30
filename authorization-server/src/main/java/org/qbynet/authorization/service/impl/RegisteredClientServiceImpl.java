@@ -12,8 +12,10 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.UUID;
 
 @Log4j2
@@ -47,6 +49,10 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
                 .scope("message.read")
                 .scope("message.write")
                 .scope("user.read")
+                .tokenSettings(TokenSettings.builder()
+                        .refreshTokenTimeToLive(Duration.ofDays(7))
+                        .accessTokenTimeToLive(Duration.ofDays(1))
+                        .build())
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
         save(hoppscotch);
