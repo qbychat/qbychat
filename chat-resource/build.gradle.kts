@@ -17,6 +17,7 @@ repositories {
 
 dependencies {
     implementation(project(":"))
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains:annotations:24.0.0")
     implementation("org.springframework.security:spring-security-data")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
