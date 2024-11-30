@@ -109,7 +109,7 @@ public class AuthorizationConsentController {
         }
         String domain = email.split("@")[1];
         String[] domainParts = domain.split("\\.");
-        String maskedDomain = domainParts[domainParts.length - 1];
+        String maskedDomain = domainParts[0];
         if (maskedDomain.length() > 2) {
             maskedDomain = domainParts[0].substring(0, 2) +
                     domainParts[0].substring(2).replaceAll(".", "*");
