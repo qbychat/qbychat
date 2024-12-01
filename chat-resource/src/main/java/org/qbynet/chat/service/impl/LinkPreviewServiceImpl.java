@@ -41,7 +41,6 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
     public LinkPreview generateLinkPreview(URI link) {
         LinkPreview lp = new LinkPreview();
         lp.setLink(link.toString());
-        // todo: do fetch
         try (Response response = okHttpClient.newCall(new Request.Builder()
                 .head()
                 .url(link.toURL())
@@ -52,10 +51,11 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
             // metadata
             String contentType = response.header("Content-Type");
             long contentLength = Long.parseLong(Objects.requireNonNullElse(response.header("Content-Length"), "-1"));
-            if (contentType == null || contentLength > 2048_000L || contentLength == -1) {
+            boolean isHtml = ContentTypeUtils.isContentTypeHTML(contentType);
+            if (contentType == null || contentLength > 2048_000L || (contentLength == -1 && !isHtml)) {
                 // file too big or there's no content type
                 return null; // nothing
-            } else if (ContentTypeUtils.isContentTypeHTML(contentType)) {
+            } else if (isHtml) {
                 // html page
                 // load page if its size < 2MB
                 Metadata metadata = fetchMetadata(link); // fetch metadata
@@ -77,6 +77,7 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
                 // No description necessary
                 return null;
             }
+
         } catch (Exception e) {
             log.error("Failed to generate link preview of link {}", lp.getLink(), e);
             return null;
