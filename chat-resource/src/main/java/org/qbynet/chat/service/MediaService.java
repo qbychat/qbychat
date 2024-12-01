@@ -2,7 +2,6 @@ package org.qbynet.chat.service;
 
 import org.qbynet.chat.entity.Media;
 import org.qbynet.chat.entity.User;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,5 +15,7 @@ public interface MediaService {
 
     InputStream openInputStream(Media media) throws IOException;
 
-    Media upload(MultipartFile file, User uploader) throws IOException;
+    Media upload(InputStream inputStream, String filename, String contentType, User uploader) throws IOException;
+
+    boolean hasFile(String sha256);
 }

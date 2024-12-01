@@ -16,13 +16,13 @@ import org.qbynet.chat.repository.MediaRepository;
 import org.qbynet.chat.service.MediaService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -89,13 +89,15 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public Media upload(MultipartFile file, User uploader) throws IOException {
+    public Media upload(InputStream inputStream, String filename, String contentType, User uploader) throws IOException {
         Media media = new Media();
-        media.setName(file.getOriginalFilename());
-        media.setContentType(file.getContentType());
+        media.setName(filename);
+        log.info("Upload {}", media.getName());
+        media.setContentType(contentType);
         media.setUploader(uploader);
-        FileMetadata metadata = saveToLocal(file.getInputStream());
+        FileMetadata metadata = saveToLocal(inputStream);
         media.setHash(metadata.getHash());
+        log.info("Uploaded {}", media.getName());
         return mediaRepository.save(media);
     }
 
@@ -117,11 +119,21 @@ public class MediaServiceImpl implements MediaService {
      * @return the file
      */
     private File getFileByHash(String hash) {
-        return new File(FileUtils.current(), ".qbychat/files/" + hash);
+        return new File(this.getDataFolder(), "files/" + hash);
+    }
+
+    private File getDataFolder() {
+        return new File(FileUtils.current(), ".qbychat");
+    }
+
+    @Override
+    public boolean hasFile(String sha256) {
+        return getFileByHash(sha256).exists();
     }
 
     private @NotNull FileMetadata saveToLocal(InputStream source) throws IOException {
-        File tmp = File.createTempFile("qbychat-", "-tmp");
+        File tmp = new File(new File(getDataFolder(), "temp"), UUID.randomUUID().toString());
+        FileUtils.createParentDirectories(tmp);
         TeeInputStream inputStream = new TeeInputStream(source, FileUtils.openOutputStream(tmp), true);
         // calculate sha256
         String sha256 = SecureUtil.sha256(inputStream);
