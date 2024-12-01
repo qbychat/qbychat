@@ -72,7 +72,7 @@ public class MediaController {
             FileItemInput item = iterStream.next();
             InputStream stream = item.getInputStream();
             if (!item.isFormField()) {
-                mediaService.upload(stream, item.getName(), item.getContentType(), user);
+                vos.add(MediaVO.from(mediaService.upload(stream, item.getName(), item.getContentType(), user)));
             }
         }
         return ResponseEntity.ok(RestBean.success(vos));
