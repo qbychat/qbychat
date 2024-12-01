@@ -16,3 +16,5 @@ spring:
 qbychat:
   link:
     ttl: 7
+  request:
+    user-agent: qbychat

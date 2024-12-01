@@ -16,6 +16,7 @@ public class LinkPreview {
     private String link;
     private String title;
     private String description;
+    private int status;
     @DBRef
     private Media image = null;
 

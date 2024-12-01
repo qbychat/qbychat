@@ -13,6 +13,7 @@ public class LinkPreviewVO {
     private String link;
     private String title;
     private String description;
+    private int status;
     private MediaVO image;
 
     private long timestamp;

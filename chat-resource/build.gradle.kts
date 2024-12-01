@@ -17,6 +17,9 @@ repositories {
 
 dependencies {
     implementation(project(":"))
+    implementation("cn.hutool:hutool-crypto:5.8.34")
+    implementation("commons-io:commons-io:2.18.0")
+    implementation("org.jsoup:jsoup:1.18.2")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains:annotations:24.0.0")
     implementation("org.springframework.security:spring-security-data")
