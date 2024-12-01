@@ -12,8 +12,17 @@ import org.qbynet.chat.entity.Media;
 public class MediaVO {
     private String id;
 
+    /**
+     * File name
+     */
     private String name;
+    /**
+     * Sha256 hash
+     */
     private String hash;
+    /**
+     * Mime type
+     */
     private String contentType;
 
     public static @NotNull MediaVO from(@NotNull Media origin) {

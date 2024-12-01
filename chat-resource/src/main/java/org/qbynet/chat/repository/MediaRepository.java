@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface MediaRepository extends MongoRepository<Media, String> {
-    Optional<Media> findByHash(String hash);
+    Optional<Media> findByHashAndName(String hash, String name);
 }

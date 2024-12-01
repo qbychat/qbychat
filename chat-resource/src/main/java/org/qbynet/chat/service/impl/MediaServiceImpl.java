@@ -67,13 +67,13 @@ public class MediaServiceImpl implements MediaService {
             log.info("Failed to download file from {}", remote, e);
             return null;
         }
-        Optional<Media> existFile = mediaRepository.findByHash(media.getHash());
+        Optional<Media> existFile = mediaRepository.findByHashAndName(media.getHash(), media.getName());
         return existFile.orElseGet(() -> mediaRepository.save(media));
     }
 
     @Override
-    public Media findByHash(String hash) {
-        return mediaRepository.findByHash(hash).orElse(null);
+    public Media findById(String id) {
+        return mediaRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -132,6 +132,18 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public boolean hasFile(String sha256) {
         return getFileByHash(sha256).exists();
+    }
+
+    @Override
+    public @NotNull Optional<Media> fromExist(String hash, String name, String contentType) {
+        if (!hasFile(hash)) {
+            return Optional.empty();
+        }
+        Media media = new Media();
+        media.setHash(hash);
+        media.setName(name);
+        media.setContentType(contentType);
+        return Optional.of(mediaRepository.save(media));
     }
 
     private @NotNull FileMetadata saveToLocal(InputStream source) throws IOException {

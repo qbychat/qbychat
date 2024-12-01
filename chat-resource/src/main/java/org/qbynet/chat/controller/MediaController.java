@@ -9,6 +9,8 @@ import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.qbynet.chat.entity.Media;
 import org.qbynet.chat.entity.User;
+import org.qbynet.chat.entity.dto.CreateExistMediaDTO;
+import org.qbynet.chat.entity.vo.ExistMediaVO;
 import org.qbynet.chat.entity.vo.MediaVO;
 import org.qbynet.chat.service.MediaService;
 import org.qbynet.shared.entity.RestBean;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/media")
@@ -29,11 +32,11 @@ public class MediaController {
     /**
      * Get the info of a media
      *
-     * @param hash media's sha256
+     * @param id media's id
      */
-    @GetMapping("{hash}/info")
-    public ResponseEntity<RestBean<MediaVO>> mediaInfo(@PathVariable String hash) {
-        Media media = mediaService.findByHash(hash);
+    @GetMapping("{id}/info")
+    public ResponseEntity<RestBean<MediaVO>> mediaInfo(@PathVariable String id) {
+        Media media = mediaService.findById(id);
         if (media == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RestBean.failure(404, "Media Not Found"));
         }
@@ -43,11 +46,11 @@ public class MediaController {
     /**
      * Download a media
      *
-     * @param hash sha256 hash
+     * @param id sha256 id
      */
-    @GetMapping("{hash}/download")
-    public void mediaDownload(@PathVariable String hash, HttpServletResponse response) throws Exception {
-        Media media = mediaService.findByHash(hash);
+    @GetMapping("{id}/download")
+    public void mediaDownload(@PathVariable String id, HttpServletResponse response) throws Exception {
+        Media media = mediaService.findById(id);
         MediaService.StreamMetadata streamMetadata = mediaService.openInputStream(media);
         InputStream inputStream = streamMetadata.getInputStream();
         if (inputStream == null) {
@@ -65,6 +68,11 @@ public class MediaController {
 
     @PutMapping("upload")
     public ResponseEntity<RestBean<List<MediaVO>>> upload(HttpServletRequest request, @RequestAttribute("user") User user) throws Exception {
+        boolean isMultipart = JakartaServletFileUpload.isMultipartContent(request);
+        if (!isMultipart) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(404, "Not Multipart"));
+        }
+
         JakartaServletFileUpload upload = new JakartaServletFileUpload();
         FileItemInputIterator iterStream = upload.getItemIterator(request);
         List<MediaVO> vos = new ArrayList<>();
@@ -76,5 +84,13 @@ public class MediaController {
             }
         }
         return ResponseEntity.ok(RestBean.success(vos));
+    }
+
+    @PostMapping("create-exist")
+    public ResponseEntity<RestBean<List<ExistMediaVO>>> createExist(@RequestBody CreateExistMediaDTO dto, @RequestAttribute("user") User user) {
+        return ResponseEntity.ok(RestBean.success(dto.getMedias().stream().map(mediaInfo -> {
+            Optional<Media> optional = mediaService.fromExist(mediaInfo.getHash(), mediaInfo.getName(), mediaInfo.getContentType());
+            return optional.map(ExistMediaVO::from).orElseGet(() -> ExistMediaVO.missing(mediaInfo.getHash()));
+        }).toList()));
     }
 }
