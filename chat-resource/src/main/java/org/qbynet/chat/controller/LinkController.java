@@ -1,18 +1,27 @@
 package org.qbynet.chat.controller;
 
+import jakarta.annotation.Resource;
+import org.qbynet.chat.entity.LinkPreview;
 import org.qbynet.chat.entity.dto.LinkPreviewDTO;
 import org.qbynet.chat.entity.vo.LinkPreviewVO;
+import org.qbynet.chat.service.LinkPreviewService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
+
 @RestController
 @RequestMapping("/api/link")
 public class LinkController {
+    @Resource
+    LinkPreviewService linkPreviewService;
+
     @PostMapping("preview")
     public LinkPreviewVO preview(@RequestBody LinkPreviewDTO dto) {
-        // todo
-        return null;
+        URI uri = URI.create(dto.getLink());
+        LinkPreview linkPreview = linkPreviewService.generateOrGetLinkPreview(uri);
+        return LinkPreviewVO.from(linkPreview);
     }
 }

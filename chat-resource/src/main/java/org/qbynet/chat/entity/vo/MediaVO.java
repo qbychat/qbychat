@@ -1,14 +1,27 @@
 package org.qbynet.chat.entity.vo;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.qbynet.chat.entity.Media;
 
 @Data
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MediaVO {
     private String id;
 
     private String name;
     private String hash;
     private String contentType;
+
+    public static @NotNull MediaVO from(@NotNull Media origin) {
+        MediaVO media = new MediaVO();
+        media.setId(origin.getId());
+        media.setName(origin.getName());
+        media.setHash(origin.getHash());
+        media.setContentType(origin.getContentType());
+        return media;
+    }
 }
