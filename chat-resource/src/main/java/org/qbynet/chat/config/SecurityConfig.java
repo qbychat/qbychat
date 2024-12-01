@@ -20,6 +20,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(conf -> conf
+                        .requestMatchers("/api/media/*/download", "/api/media/*/info").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(conf -> conf
