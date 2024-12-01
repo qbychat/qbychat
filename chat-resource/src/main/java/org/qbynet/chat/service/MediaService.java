@@ -1,5 +1,7 @@
 package org.qbynet.chat.service;
 
+import lombok.Builder;
+import lombok.Data;
 import org.qbynet.chat.entity.Media;
 import org.qbynet.chat.entity.User;
 
@@ -13,9 +15,16 @@ public interface MediaService {
 
     Media findByHash(String hash);
 
-    InputStream openInputStream(Media media) throws IOException;
+    StreamMetadata openInputStream(Media media) throws IOException;
 
     Media upload(InputStream inputStream, String filename, String contentType, User uploader) throws IOException;
 
     boolean hasFile(String sha256);
+
+    @Data
+    @Builder
+    class StreamMetadata {
+        private InputStream inputStream;
+        private long size;
+    }
 }

@@ -77,7 +77,7 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public InputStream openInputStream(Media media) throws IOException {
+    public StreamMetadata openInputStream(Media media) throws IOException {
         if (media == null) {
             return null;
         }
@@ -85,7 +85,10 @@ public class MediaServiceImpl implements MediaService {
         if (!file.exists()) {
             return null;
         }
-        return FileUtils.openInputStream(file);
+        return StreamMetadata.builder()
+                .inputStream(FileUtils.openInputStream(file))
+                .size(file.length())
+                .build();
     }
 
     @Override

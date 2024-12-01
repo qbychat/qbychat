@@ -48,7 +48,8 @@ public class MediaController {
     @GetMapping("{hash}/download")
     public void mediaDownload(@PathVariable String hash, HttpServletResponse response) throws Exception {
         Media media = mediaService.findByHash(hash);
-        InputStream inputStream = mediaService.openInputStream(media);
+        MediaService.StreamMetadata streamMetadata = mediaService.openInputStream(media);
+        InputStream inputStream = streamMetadata.getInputStream();
         if (inputStream == null) {
             // file not found
             response.setStatus(HttpStatus.NOT_FOUND.value());
@@ -56,6 +57,7 @@ public class MediaController {
             response.getWriter().write(RestBean.failure(404, "Not Found").toJson());
             return;
         }
+        response.addHeader("Content-Length", String.valueOf(streamMetadata.getSize()));
         response.addHeader("Content-Disposition", "attachment; filename=\"" + media.getName() + "\"");
         response.setContentType(media.getContentType());
         IOUtils.copy(inputStream, response.getOutputStream());
