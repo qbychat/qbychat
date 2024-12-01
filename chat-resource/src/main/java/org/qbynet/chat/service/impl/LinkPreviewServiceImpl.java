@@ -41,6 +41,7 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
     public LinkPreview generateLinkPreview(URI link) {
         LinkPreview lp = new LinkPreview();
         lp.setLink(link.toString());
+        log.info("Generate link preview for {}", link);
         try (Response response = okHttpClient.newCall(new Request.Builder()
                 .head()
                 .url(link.toURL())

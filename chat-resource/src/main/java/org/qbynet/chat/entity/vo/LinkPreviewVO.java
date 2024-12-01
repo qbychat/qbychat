@@ -23,7 +23,9 @@ public class LinkPreviewVO {
         lp.setLink(origin.getLink());
         lp.setTitle(origin.getTitle());
         lp.setDescription(origin.getDescription());
-        lp.setImage(MediaVO.from(origin.getImage()));
+        if (origin.getImage() != null) {
+            lp.setImage(MediaVO.from(origin.getImage()));
+        }
         lp.setTimestamp(origin.getTimestamp().getEpochSecond());
         return lp;
     }
