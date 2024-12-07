@@ -15,11 +15,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/conversation")
 public class ConversationController {
     @Resource
     ConversationService conversationService;
+
+    @GetMapping("list")
+    public ResponseEntity<RestBean<List<ConversationVO>>> list(@RequestAttribute("user") User user) {
+        return ResponseEntity.ok(RestBean.success(conversationService.list(user).stream().map(ConversationVO::from).toList()));
+    }
 
     @PostMapping("create")
     public ResponseEntity<RestBean<ConversationVO>> createConversation(@RequestBody CreateConversationDTO dto, @RequestAttribute("user") User user) {

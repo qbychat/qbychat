@@ -37,9 +37,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/user/profile").hasAuthority("SCOPE_profile.edit")
                         .requestMatchers("/api/link/**").hasAuthority("SCOPE_link")
                         .requestMatchers("/api/bot/create").hasAuthority("SCOPE_bot.create")
+                        .requestMatchers("/api/bot/list").hasAuthority("SCOPE_bot.list")
                         .requestMatchers("/api/message/send").hasAuthority("SCOPE_message.send")
                         .requestMatchers("/api/media/upload").hasAuthority("SCOPE_media.upload")
-                        .requestMatchers("/api/conversation/").hasAuthority("SCOPE_conversation.create")
+                        .requestMatchers("/api/conversation/create").hasAuthority("SCOPE_conversation.create")
+                        .requestMatchers("/api/conversation/list").hasAuthority("SCOPE_conversation.list")
+                        .requestMatchers("/api/conversation/*/join").hasAuthority("SCOPE_conversation.join")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(conf -> conf

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 @Log4j2
@@ -104,5 +105,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
+    }
+
+    @Override
+    public List<Bot> listBots(User user) {
+        return botRepository.findAllByOwner(user);
     }
 }

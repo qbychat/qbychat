@@ -6,9 +6,12 @@ import org.qbynet.chat.entity.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends MongoRepository<Member, String> {
     Optional<Member> findByUserAndConversation(User user, Conversation conversation);
+
+    List<Member> findAllByUser(User user);
 }

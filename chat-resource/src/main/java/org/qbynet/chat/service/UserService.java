@@ -7,6 +7,7 @@ import org.qbynet.chat.entity.User;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 
 public interface UserService {
     User createProfile(String remoteId, String nickname);
@@ -24,4 +25,6 @@ public interface UserService {
     Bot verifyBotToken(String botKey) throws IOException;
 
     User findByUsername(String username);
+
+    List<Bot> listBots(User user);
 }

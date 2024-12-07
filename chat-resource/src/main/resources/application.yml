@@ -34,3 +34,4 @@ qbychat:
       - message.send
       - profile.read
       - profile.edit
+      - conversation.list

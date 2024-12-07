@@ -165,4 +165,9 @@ public class ConversationServiceImpl implements ConversationService {
     public JoinRequest findJoinRequest(String id) {
         return joinRequestRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public List<Conversation> list(User user) {
+        return memberRepository.findAllByUser(user).stream().map(Member::getConversation).toList();
+    }
 }

@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Secured("SCOPE_bot")
 @RestController
 @RequestMapping("/api/bot")
@@ -38,5 +40,10 @@ public class BotController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, e.getMessage()));
         }
         return ResponseEntity.ok(RestBean.success(BotVO.from(cb)));
+    }
+
+    @GetMapping("list")
+    public ResponseEntity<RestBean<List<BotVO>>> list(@RequestAttribute("user") User user) {
+        return ResponseEntity.ok(RestBean.success(userService.listBots(user).stream().map(BotVO::from).toList()));
     }
 }

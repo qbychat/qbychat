@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Data;
 import org.qbynet.chat.entity.*;
 
+import java.util.List;
+
 public interface ConversationService {
     /**
      * Create a conversation
@@ -45,6 +47,8 @@ public interface ConversationService {
     Member findMember(Conversation conversation, User user);
 
     JoinRequest findJoinRequest(String id);
+
+    List<Conversation> list(User user);
 
     @Data
     @Builder
