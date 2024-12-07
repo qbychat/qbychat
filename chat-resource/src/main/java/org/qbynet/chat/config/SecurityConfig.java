@@ -32,7 +32,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(conf -> conf
-                        .requestMatchers("/api/media/*/download", "/api/media/*/info").permitAll()
+                        .requestMatchers("/api/media/*/raw", "/api/media/*/info").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAuthority("SCOPE_profile.read")
                         .requestMatchers(HttpMethod.POST, "/api/user/profile").hasAuthority("SCOPE_profile.edit")
                         .requestMatchers("/api/link/**").hasAuthority("SCOPE_link")

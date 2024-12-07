@@ -16,7 +16,6 @@ import org.qbynet.chat.service.MediaService;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
@@ -49,8 +48,8 @@ public class MediaController {
      *
      * @param id sha256 id
      */
-    @GetMapping("{id}/download")
-    public void mediaDownload(@PathVariable String id, HttpServletResponse response) throws Exception {
+    @GetMapping("{id}/raw")
+    public void mediaDownload(@PathVariable String id, HttpServletResponse response, @RequestParam(required = false) boolean download) throws Exception {
         Media media = mediaService.findById(id);
         MediaService.StreamMetadata streamMetadata = mediaService.openInputStream(media);
         InputStream inputStream = streamMetadata.getInputStream();
@@ -62,17 +61,20 @@ public class MediaController {
             return;
         }
         response.addHeader("Content-Length", String.valueOf(streamMetadata.getSize()));
-        response.addHeader("Content-Disposition", "attachment; filename=\"" + media.getName() + "\"");
+        if (download) {
+            response.addHeader("Content-Disposition", "attachment; filename=\"" + media.getName() + "\"");
+        } else {
+            response.addHeader("Content-Disposition", "filename=\"" + media.getName() + "\"");
+        }
         response.setContentType(media.getContentType());
         IOUtils.copy(inputStream, response.getOutputStream());
     }
 
-    @PutMapping("upload")
-    @Secured("SCOPE_media.upload")
+    @PostMapping("upload")
     public ResponseEntity<RestBean<List<MediaVO>>> upload(HttpServletRequest request, @RequestAttribute("user") User user) throws Exception {
         boolean isMultipart = JakartaServletFileUpload.isMultipartContent(request);
         if (!isMultipart) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(404, "Not Multipart"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Not Multipart"));
         }
 
         JakartaServletFileUpload upload = new JakartaServletFileUpload();
@@ -89,7 +91,6 @@ public class MediaController {
     }
 
     @PostMapping("create-exist")
-    @Secured("SCOPE_media.upload")
     public ResponseEntity<RestBean<List<ExistMediaVO>>> createExist(@RequestBody CreateExistMediaDTO dto, @RequestAttribute("user") User user) {
         return ResponseEntity.ok(RestBean.success(dto.getMedias().stream().map(mediaInfo -> {
             Optional<Media> optional = mediaService.fromExist(user, mediaInfo.getHash(), mediaInfo.getName(), mediaInfo.getContentType());
