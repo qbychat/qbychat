@@ -40,5 +40,5 @@ public class Message implements Serializable {
     private MessageType type = MessageType.TEXT_MESSAGE;
 
     private Instant expiresAt = null; // set to Instant.now() to delete message
-    private boolean encrypted = false;
+    private boolean pinned = false;
 }

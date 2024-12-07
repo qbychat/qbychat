@@ -50,6 +50,10 @@ public interface ConversationService {
 
     List<Conversation> list(User user);
 
+    List<Member> listMembers(Conversation conversation);
+
+    InviteLink invite(Conversation conversation, User user);
+
     @Data
     @Builder
     class JoinConversationDetails {

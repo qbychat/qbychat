@@ -1,13 +1,12 @@
 package org.qbynet.chat.controller;
 
 import jakarta.annotation.Resource;
-import org.qbynet.chat.entity.Conversation;
-import org.qbynet.chat.entity.JoinRequest;
-import org.qbynet.chat.entity.Member;
-import org.qbynet.chat.entity.User;
+import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.dto.ApproveJoinRequestDTO;
 import org.qbynet.chat.entity.dto.CreateConversationDTO;
+import org.qbynet.chat.entity.dto.InviteDTO;
 import org.qbynet.chat.entity.vo.ConversationVO;
+import org.qbynet.chat.entity.vo.InviteLinkVO;
 import org.qbynet.chat.entity.vo.JoinConversationVO;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.shared.entity.RestBean;
@@ -55,6 +54,15 @@ public class ConversationController {
                 .joined(details.isJoined())
                 .banned(details.isBanned())
                 .build()));
+    }
+
+    @PostMapping("invite")
+    public ResponseEntity<RestBean<InviteLinkVO>> invite(@RequestBody InviteDTO dto, @RequestAttribute("user") User user) {
+        InviteLink inviteLink = conversationService.invite(conversationService.findConversationById(dto.getConversation()), user);
+        if (inviteLink == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "You have no permission to invite"));
+        }
+        return ResponseEntity.ok(RestBean.success(InviteLinkVO.from(inviteLink)));
     }
 
     @PostMapping("approve")

@@ -1,5 +1,6 @@
 package org.qbynet.chat.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
@@ -9,9 +10,11 @@ import org.qbynet.chat.repository.InviteLinkRepository;
 import org.qbynet.chat.repository.JoinRequestRepository;
 import org.qbynet.chat.repository.MemberRepository;
 import org.qbynet.chat.service.ConversationService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +35,9 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Resource
     InviteLinkRepository inviteLinkRepository;
+
+    @Value("${qbychat.conversation.invite.expire}")
+    int inviteExpire;
 
     @Override
     public Conversation create(String name, ConversationType type, User user) {
@@ -148,7 +154,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public boolean isBanned(Conversation conversation, User user) {
-        return Boolean.TRUE.equals(memberRepository.findByUserAndConversation(user, conversation).map(it -> it.getBanUntil().isAfter(Instant.now())).orElse(null));
+        return Boolean.TRUE.equals(memberRepository.findByUserAndConversation(user, conversation).map(it -> it.getBanUntil() != null && it.getBanUntil().isAfter(Instant.now())).orElse(null));
     }
 
     @Override
@@ -169,5 +175,23 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public List<Conversation> list(User user) {
         return memberRepository.findAllByUser(user).stream().map(Member::getConversation).toList();
+    }
+
+    @Override
+    public List<Member> listMembers(Conversation conversation) {
+        return memberRepository.findAllByConversationAndBanUntilBefore(conversation, Instant.now());
+    }
+
+    @Override
+    public InviteLink invite(Conversation conversation, User user) {
+        InviteLink inviteLink = new InviteLink();
+        Optional<Member> member = memberRepository.findByUserAndConversation(user, conversation);
+        if (member.isEmpty() || !member.get().getPermissions().contains(MemberPermission.CREATE_INVITE_LINKS)) {
+            return null;
+        }
+        inviteLink.setCreateBy(member.get());
+        inviteLink.setLink("+" + RandomUtil.randomString(16));
+        inviteLink.setExpireAt(Instant.now().plus(inviteExpire, ChronoUnit.DAYS));
+        return inviteLinkRepository.save(inviteLink);
     }
 }

@@ -23,6 +23,10 @@ qbychat:
   request:
     # The User-Agent header
     user-agent: qbychat
+  conversation:
+    invite:
+      # Default invite link expire time (Unit: days)
+      expire: 7
   bot:
     # Should this qbychat instance allow bots?
     state: true
