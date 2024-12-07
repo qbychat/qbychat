@@ -26,6 +26,18 @@ public class UserFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        // bot
+        if ((boolean) request.getAttribute("bot")) {
+            User user = userService.findByUsername(principal.getName());
+            if (user == null) {
+                // did you drop the user document?
+                throw new ServletException("User not found, did you drop the user document?");
+            }
+            request.setAttribute("user", user);
+            filterChain.doFilter(request, response);
+            return;
+        }
+        // normal user
         User user = userService.find(principal);
         if (user == null) {
             // create user from request

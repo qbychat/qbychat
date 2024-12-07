@@ -18,6 +18,18 @@ spring:
 
 qbychat:
   link:
+    # How long do links expire (Unit: days)
     ttl: 7
   request:
+    # The User-Agent header
     user-agent: qbychat
+  bot:
+    # Should this qbychat instance allow bots?
+    state: true
+    # What permission will be granted to bots?
+    scopes:
+      - link
+      - media.upload
+      - message.send
+      - profile.read
+      - profile.edit

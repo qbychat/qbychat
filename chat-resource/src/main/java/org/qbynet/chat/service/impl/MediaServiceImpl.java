@@ -135,13 +135,14 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public @NotNull Optional<Media> fromExist(String hash, String name, String contentType) {
+    public @NotNull Optional<Media> fromExist(User user, String hash, String name, String contentType) {
         if (!hasFile(hash)) {
             return Optional.empty();
         }
         Media media = new Media();
         media.setHash(hash);
         media.setName(name);
+        media.setUploader(user);
         media.setContentType(contentType);
         return Optional.of(mediaRepository.save(media));
     }

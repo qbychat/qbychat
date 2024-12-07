@@ -16,6 +16,7 @@ import org.qbynet.chat.service.MediaService;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
@@ -67,6 +68,7 @@ public class MediaController {
     }
 
     @PutMapping("upload")
+    @Secured("SCOPE_media.upload")
     public ResponseEntity<RestBean<List<MediaVO>>> upload(HttpServletRequest request, @RequestAttribute("user") User user) throws Exception {
         boolean isMultipart = JakartaServletFileUpload.isMultipartContent(request);
         if (!isMultipart) {
@@ -87,9 +89,10 @@ public class MediaController {
     }
 
     @PostMapping("create-exist")
+    @Secured("SCOPE_media.upload")
     public ResponseEntity<RestBean<List<ExistMediaVO>>> createExist(@RequestBody CreateExistMediaDTO dto, @RequestAttribute("user") User user) {
         return ResponseEntity.ok(RestBean.success(dto.getMedias().stream().map(mediaInfo -> {
-            Optional<Media> optional = mediaService.fromExist(mediaInfo.getHash(), mediaInfo.getName(), mediaInfo.getContentType());
+            Optional<Media> optional = mediaService.fromExist(user, mediaInfo.getHash(), mediaInfo.getName(), mediaInfo.getContentType());
             return optional.map(ExistMediaVO::from).orElseGet(() -> ExistMediaVO.missing(mediaInfo.getHash()));
         }).toList()));
     }
