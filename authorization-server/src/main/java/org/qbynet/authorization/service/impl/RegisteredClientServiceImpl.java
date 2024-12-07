@@ -56,6 +56,7 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
                 .scope("conversation.join")
                 .scope("conversation.list")
                 .scope("conversation.create")
+                .scope("search")
                 .scope("link")
                 .tokenSettings(TokenSettings.builder()
                         .refreshTokenTimeToLive(Duration.ofDays(7))
