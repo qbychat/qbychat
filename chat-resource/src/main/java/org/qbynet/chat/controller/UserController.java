@@ -18,7 +18,7 @@ public class UserController {
 
     @GetMapping("profile")
     public ResponseEntity<RestBean<UserVO>> profile(@RequestAttribute("user") User user) {
-        return ResponseEntity.ok(RestBean.success(UserVO.fromUser(user)));
+        return ResponseEntity.ok(RestBean.success(UserVO.from(user)));
     }
 
     @PostMapping("profile")
@@ -29,6 +29,6 @@ public class UserController {
         user.setNickname(dto.getNickname());
         user.setUsername(dto.getUsername());
         user.setBio(dto.getBio());
-        return ResponseEntity.ok(RestBean.success(UserVO.fromUser(userService.update(user))));
+        return ResponseEntity.ok(RestBean.success(UserVO.from(userService.update(user))));
     }
 }

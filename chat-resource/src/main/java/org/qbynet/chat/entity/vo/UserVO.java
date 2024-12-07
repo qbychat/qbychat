@@ -15,7 +15,7 @@ public class UserVO {
     private long registerTime;
     private long lastLoginTime;
 
-    public static UserVO fromUser(User user) {
+    public static UserVO from(User user) {
         return UserVO.builder()
                 .id(user.getId())
                 .username(user.getUsername())

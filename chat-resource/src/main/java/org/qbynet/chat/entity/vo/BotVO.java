@@ -15,7 +15,7 @@ public class BotVO {
     public static @NotNull BotVO from(@NotNull CreateBot cb) {
         BotVO vo = new BotVO();
         vo.setId(cb.getBot().getId());
-        vo.setUser(UserVO.fromUser(cb.getBot().getBot()));
+        vo.setUser(UserVO.from(cb.getBot().getBot()));
         vo.setToken(cb.getToken());
         return vo;
     }
@@ -23,7 +23,7 @@ public class BotVO {
     public static @NotNull BotVO from(@NotNull Bot source) {
         BotVO vo = new BotVO();
         vo.setId(source.getId());
-        vo.setUser(UserVO.fromUser(source.getBot()));
+        vo.setUser(UserVO.from(source.getBot()));
         return vo;
     }
 }

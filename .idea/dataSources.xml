@@ -29,7 +29,7 @@
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
     <data-source source="LOCAL" name="qby-chat@localhost" uuid="605b670d-032f-49b1-9ec5-786046fdc2e3">
-      <driver-ref>mongo</driver-ref>
+      <driver-ref>mongo.4</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>
       <jdbc-driver>com.dbschema.MongoJdbcDriver</jdbc-driver>

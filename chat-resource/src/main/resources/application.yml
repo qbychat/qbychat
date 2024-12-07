@@ -27,6 +27,12 @@ qbychat:
     invite:
       # Default invite link expire time (Unit: days)
       expire: 7
+  search:
+    # Allow users search medias
+    media: true
+    page:
+      # Limit pre page
+      limit: 50
   bot:
     # Should this qbychat instance allow bots?
     state: true

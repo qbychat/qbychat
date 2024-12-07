@@ -4,5 +4,6 @@ public enum SearchResultType {
     CONVERSATION,
     USER,
     MESSAGE,
-    MEDIA
+    MEDIA,
+    INVITE_LINK
 }
