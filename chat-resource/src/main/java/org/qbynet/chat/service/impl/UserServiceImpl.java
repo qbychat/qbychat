@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
         BotToken botToken = objectMapper.readValue(decodedBytes, BotToken.class);
         // find bot
         Optional<Bot> bot = botRepository.findById(botToken.getBotId());
-        return bot.filter(value -> passwordEncoder.matches(botToken.getBotToken(), value.getToken())).orElseThrow();
+        return bot.filter(value -> passwordEncoder.matches(botToken.getBotToken(), value.getToken())).orElse(null);
     }
 
     @Override

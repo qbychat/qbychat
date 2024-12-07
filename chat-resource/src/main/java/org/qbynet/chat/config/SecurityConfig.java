@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer(conf -> conf
                         .jwt(Customizer.withDefaults())
                 )
-                .addFilterAfter(new BotAuthenticationFilter(botConfig.getScopes(), userService), BasicAuthenticationFilter.class)
+                .addFilterAfter(new BotAuthenticationFilter(botConfig, userService), BasicAuthenticationFilter.class)
                 .addFilterAfter(new UserFilter(userService), AuthorizationFilter.class)
                 .build();
     }

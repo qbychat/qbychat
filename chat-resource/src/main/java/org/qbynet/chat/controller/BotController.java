@@ -7,6 +7,7 @@ import org.qbynet.chat.entity.User;
 import org.qbynet.chat.entity.dto.CreateBotDTO;
 import org.qbynet.chat.entity.vo.BotVO;
 import org.qbynet.chat.service.UserService;
+import org.qbynet.chat.util.BotConfig;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,14 @@ public class BotController {
     @Resource
     UserService userService;
 
+    @Resource
+    BotConfig botConfig;
+
     @PostMapping("create")
     public ResponseEntity<RestBean<BotVO>> create(@RequestBody CreateBotDTO dto, @RequestAttribute("user") User user) {
+        if (!botConfig.isState()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Bots are disabled on this instance."));
+        }
         CreateBot cb;
         try {
             cb = userService.createBot(user, dto.getUsername(), dto.getNickname());
