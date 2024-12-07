@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
@@ -38,11 +39,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/bot/create").hasAuthority("SCOPE_bot.create")
                         .requestMatchers("/api/message/send").hasAuthority("SCOPE_message.send")
                         .requestMatchers("/api/media/upload").hasAuthority("SCOPE_media.upload")
+                        .requestMatchers("/api/conversation/").hasAuthority("SCOPE_conversation.create")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(conf -> conf
                         .jwt(Customizer.withDefaults())
                 )
+                .csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(new BotAuthenticationFilter(botConfig, userService), BasicAuthenticationFilter.class)
                 .addFilterAfter(new UserFilter(userService), AuthorizationFilter.class)
                 .build();

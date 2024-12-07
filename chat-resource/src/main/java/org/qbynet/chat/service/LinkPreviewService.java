@@ -8,4 +8,6 @@ public interface LinkPreviewService {
     LinkPreview generateLinkPreview(URI link);
 
     LinkPreview generateOrGetLinkPreview(URI link);
+
+    LinkPreview fromText(String content);
 }

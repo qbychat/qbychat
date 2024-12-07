@@ -24,7 +24,7 @@ public class BotAuthenticationFilter extends OncePerRequestFilter {
     private final UserService userService;
     private final boolean state;
 
-    public BotAuthenticationFilter(BotConfig botConfig, UserService userService) {
+    public BotAuthenticationFilter(@NotNull BotConfig botConfig, UserService userService) {
         this.scopes = botConfig.getScopes();
         state = botConfig.isState();
         this.userService = userService;

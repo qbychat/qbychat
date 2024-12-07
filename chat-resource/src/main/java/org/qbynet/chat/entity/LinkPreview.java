@@ -6,11 +6,12 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 @Data
 @Document
-public class LinkPreview {
+public class LinkPreview implements Serializable {
     @Id
     private String id;
 

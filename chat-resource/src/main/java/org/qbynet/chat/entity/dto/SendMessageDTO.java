@@ -6,11 +6,13 @@ import java.util.List;
 
 @Data
 public class SendMessageDTO {
-    private String conversationId;
+    private String conversation;
     private String content;
 
-    private String replyTo; // message id
-    private String redirectFrom; // message id
+    private String replyTo = null; // message id
+    private String redirectFrom = null; // message id
+
+    private boolean linkPreview = true;
 
     private List<String> medias = List.of(); // media ids (should upload first)
 }

@@ -5,12 +5,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.security.Principal;
 import java.time.Instant;
 
 @Data
 @Document
-public class User implements Principal {
+public class User implements Principal, Serializable {
     @Id
     private String id; // http://resource-server/view/u/<id>/id
     private String remoteId; // id from OAuth2 Authorization server

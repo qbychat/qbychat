@@ -25,7 +25,6 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.jetbrains:annotations:24.0.0")
     implementation("com.alibaba.fastjson2:fastjson2:2.0.53")
 }

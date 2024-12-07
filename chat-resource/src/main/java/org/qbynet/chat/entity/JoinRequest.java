@@ -5,15 +5,18 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.io.Serializable;
+import java.time.Instant;
 
 @Data
 @Document
-public class Sticker implements Serializable {
+public class JoinRequest {
     @Id
     private String id;
 
-    private String alternativeEmoji;
     @DBRef
-    private Media media; // link to a lottie json, image or gif file
+    private User user;
+    @DBRef
+    private Conversation conversation;
+
+    private Instant timestamp = Instant.now();
 }

@@ -27,6 +27,7 @@ qbychat:
     # Should this qbychat instance allow bots?
     state: true
     # What permission will be granted to bots?
+    # Warning: DO NOT grant ADMIN permissions, otherwise bots will break your servlet
     scopes:
       - link
       - media.upload

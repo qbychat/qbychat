@@ -18,15 +18,16 @@ public class LinkPreviewVO {
 
     private long timestamp;
 
-    public static @NotNull LinkPreviewVO from(@NotNull LinkPreview origin) {
-        LinkPreviewVO lp = new LinkPreviewVO();
-        lp.setLink(origin.getLink());
-        lp.setTitle(origin.getTitle());
-        lp.setDescription(origin.getDescription());
-        if (origin.getImage() != null) {
-            lp.setImage(MediaVO.from(origin.getImage()));
+    public static @NotNull LinkPreviewVO from(@NotNull LinkPreview source) {
+        LinkPreviewVO vo = new LinkPreviewVO();
+        vo.setLink(source.getLink());
+        vo.setTitle(source.getTitle());
+        vo.setStatus(source.getStatus());
+        vo.setDescription(source.getDescription());
+        if (source.getImage() != null) {
+            vo.setImage(MediaVO.from(source.getImage()));
         }
-        lp.setTimestamp(origin.getTimestamp().getEpochSecond());
-        return lp;
+        vo.setTimestamp(source.getTimestamp().getEpochSecond());
+        return vo;
     }
 }

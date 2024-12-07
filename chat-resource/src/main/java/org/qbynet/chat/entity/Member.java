@@ -5,12 +5,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Document
-public class Member {
+public class Member implements Serializable {
     @Id
     private String id;
 
@@ -18,7 +20,7 @@ public class Member {
     private User user;
     @DBRef
     private Conversation conversation;
-    private String nickname;
+    private String nickname = null; // default to user's nickname
     private String title = null;
 
     private List<MemberPermission> permissions = null; // if this set null, the default permissions in the conversation entity will be used
@@ -28,7 +30,6 @@ public class Member {
     private Instant banUntil = null;
     private boolean owner = false;
     private boolean anonymous = false;
-    private boolean verified = !conversation.isMemberVerificationNeeded();
     private boolean quit = false;
 
     private boolean notifications = true; // should we send notifications to this user?
@@ -37,12 +38,13 @@ public class Member {
         if (owner) {
             return List.of(MemberPermission.values());
         }
-        if (!verified) {
-            return List.of();
-        }
         if (permissions == null) {
             return conversation.getDefaultPermissions();
         }
         return MemberPermission.calculate(permissions);
+    }
+
+    public String getNickname() {
+        return Objects.requireNonNullElseGet(nickname, () -> user.getNickname());
     }
 }

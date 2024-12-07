@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -22,8 +23,12 @@ import org.thymeleaf.util.ContentTypeUtils;
 import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Log4j2
 @Service
@@ -43,9 +48,49 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
     @Value("${qbychat.link.ttl}")
     int linkTtl;
 
+    public static @NotNull List<String> extractLinks(String text) {
+        List<String> links = new ArrayList<>();
+        String regex = "https?://[\\w-]+(\\.[\\w-]+)+(/\\S*)?";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(text);
+
+        while (matcher.find()) {
+            links.add(matcher.group());
+        }
+
+        return links;
+    }
+
+    private @Nullable Metadata fetchMetadata(URI link) {
+        Metadata metadata = new Metadata();
+        metadata.setLink(link);
+        try (Response response = okHttpClient.newCall(new Request.Builder()
+                .get()
+                .url(link.toURL())
+                .header("User-Agent", userAgent)
+                .build()).execute()) {
+            assert response.body() != null;
+            Document document = Jsoup.parse(response.body().string());
+            metadata.setTitle(document.title());
+            Element descriptionElement = document.selectFirst("meta[name=description]");
+            if (descriptionElement != null) {
+                metadata.setDescription(descriptionElement.attr("content"));
+            }
+            // Open Graph image
+            Element metaImage = document.selectFirst("meta[property=og:image]");
+            if (metaImage != null) {
+                metadata.setImage(URI.create(metaImage.attr("content")));
+            }
+        } catch (Exception e) {
+            log.info("Failed to fetch metadata of url {}", link, e);
+            return null;
+        }
+        return metadata;
+    }
+
     @Override
     public LinkPreview generateLinkPreview(URI link) {
-        LinkPreview lp = new LinkPreview();
+        LinkPreview lp = linkPreviewRepository.findByLink(link.toString()).orElseGet(LinkPreview::new);
         lp.setLink(link.toString());
         log.info("Generate link preview for {}", link);
         try (Response response = okHttpClient.newCall(new Request.Builder()
@@ -92,33 +137,6 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
         return linkPreviewRepository.save(lp);
     }
 
-    private @Nullable Metadata fetchMetadata(URI link) {
-        Metadata metadata = new Metadata();
-        metadata.setLink(link);
-        try (Response response = okHttpClient.newCall(new Request.Builder()
-                .get()
-                .url(link.toURL())
-                .header("User-Agent", userAgent)
-                .build()).execute()) {
-            assert response.body() != null;
-            Document document = Jsoup.parse(response.body().string());
-            metadata.setTitle(document.title());
-            Element descriptionElement = document.selectFirst("meta[name=description]");
-            if (descriptionElement != null) {
-                metadata.setDescription(descriptionElement.attr("content"));
-            }
-            // Open Graph image
-            Element metaImage = document.selectFirst("meta[property=og:image]");
-            if (metaImage != null) {
-                metadata.setImage(URI.create(metaImage.attr("content")));
-            }
-        } catch (Exception e) {
-            log.info("Failed to fetch metadata of url {}", link, e);
-            return null;
-        }
-        return metadata;
-    }
-
     @Override
     public LinkPreview generateOrGetLinkPreview(URI link) {
         Optional<LinkPreview> lpOptional = linkPreviewRepository.findByLink(link.toString());
@@ -131,6 +149,16 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
             return lp;
         }
         return generateLinkPreview(link);
+    }
+
+    @Override
+    public LinkPreview fromText(String content) {
+        // parse the first link
+        List<String> links = extractLinks(content);
+        if (links.isEmpty()) {
+            return null;
+        }
+        return generateOrGetLinkPreview(URI.create(links.getFirst()));
     }
 
     @Data
