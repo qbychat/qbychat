@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean canDeleteBot(String botId, User user) {
-        return botRepository.findById(botId).map(it -> it.getOwner().equals(user)).orElse(false);
+        return botRepository.findById(botId).map(it -> it.getOwner().getId().equals(user.getId())).orElse(false);
     }
 
     @Override
