@@ -66,6 +66,17 @@ public class SearchServiceImpl implements SearchService {
             );
             linkOptional.ifPresent(results::add);
         }
+
+        // search by nickname
+        List<User> users = userRepository.findAllByNicknameContainingIgnoreCase(content, PageRequest.of(page, searchPageLimit)).toList();
+        List<SearchResult> userSearchResults = users.stream().map(it -> SearchResult.builder().user(UserVO.from(it)).type(SearchResultType.USER).build()).toList();
+        results.addAll(userSearchResults);
+
+        // search by conversation name
+        List<Conversation> conversations = conversationRepository.findAllByNameContainingIgnoreCase(content, PageRequest.of(page, searchPageLimit)).toList();
+        List<SearchResult> conversationSearchResults = conversations.stream().map(it -> SearchResult.builder().conversation(ConversationVO.from(it)).type(SearchResultType.CONVERSATION).build()).toList();
+        results.addAll(conversationSearchResults);
+
         // search for messages
         List<Conversation> joinedConversations = conversationService.list(user);
         joinedConversations.forEach(conversation -> {

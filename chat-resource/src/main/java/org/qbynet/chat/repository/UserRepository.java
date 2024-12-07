@@ -17,4 +17,6 @@ public interface UserRepository extends MongoRepository<User, String> {
     boolean existsByUsername(String username);
 
     Page<User> findAllByUsernameStartsWithIgnoreCase(String username, Pageable pageable);
+
+    Page<User> findAllByNicknameContainingIgnoreCase(String nickname, Pageable pageable);
 }

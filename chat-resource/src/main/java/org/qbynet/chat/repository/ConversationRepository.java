@@ -13,4 +13,6 @@ public interface ConversationRepository extends MongoRepository<Conversation, St
     Optional<Conversation> findByLink(String link);
 
     Page<Conversation> findAllByLinkStartsWithIgnoreCase(String link, Pageable pageable);
+
+    Page<Conversation> findAllByNameContainingIgnoreCase(String name, Pageable pageable);
 }
