@@ -20,7 +20,10 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.util.ContentTypeUtils;
 
 import java.net.URI;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.Optional;
 
 @Log4j2
 @Service
@@ -36,6 +39,9 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
 
     @Value("${qbychat.request.user-agent}")
     String userAgent;
+
+    @Value("${qbychat.link.ttl}")
+    int linkTtl;
 
     @Override
     public LinkPreview generateLinkPreview(URI link) {
@@ -115,7 +121,16 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
 
     @Override
     public LinkPreview generateOrGetLinkPreview(URI link) {
-        return linkPreviewRepository.findByLink(link.toString()).orElseGet(() -> generateLinkPreview(link));
+        Optional<LinkPreview> lpOptional = linkPreviewRepository.findByLink(link.toString());
+        if (lpOptional.isPresent()) {
+            LinkPreview lp = lpOptional.get();
+            if (Instant.now().isAfter(lp.getTimestamp().plus(linkTtl, ChronoUnit.DAYS))) {
+                // expired
+                return generateLinkPreview(link);
+            }
+            return lp;
+        }
+        return generateLinkPreview(link);
     }
 
     @Data
