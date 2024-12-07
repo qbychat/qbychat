@@ -194,4 +194,9 @@ public class ConversationServiceImpl implements ConversationService {
         inviteLink.setExpireAt(Instant.now().plus(inviteExpire, ChronoUnit.DAYS));
         return inviteLinkRepository.save(inviteLink);
     }
+
+    @Override
+    public boolean hasJoined(Conversation conversation, User user) {
+        return memberRepository.existsByUserAndConversation(user, conversation);
+    }
 }

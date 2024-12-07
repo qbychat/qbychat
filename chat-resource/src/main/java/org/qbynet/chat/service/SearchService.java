@@ -11,4 +11,6 @@ public interface SearchService {
     List<SearchResult> mixed(String content, User user, int page);
 
     List<SearchResult> media(@NotNull String content, @Nullable String contentType, int page);
+
+    List<SearchResult> tag(@NotNull String tag, User user, int page);
 }

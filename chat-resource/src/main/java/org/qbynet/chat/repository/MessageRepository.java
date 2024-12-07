@@ -17,4 +17,6 @@ public interface MessageRepository extends MongoRepository<Message, String> {
     void deleteByExpiresAtLessThan(Instant now);
 
     Page<Message> findAllByConversationAndContentContainingIgnoreCase(Conversation conversation, String content, Pageable pageable);
+
+    Page<Message> findAllByContentContainingIgnoreCase(String content, Pageable pageable);
 }

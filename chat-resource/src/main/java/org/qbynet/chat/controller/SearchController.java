@@ -36,4 +36,11 @@ public class SearchController {
         }
         return ResponseEntity.ok(RestBean.success(searchService.media(query, contentType, page)));
     }
+
+    @GetMapping("tag")
+    public ResponseEntity<RestBean<List<SearchResult>>> searchByTag(@RequestParam(name = "q") String query,
+                                                                    @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                                                    @RequestAttribute("user") User user) {
+        return ResponseEntity.ok(RestBean.success(searchService.tag(query, user, page)));
+    }
 }

@@ -54,6 +54,8 @@ public interface ConversationService {
 
     InviteLink invite(Conversation conversation, User user);
 
+    boolean hasJoined(Conversation conversation, User user);
+
     @Data
     @Builder
     class JoinConversationDetails {
