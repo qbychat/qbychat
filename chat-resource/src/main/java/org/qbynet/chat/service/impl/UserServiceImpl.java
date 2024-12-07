@@ -111,4 +111,26 @@ public class UserServiceImpl implements UserService {
     public List<Bot> listBots(User user) {
         return botRepository.findAllByOwner(user);
     }
+
+    @Override
+    public boolean canDeleteBot(String botId, User user) {
+        return botRepository.findById(botId).map(it -> it.getOwner().equals(user)).orElse(false);
+    }
+
+    @Override
+    public void deleteBot(String botId) {
+        Bot bot = botRepository.findById(botId).orElse(null);
+        if (bot == null) {
+            return;
+        }
+        // make its user anonymous
+        log.info("Bot {} was deleted", bot.getBot().getNickname());
+        User botUser = bot.getBot();
+        botUser.setNickname("Deleted Account");
+        botUser.setBio(null);
+        botUser.setUsername(null);
+        botUser.setLastLoginTime(null);
+        userRepository.save(botUser);
+        botRepository.delete(bot);
+    }
 }

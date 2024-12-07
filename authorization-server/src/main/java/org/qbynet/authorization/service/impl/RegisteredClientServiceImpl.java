@@ -47,6 +47,7 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
                 .scope("bot.create")
+                .scope("bot.delete")
                 .scope("bot.list")
                 .scope("profile.read")
                 .scope("profile.edit")

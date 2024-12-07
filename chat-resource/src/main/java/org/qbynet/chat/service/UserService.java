@@ -27,4 +27,8 @@ public interface UserService {
     User findByUsername(String username);
 
     List<Bot> listBots(User user);
+
+    boolean canDeleteBot(String botId, User user);
+
+    void deleteBot(String botId);
 }

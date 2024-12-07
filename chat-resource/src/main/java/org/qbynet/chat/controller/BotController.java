@@ -5,6 +5,7 @@ import jakarta.annotation.Resource;
 import org.qbynet.chat.entity.CreateBot;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.entity.dto.CreateBotDTO;
+import org.qbynet.chat.entity.dto.DeleteBotDTO;
 import org.qbynet.chat.entity.vo.BotVO;
 import org.qbynet.chat.service.UserService;
 import org.qbynet.chat.util.BotConfig;
@@ -45,5 +46,14 @@ public class BotController {
     @GetMapping("list")
     public ResponseEntity<RestBean<List<BotVO>>> list(@RequestAttribute("user") User user) {
         return ResponseEntity.ok(RestBean.success(userService.listBots(user).stream().map(BotVO::from).toList()));
+    }
+
+    @DeleteMapping("delete")
+    public ResponseEntity<RestBean<String>> delete(@RequestBody DeleteBotDTO dto, @RequestAttribute("user") User user) {
+        if (!userService.canDeleteBot(dto.getBot(), user)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.failure(400, "You are not allowed to delete this bot."));
+        }
+        userService.deleteBot(dto.getBot());
+        return ResponseEntity.ok(RestBean.success("Deleted"));
     }
 }

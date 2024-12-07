@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/user/profile").hasAuthority("SCOPE_profile.edit")
                         .requestMatchers("/api/link/**").hasAuthority("SCOPE_link")
                         .requestMatchers("/api/bot/create").hasAuthority("SCOPE_bot.create")
+                        .requestMatchers("/api/bot/delete").hasAuthority("SCOPE_bot.delete")
                         .requestMatchers("/api/bot/list").hasAuthority("SCOPE_bot.list")
                         .requestMatchers("/api/message/send").hasAuthority("SCOPE_message.send")
                         .requestMatchers("/api/media/upload").hasAuthority("SCOPE_media.upload")
