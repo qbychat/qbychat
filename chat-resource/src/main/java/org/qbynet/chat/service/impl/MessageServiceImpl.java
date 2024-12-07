@@ -10,6 +10,7 @@ import org.qbynet.chat.repository.MemberRepository;
 import org.qbynet.chat.repository.MessageRepository;
 import org.qbynet.chat.service.LinkPreviewService;
 import org.qbynet.chat.service.MessageService;
+import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,10 +40,13 @@ public class MessageServiceImpl implements MessageService {
     @Resource
     RabbitTemplate rabbitTemplate;
 
+    @Resource(name = "messagesQueue")
+    Queue messagesQueue;
+
     @Override
     public Message send(Message source) {
         Message message = messageRepository.save(source);
-        rabbitTemplate.convertAndSend(message);
+        rabbitTemplate.convertAndSend(messagesQueue.getName(), message);
         return message;
     }
 
