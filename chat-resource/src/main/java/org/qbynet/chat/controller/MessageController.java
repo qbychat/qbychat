@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import org.qbynet.chat.entity.Conversation;
 import org.qbynet.chat.entity.Message;
 import org.qbynet.chat.entity.User;
+import org.qbynet.chat.entity.dto.ReadMessageDTO;
 import org.qbynet.chat.entity.dto.SendMessageDTO;
 import org.qbynet.chat.entity.vo.MessageVO;
 import org.qbynet.chat.service.MessageService;
@@ -32,5 +33,11 @@ public class MessageController {
         }
         Message msg = messageService.send(message, user);
         return ResponseEntity.ok(RestBean.success(MessageVO.from(msg)));
+    }
+
+    @PostMapping("read")
+    public ResponseEntity<RestBean<String>> markAsRead(@RequestBody ReadMessageDTO dto, @RequestAttribute("user") User user) {
+        messageService.markAsRead(dto.getMessages(), user);
+        return ResponseEntity.ok(RestBean.success("Ok"));
     }
 }

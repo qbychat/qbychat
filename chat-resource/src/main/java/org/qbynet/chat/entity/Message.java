@@ -17,6 +17,8 @@ public class Message implements Serializable {
 
     @DBRef
     private Member sender; // set to null to send messages anonymous
+    @DBRef
+    private Conversation conversation;
     private String content;
     @DBRef
     private Sticker sticker;

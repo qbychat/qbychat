@@ -2,21 +2,19 @@ package org.qbynet.chat.service.impl;
 
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.dto.SendMessageDTO;
-import org.qbynet.chat.repository.ConversationRepository;
-import org.qbynet.chat.repository.MediaRepository;
-import org.qbynet.chat.repository.MemberRepository;
-import org.qbynet.chat.repository.MessageRepository;
+import org.qbynet.chat.repository.*;
 import org.qbynet.chat.service.LinkPreviewService;
 import org.qbynet.chat.service.MessageService;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 
 @Log4j2
@@ -27,6 +25,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Resource
     MediaRepository mediaRepository;
+
+    @Resource
+    ReadRepository readRepository;
 
     @Resource
     MemberRepository memberRepository;
@@ -51,11 +52,12 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message send(SendMessageDTO dto, User user) {
+    public Message send(@NotNull SendMessageDTO dto, User user) {
         Conversation conversation = conversationRepository.findById(dto.getConversation()).orElseThrow();
         Member member = memberRepository.findByUserAndConversation(user, conversation).orElseThrow();
 
         Message message = new Message();
+        message.setConversation(conversation);
         message.setContent(dto.getContent());
         message.setMedias(dto.getMedias().stream().map(it -> mediaRepository.findById(it).orElse(null)).filter(Objects::nonNull).toList());
         // sender info
@@ -96,14 +98,24 @@ public class MessageServiceImpl implements MessageService {
         return conversationRepository.findById(id).orElse(null);
     }
 
-    @RabbitListener
-    private void onMessage(Message message) {
-        log.info("Message received: {}", message.getId());
+    @Override
+    public void markAsRead(@NotNull List<String> messageIds, User user) {
+        List<Message> messages = messageIds.stream().map(messageId -> messageRepository.findById(messageId).orElse(null)).filter(Objects::nonNull).toList();
+        readRepository.saveAll(messages.stream().map(it -> {
+            Read read = new Read();
+            read.setMessage(it);
+            Member member = memberRepository.findByUserAndConversation(user, it.getConversation()).orElse(null);
+            if (member == null) {
+                return null;
+            }
+            read.setMember(member);
+            return read;
+        }).filter(Objects::nonNull).toList());
     }
 
     @Scheduled(cron = "0 0 */6 * * *")
     private void autoDeleteExpiredMessages() {
-        log.info("Delete expired messages");
+        log.debug("Delete expired messages");
         messageRepository.deleteByExpiresAtLessThan(Instant.now());
     }
 }
