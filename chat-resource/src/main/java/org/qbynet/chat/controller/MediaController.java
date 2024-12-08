@@ -56,6 +56,7 @@ public class MediaController {
             response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
             response.setContentType("application/json; charset=utf-8");
             response.getWriter().write(RestBean.failure(503, "File was deleted on this server.").toJson());
+            return;
         }
         InputStream inputStream = streamMetadata.getInputStream();
         if (inputStream == null) {
