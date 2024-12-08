@@ -21,10 +21,12 @@
             <div th:if="${param.error}" class="alert alert-danger animate__animated animate__bounceIn animate__delay-1s">
                 <p th:text="#{register.error}">Email always exists</p>
             </div>
-            <mdui-text-field th:label="#{register.email}" type="email" label="Email" class="animate__animated animate__backInUp animate__delay-1s" name="email" required>
+            <mdui-text-field autofocus class="animate__animated animate__backInUp animate__delay-1s" label="Email" name="email" required
+                             tabindex="0" th:label="#{register.email}" type="email">
                 <mdui-button-icon slot="icon" icon="email"></mdui-button-icon>
             </mdui-text-field>
-            <mdui-text-field th:label="#{login.password}" label="Password" type="password" class="animate__animated animate__backInUp animate__delay-1s" name="password" required>
+            <mdui-text-field class="animate__animated animate__backInUp animate__delay-1s" label="Password" name="password" required
+                             tabindex="1" th:label="#{login.password}" type="password">
                 <mdui-button-icon slot="icon" icon="password"></mdui-button-icon>
             </mdui-text-field>
             <mdui-button th:text="#{register.button}" type="submit" class="animate__animated animate__bounceIn animate__delay-1s">Register</mdui-button>
