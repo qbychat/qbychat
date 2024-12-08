@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,6 +61,11 @@ public class MessageServiceImpl implements MessageService {
         message.setConversation(conversation);
         message.setContent(dto.getContent());
         message.setMedias(dto.getMedias().stream().map(it -> mediaRepository.findById(it).orElse(null)).filter(Objects::nonNull).toList());
+
+        // enable auto delete timer
+        if (conversation.getAutoDeleteTimer() != -1) {
+            message.setExpiresAt(Instant.now().plus(conversation.getAutoDeleteTimer(), ChronoUnit.DAYS));
+        }
         // sender info
         if (!member.isAnonymous()) {
             message.setSender(member);
@@ -116,6 +122,6 @@ public class MessageServiceImpl implements MessageService {
     @Scheduled(cron = "0 0 */6 * * *")
     private void autoDeleteExpiredMessages() {
         log.debug("Delete expired messages");
-        messageRepository.deleteByExpiresAtLessThan(Instant.now());
+        messageRepository.deleteAllByExpiresAtLessThan(Instant.now());
     }
 }
