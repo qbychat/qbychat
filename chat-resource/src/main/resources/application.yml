@@ -44,6 +44,8 @@ qbychat:
     scopes:
       - link
       - media.upload
+      - avatar.add
+      - avatar.remove
       - message.send
       - profile.read
       - profile.edit

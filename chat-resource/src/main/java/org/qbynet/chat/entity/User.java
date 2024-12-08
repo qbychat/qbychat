@@ -1,6 +1,7 @@
 package org.qbynet.chat.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -12,6 +13,7 @@ import java.time.Instant;
 
 @Data
 @Document
+@EqualsAndHashCode(callSuper = false)
 public class User implements Principal, Serializable {
     @Id
     private String id; // http://resource-server/view/u/<id>/id

@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface MediaService {
     Media fromRemote(URI remote);
 
-    Media findById(String hash);
+    Media findById(String id);
 
     StreamMetadata openInputStream(Media media) throws IOException;
 

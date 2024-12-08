@@ -1,9 +1,7 @@
 package org.qbynet.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.qbynet.chat.entity.Bot;
-import org.qbynet.chat.entity.CreateBot;
-import org.qbynet.chat.entity.User;
+import org.qbynet.chat.entity.*;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -31,4 +29,16 @@ public interface UserService {
     boolean canDeleteBot(String botId, User user);
 
     void deleteBot(String botId);
+
+    User findById(String id);
+
+    Avatar findLatestAvatar(User user);
+
+    List<Avatar> findAllAvatars(User user);
+
+    Avatar addAvatar(Media media, User user);
+
+    void removeAvatar(String id);
+
+    boolean isAvatarBelongsTo(String avatarId, User user);
 }

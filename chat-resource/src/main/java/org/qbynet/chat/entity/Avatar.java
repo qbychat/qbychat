@@ -5,6 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+
 @Data
 @Document
 public class Avatar {
@@ -14,5 +16,11 @@ public class Avatar {
     @DBRef
     private User user;
     @DBRef
+    private Conversation conversation;
+    @DBRef
     private Media media;
+
+    private AvatarType type;
+
+    private Instant timestamp = Instant.now();
 }

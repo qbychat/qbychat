@@ -64,6 +64,10 @@ public interface ConversationService {
      */
     void switchAutoDeleteTimer(Conversation conversation, int duration);
 
+    Avatar findLatestAvatar(Conversation conversation);
+
+    List<Avatar> findAllAvatars(Conversation conversation);
+
     @Data
     @Builder
     class JoinConversationDetails {

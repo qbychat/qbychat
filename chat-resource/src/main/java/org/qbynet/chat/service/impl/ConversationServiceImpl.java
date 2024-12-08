@@ -36,6 +36,9 @@ public class ConversationServiceImpl implements ConversationService {
     @Resource
     MessageRepository messageRepository;
 
+    @Resource
+    AvatarRepository avatarRepository;
+
     @Value("${qbychat.conversation.invite.expire}")
     int inviteExpire;
 
@@ -212,5 +215,15 @@ public class ConversationServiceImpl implements ConversationService {
                 it.setExpiresAt(Instant.now().plus(duration, ChronoUnit.DAYS));
             }
         }).toList());
+    }
+
+    @Override
+    public Avatar findLatestAvatar(Conversation conversation) {
+        return avatarRepository.findFirstByConversation(conversation).orElse(null);
+    }
+
+    @Override
+    public List<Avatar> findAllAvatars(Conversation conversation) {
+        return avatarRepository.findAllByConversation(conversation);
     }
 }

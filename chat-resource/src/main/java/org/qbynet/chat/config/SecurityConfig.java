@@ -34,7 +34,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(conf -> conf
-                        .requestMatchers("/api/media/*/raw", "/api/media/*/info").permitAll()
+                        .requestMatchers("/api/media/*/raw", "/api/media/*/info", "/api/avatar/image", "/api/avatar/list").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAuthority("SCOPE_profile.read")
                         .requestMatchers(HttpMethod.POST, "/api/user/profile").hasAuthority("SCOPE_profile.edit")
                         .requestMatchers("/api/link/**").hasAuthority("SCOPE_link")
@@ -47,6 +47,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/conversation/create").hasAuthority("SCOPE_conversation.create")
                         .requestMatchers("/api/conversation/list").hasAuthority("SCOPE_conversation.list")
                         .requestMatchers("/api/conversation/*/join").hasAuthority("SCOPE_conversation.join")
+                        .requestMatchers("/api/avatar/add").hasAuthority("SCOPE_avatar.add")
+                        .requestMatchers("/api/avatar/remove").hasAuthority("SCOPE_avatar.remove")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(conf -> conf

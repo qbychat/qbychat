@@ -56,6 +56,8 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
                 .scope("conversation.join")
                 .scope("conversation.list")
                 .scope("conversation.create")
+                .scope("avatar.add")
+                .scope("avatar.remove")
                 .scope("search")
                 .scope("link")
                 .tokenSettings(TokenSettings.builder()
