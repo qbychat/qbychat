@@ -12,6 +12,9 @@ import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
+
+import java.util.concurrent.ForkJoinPool;
 
 @RestController
 @RequestMapping("/api/message")
@@ -20,23 +23,33 @@ public class MessageController {
     MessageService messageService;
 
     @PostMapping("send")
-    public ResponseEntity<RestBean<MessageVO>> sendMessage(@RequestBody SendMessageDTO message, @RequestAttribute("user") User user) {
+    public DeferredResult<ResponseEntity<RestBean<MessageVO>>> sendMessage(@RequestBody SendMessageDTO message, @RequestAttribute("user") User user) {
+        DeferredResult<ResponseEntity<RestBean<MessageVO>>> result = new DeferredResult<>();
         if (message.getConversation() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "The given conversation must not be null"));
+            result.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "The given conversation must not be null")));
+            return result;
         }
         Conversation conversation = messageService.findConversationById(message.getConversation());
         if (conversation == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Conversation not found"));
+            result.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Conversation not found")));
+            return result;
         }
         if (!messageService.canSendMessage(conversation, user)) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(RestBean.failure(503, "Cannot send message"));
+            result.setErrorResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(RestBean.failure(503, "Cannot send message")));
+            return result;
         }
-        try {
-            Message msg = messageService.send(message, user);
-            return ResponseEntity.ok(RestBean.success(MessageVO.from(msg)));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, e.getMessage()));
-        }
+
+        result.onTimeout(() -> result.setResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(RestBean.failure(408, "Timeout"))));
+
+        ForkJoinPool.commonPool().submit(() -> {
+            try {
+                Message msg = messageService.send(message, user);
+                result.setResult(ResponseEntity.ok(RestBean.success(MessageVO.from(msg))));
+            } catch (Exception e) {
+                result.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, e.getMessage())));
+            }
+        });
+        return result;
     }
 
     @PostMapping("read")

@@ -3,7 +3,6 @@ package org.qbynet.chat.service.impl;
 import com.google.common.base.Optional;
 import com.optimaize.langdetect.LanguageDetector;
 import com.optimaize.langdetect.i18n.LdLocale;
-import com.optimaize.langdetect.text.TextObjectFactory;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
@@ -55,9 +54,6 @@ public class MessageServiceImpl implements MessageService {
     @Resource
     LanguageDetector languageDetector;
 
-    @Resource
-    TextObjectFactory textObjectFactory;
-
     @Override
     public Message send(Message source) {
         Message message = messageRepository.save(source);
@@ -95,7 +91,7 @@ public class MessageServiceImpl implements MessageService {
             message.setExpiresAt(Instant.now().plus(conversation.getAutoDeleteTimer(), ChronoUnit.DAYS));
         }
         // sender info
-        if (!member.isAnonymous()) {
+        if (!(member.isAnonymous() && dto.isAnonymous())) {
             message.setSender(member);
         }
         if (dto.getRedirectFrom() != null) {
@@ -105,8 +101,12 @@ public class MessageServiceImpl implements MessageService {
             message.setReply(messageRepository.findById(dto.getReplyTo()).orElseThrow());
         }
         // generate link preview
-        if (dto.isLinkPreview()) {
-            message.setLinkPreview(linkPreviewService.fromText(message.getContent()));
+        try {
+            if (dto.isLinkPreview()) {
+                message.setLinkPreview(linkPreviewService.fromText(message.getContent()));
+            }
+        } catch (Exception ignored) {
+            // ignored
         }
         return send(message);
     }

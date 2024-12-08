@@ -1,6 +1,7 @@
 package org.qbynet.chat.entity;
 
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -32,7 +33,7 @@ public class Member implements Serializable {
     private boolean anonymous = false;
     private boolean quit = false;
 
-    private boolean notifications = true; // should we send notifications to this user?
+    private NotificationPreferment notifications = null; // should we send notifications to this user?
 
     public List<MemberPermission> getPermissions() {
         if (owner) {
@@ -46,5 +47,20 @@ public class Member implements Serializable {
 
     public String getNickname() {
         return Objects.requireNonNullElseGet(nickname, () -> user.getNickname());
+    }
+
+    public boolean shouldPush(@NotNull Message message) {
+        NotificationPreferment real = notifications;
+        if (real == null) {
+            real = user.getNotificationPreferment(conversation.getType());
+        }
+        if (real == NotificationPreferment.EVERYTHING) return true;
+        if (real == NotificationPreferment.NOTHING) return false;
+        // judge is mentioned or replied
+        Message reply = message.getReply();
+        if (reply.getSender() != null && reply.getSender().getId().equals(id)) {
+            return true;
+        }
+        return message.getContent().contains("@" + user.getId() + " ");
     }
 }

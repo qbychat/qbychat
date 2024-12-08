@@ -14,6 +14,7 @@ public class SendMessageDTO {
     private String redirectFrom = null; // message id
 
     private boolean linkPreview = true;
+    private boolean anonymous = false;
 
     private List<String> medias = List.of(); // media ids (should upload first)
 }

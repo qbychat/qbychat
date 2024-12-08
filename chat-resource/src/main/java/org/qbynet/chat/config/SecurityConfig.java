@@ -5,6 +5,8 @@ import org.qbynet.chat.filter.BotAuthenticationFilter;
 import org.qbynet.chat.filter.UserFilter;
 import org.qbynet.chat.service.UserService;
 import org.qbynet.chat.util.BotConfig;
+import org.qbynet.chat.util.CustomAccessDeniedHandler;
+import org.qbynet.chat.util.CustomAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -49,6 +51,8 @@ public class SecurityConfig {
                 )
                 .oauth2ResourceServer(conf -> conf
                         .jwt(Customizer.withDefaults())
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(new BotAuthenticationFilter(botConfig, userService), BasicAuthenticationFilter.class)

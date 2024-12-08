@@ -1,10 +1,16 @@
 package org.qbynet.chat.entity.vo;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Member;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SenderVO {
     private String conversation;
     private String user;

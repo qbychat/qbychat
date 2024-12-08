@@ -65,6 +65,7 @@ public class ConversationServiceImpl implements ConversationService {
     public Member addMember(@NotNull Conversation conversation, User user) {
         Member member = new Member();
         member.setUser(user);
+        member.setConversation(conversation);
         log.info("Add user {} to conversation {}", user.getNickname(), conversation.getName());
         return memberRepository.save(member);
     }

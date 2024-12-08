@@ -1,6 +1,7 @@
 package org.qbynet.chat.entity;
 
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -24,8 +25,20 @@ public class User implements Principal, Serializable {
     private Instant registerTime = Instant.now();
     private Instant lastLoginTime = null;
 
+    private NotificationPreferment groupNotificationPreferment = NotificationPreferment.MENTION_AND_REPLY;
+    private NotificationPreferment channelNotificationPreferment = NotificationPreferment.EVERYTHING;
+    private NotificationPreferment pmNotificationPreferment = NotificationPreferment.EVERYTHING;
+
     @Override
     public String getName() {
         return id;
+    }
+
+    public NotificationPreferment getNotificationPreferment(@NotNull ConversationType type) {
+        return switch (type) {
+            case GROUP -> groupNotificationPreferment;
+            case CHANNEL -> channelNotificationPreferment;
+            case PRIVATE_MESSAGE, SECRETED_CHAT -> pmNotificationPreferment;
+        };
     }
 }

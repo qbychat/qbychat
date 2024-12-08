@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import java.net.URI;
+import java.util.concurrent.ForkJoinPool;
 
 @RestController
 @RequestMapping("/api/link")
@@ -22,12 +24,18 @@ public class LinkController {
     LinkPreviewService linkPreviewService;
 
     @PostMapping("preview")
-    public ResponseEntity<RestBean<LinkPreviewVO>> preview(@RequestBody LinkPreviewDTO dto) {
-        URI uri = URI.create(dto.getLink());
-        LinkPreview linkPreview = linkPreviewService.generateOrGetLinkPreview(uri);
-        if (linkPreview == null) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(RestBean.failure(422, "Unprocessable Entity"));
-        }
-        return ResponseEntity.ok(RestBean.success(LinkPreviewVO.from(linkPreview)));
+    public DeferredResult<ResponseEntity<RestBean<LinkPreviewVO>>> preview(@RequestBody LinkPreviewDTO dto) {
+        DeferredResult<ResponseEntity<RestBean<LinkPreviewVO>>> result = new DeferredResult<>(5000L);
+        result.onTimeout(() -> result.setResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(RestBean.failure(408, "Timeout"))));
+        ForkJoinPool.commonPool().submit(() -> {
+            URI uri = URI.create(dto.getLink());
+            LinkPreview linkPreview = linkPreviewService.generateOrGetLinkPreview(uri);
+            if (linkPreview == null) {
+                result.setResult(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(RestBean.failure(422, "Unprocessable Entity")));
+                return;
+            }
+            result.setResult(ResponseEntity.ok(RestBean.success(LinkPreviewVO.from(linkPreview))));
+        });
+        return result;
     }
 }
