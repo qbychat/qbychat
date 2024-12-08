@@ -5,10 +5,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
-import org.qbynet.chat.repository.ConversationRepository;
-import org.qbynet.chat.repository.InviteLinkRepository;
-import org.qbynet.chat.repository.JoinRequestRepository;
-import org.qbynet.chat.repository.MemberRepository;
+import org.qbynet.chat.repository.*;
 import org.qbynet.chat.service.ConversationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,6 +32,9 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Resource
     InviteLinkRepository inviteLinkRepository;
+
+    @Resource
+    MessageRepository messageRepository;
 
     @Value("${qbychat.conversation.invite.expire}")
     int inviteExpire;
@@ -198,5 +198,18 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public boolean hasJoined(Conversation conversation, User user) {
         return memberRepository.existsByUserAndConversation(user, conversation);
+    }
+
+    @Override
+    public void switchAutoDeleteTimer(@NotNull Conversation conversation, int duration) {
+        conversation.setAutoDeleteTimer(duration);
+        // apply for exist messages
+        messageRepository.saveAll(messageRepository.findAllByExpiresAtNullOrExpiresAtGreaterThan(Instant.now()).stream().peek(it -> {
+            if (duration == -1) {
+                it.setExpiresAt(null); // disable timer
+            } else {
+                it.setExpiresAt(Instant.now().plus(duration, ChronoUnit.DAYS));
+            }
+        }).toList());
     }
 }

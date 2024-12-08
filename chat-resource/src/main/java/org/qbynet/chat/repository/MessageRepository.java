@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface MessageRepository extends MongoRepository<Message, String> {
-    List<Message> findByExpiresAtNullOrExpiresAtGreaterThan(Instant now);
+    List<Message> findAllByExpiresAtNullOrExpiresAtGreaterThan(Instant now);
 
     void deleteAllByExpiresAtLessThan(Instant now);
 

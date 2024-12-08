@@ -56,6 +56,14 @@ public interface ConversationService {
 
     boolean hasJoined(Conversation conversation, User user);
 
+    /**
+     * Toggle the state of auto delete timer
+     *
+     * @param conversation the conversation
+     * @param duration     the timer. set to -1 to disable the timer (Unit: days)
+     */
+    void switchAutoDeleteTimer(Conversation conversation, int duration);
+
     @Data
     @Builder
     class JoinConversationDetails {
