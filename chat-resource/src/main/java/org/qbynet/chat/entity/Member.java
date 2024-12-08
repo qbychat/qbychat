@@ -33,6 +33,8 @@ public class Member implements Serializable {
     private boolean anonymous = false;
     private boolean quit = false;
 
+    private boolean pinned = false; // does this user pin this conversation
+
     private NotificationPreferment notifications = null; // should we send notifications to this user?
 
     public List<MemberPermission> getPermissions() {

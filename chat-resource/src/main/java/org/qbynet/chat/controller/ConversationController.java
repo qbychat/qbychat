@@ -5,6 +5,7 @@ import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.dto.ApproveJoinRequestDTO;
 import org.qbynet.chat.entity.dto.CreateConversationDTO;
 import org.qbynet.chat.entity.dto.InviteDTO;
+import org.qbynet.chat.entity.vo.ConversationUserVO;
 import org.qbynet.chat.entity.vo.ConversationVO;
 import org.qbynet.chat.entity.vo.InviteLinkVO;
 import org.qbynet.chat.entity.vo.JoinConversationVO;
@@ -23,8 +24,17 @@ public class ConversationController {
     ConversationService conversationService;
 
     @GetMapping("list")
-    public ResponseEntity<RestBean<List<ConversationVO>>> list(@RequestAttribute("user") User user) {
-        return ResponseEntity.ok(RestBean.success(conversationService.list(user).stream().map(ConversationVO::from).toList()));
+    public ResponseEntity<RestBean<List<ConversationUserVO>>> list(@RequestAttribute("user") User user) {
+        return ResponseEntity.ok(RestBean.success(conversationService.list(user).stream().map((conversation -> {
+            Member member = conversationService.findMember(conversation, user);
+            return ConversationUserVO.builder()
+                    .id(conversation.getId())
+                    .name(conversation.getName())
+                    .type(conversation.getType())
+                    .notificationPreferment(member.getNotifications())
+                    .pinned(member.isPinned())
+                    .build();
+        })).toList()));
     }
 
     @PostMapping("create")
