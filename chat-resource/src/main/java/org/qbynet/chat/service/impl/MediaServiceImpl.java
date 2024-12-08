@@ -9,13 +9,16 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.TeeInputStream;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Media;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.repository.MediaRepository;
 import org.qbynet.chat.service.MediaService;
+import org.qbynet.chat.util.CompressUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeType;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +37,9 @@ public class MediaServiceImpl implements MediaService {
 
     @Resource
     OkHttpClient okHttpClient;
+
+    @Resource
+    CompressUtil compressUtil;
 
     @Value("${qbychat.request.user-agent}")
     String userAgent;
@@ -59,6 +65,7 @@ public class MediaServiceImpl implements MediaService {
                     media.setName(path[path.length - 1]);
                 }
                 media.setHash(metadata.getHash());
+                compress(media.getContentType(), null, media);
             } else {
                 log.info("Failed to download file from {} ({})", remote, response.code());
                 return null;
@@ -101,7 +108,33 @@ public class MediaServiceImpl implements MediaService {
         FileMetadata metadata = saveToLocal(inputStream);
         media.setHash(metadata.getHash());
         log.info("Uploaded {}", media.getName());
+        compress(contentType, uploader, media);
         return mediaRepository.save(media);
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void compress(String contentType, User uploader, Media media) throws IOException {
+        if (MimeType.valueOf("image/*").isCompatibleWith(MimeType.valueOf(contentType))) {
+            log.info("Generate compressed image for {}", media.getName());
+            Media compressed = new Media();
+            compressed.setName(media.getName().substring(0, media.getName().lastIndexOf(".")) + "-compressed.webp");
+            compressed.setUploader(uploader);
+            compressed.setContentType("image/webp");
+            // process image
+            File tmp = createTempFile();
+            compressUtil.compressImage(FileUtils.openInputStream(getFileByHash(media.getHash())), tmp);
+            // calc hash
+            String hash = SecureUtil.sha256(tmp);
+            // move file
+            File target = getFileByHash(hash);
+            if (target.exists()) {
+                tmp.delete();
+            } else {
+                FileUtils.moveFile(tmp, target);
+            }
+            compressed.setHash(hash);
+            media.setCompressed(mediaRepository.save(compressed));
+        }
     }
 
     private String parseFileName(String contentDisposition) {
@@ -121,11 +154,13 @@ public class MediaServiceImpl implements MediaService {
      * @param hash sha256 hash
      * @return the file
      */
-    private File getFileByHash(String hash) {
+    @Contract("_ -> new")
+    private @NotNull File getFileByHash(String hash) {
         return new File(this.getDataFolder(), "files/" + hash);
     }
 
-    private File getDataFolder() {
+    @Contract(" -> new")
+    private @NotNull File getDataFolder() {
         return new File(FileUtils.current(), ".qbychat");
     }
 
@@ -147,13 +182,22 @@ public class MediaServiceImpl implements MediaService {
         return Optional.of(mediaRepository.save(media));
     }
 
-    private @NotNull FileMetadata saveToLocal(InputStream source) throws IOException {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private @NotNull File createTempFile() throws IOException {
         File tmp = new File(new File(getDataFolder(), "temp"), UUID.randomUUID().toString());
         FileUtils.createParentDirectories(tmp);
+        tmp.createNewFile();
+        return tmp;
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private @NotNull FileMetadata saveToLocal(InputStream source) throws IOException {
+        File tmp = createTempFile();
         TeeInputStream inputStream = new TeeInputStream(source, FileUtils.openOutputStream(tmp), true);
         // calculate sha256
         String sha256 = SecureUtil.sha256(inputStream);
         File file = getFileByHash(sha256);
+        // generate metadata
         FileMetadata metadata = new FileMetadata();
         metadata.setHash(sha256);
         metadata.setFile(file);
@@ -163,7 +207,6 @@ public class MediaServiceImpl implements MediaService {
         }
         // move file
         FileUtils.moveFile(tmp, file);
-        // generate metadata
         return metadata;
     }
 

@@ -30,4 +30,7 @@ public class Media implements Serializable {
      * Mime type
      */
     private String contentType;
+
+    @DBRef
+    private Media compressed = null;
 }

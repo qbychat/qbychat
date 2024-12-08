@@ -25,12 +25,17 @@ public class MediaVO {
      */
     private String contentType;
 
+    private MediaVO compressed = null;
+
     public static @NotNull MediaVO from(@NotNull Media origin) {
         MediaVO media = new MediaVO();
         media.setId(origin.getId());
         media.setName(origin.getName());
         media.setHash(origin.getHash());
         media.setContentType(origin.getContentType());
+        if (origin.getCompressed() != null) {
+            media.setCompressed(MediaVO.from(origin.getCompressed()));
+        }
         return media;
     }
 }
