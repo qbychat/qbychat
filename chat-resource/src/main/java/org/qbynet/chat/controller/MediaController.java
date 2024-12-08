@@ -52,6 +52,11 @@ public class MediaController {
     public void mediaDownload(@PathVariable String id, HttpServletResponse response, @RequestParam(required = false) boolean download) throws Exception {
         Media media = mediaService.findById(id);
         MediaService.StreamMetadata streamMetadata = mediaService.openInputStream(media);
+        if (streamMetadata == null) {
+            response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
+            response.setContentType("application/json; charset=utf-8");
+            response.getWriter().write(RestBean.failure(503, "File was deleted on this server.").toJson());
+        }
         InputStream inputStream = streamMetadata.getInputStream();
         if (inputStream == null) {
             // file not found
