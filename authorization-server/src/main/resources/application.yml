@@ -26,8 +26,7 @@ spring:
         jwk:
           rsa:
             id: 7ebd2080-02e5-4c77-bb77-e0247b93ece6
-            # openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048
-            # openssl rsa -pubout -in private_key.pem -out public_key.pem
+            # openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048 && openssl rsa -pubout -in private_key.pem -out public_key.pem && cat public_key.pem && cat private_key.pem
             public: |
               -----BEGIN PUBLIC KEY-----
               KEY CONTENT

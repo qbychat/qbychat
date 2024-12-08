@@ -26,15 +26,19 @@
             </div>
             <h1 class="h3 mb-3 fw-normal animate__animated animate__fadeInUp animate__delay-1s"
                 th:text="#{login.headline}">Please sign in</h1>
+            <div>
             <mdui-text-field id="username" label="Email" th:label="#{login.email}" type="email"
-                             name="username"
+                             autofocus name="username" tabindex="0"
                              class="form-control animate__animated animate__fadeInUp animate__delay-1s" required>
                 <mdui-button-icon icon="email" slot="icon"></mdui-button-icon>
             </mdui-text-field>
-            <mdui-text-field th:label="#{login.password}" label="Password" type="password" id="password" name="password"
+                <mdui-text-field id="password"
+                                 label="Password"
+                                 name="password" tabindex="1" th:label="#{login.password}" type="password"
                              class="form-control animate__animated animate__fadeInUp animate__delay-1s" required>
                 <mdui-button-icon slot="icon" icon="password"></mdui-button-icon>
             </mdui-text-field>
+            </div>
             <div>
                 <mdui-button
                         class="w-100 btn btn-lg btn-primary btn-block animate__animated animate__bounceIn animate__delay-1s"
