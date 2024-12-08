@@ -80,7 +80,7 @@ public class SearchServiceImpl implements SearchService {
         // search for messages
         List<Conversation> joinedConversations = conversationService.list(user);
         joinedConversations.forEach(conversation -> {
-            List<Message> messages = messageRepository.findAllByConversationAndContentContainingIgnoreCase(conversation, content, PageRequest.of(page, searchPageLimit)).toList();
+            List<Message> messages = messageRepository.findAllByConversationAndContentContainingIgnoreCaseAndExpiresAtNullOrExpiresAtGreaterThan(conversation, content, PageRequest.of(page, searchPageLimit), Instant.now()).toList();
             List<SearchResult> messageSearchResults = messages.stream().map(it -> SearchResult.builder().message(MessageVO.from(it)).type(SearchResultType.MESSAGE).build()).toList();
             results.addAll(messageSearchResults);
         });
@@ -108,7 +108,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<SearchResult> tag(@NotNull String tag, User user, int page) {
         String realTag = (tag.startsWith("#") ? tag : "#" + tag) + " ";
-        return messageRepository.findAllByContentContainingIgnoreCase(realTag, PageRequest.of(page, searchPageLimit)).stream()
+        return messageRepository.findAllByContentContainingIgnoreCaseAndExpiresAtNullOrExpiresAtGreaterThan(realTag, PageRequest.of(page, searchPageLimit), Instant.now()).stream()
                 .filter(it -> it.getConversation().isPreview() || conversationService.hasJoined(it.getConversation(), user))
                 .map(it -> SearchResult.builder().message(MessageVO.from(it)).type(SearchResultType.MESSAGE).build())
                 .toList();

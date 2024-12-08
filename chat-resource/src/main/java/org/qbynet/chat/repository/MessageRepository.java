@@ -14,9 +14,9 @@ import java.util.List;
 public interface MessageRepository extends MongoRepository<Message, String> {
     List<Message> findByExpiresAtNullOrExpiresAtGreaterThan(Instant now);
 
-    void deleteByExpiresAtLessThan(Instant now);
+    void deleteAllByExpiresAtLessThan(Instant now);
 
-    Page<Message> findAllByConversationAndContentContainingIgnoreCase(Conversation conversation, String content, Pageable pageable);
+    Page<Message> findAllByConversationAndContentContainingIgnoreCaseAndExpiresAtNullOrExpiresAtGreaterThan(Conversation conversation, String content, Pageable pageable, Instant now);
 
-    Page<Message> findAllByContentContainingIgnoreCase(String content, Pageable pageable);
+    Page<Message> findAllByContentContainingIgnoreCaseAndExpiresAtNullOrExpiresAtGreaterThan(String content, Pageable pageable, Instant now);
 }
