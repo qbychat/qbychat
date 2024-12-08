@@ -1,6 +1,6 @@
 package org.qbynet.chat.entity;
 
 public enum MessageType {
-    TEXT_MESSAGE,
+    NORMAL_MESSAGE,
     SERVICE_MESSAGE
 }

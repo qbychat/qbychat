@@ -17,6 +17,7 @@ repositories {
 
 dependencies {
     implementation(project(":"))
+    implementation(project(":languagedetection-core"))
     implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
     implementation("cn.hutool:hutool-crypto:5.8.34")
     implementation("commons-io:commons-io:2.18.0")

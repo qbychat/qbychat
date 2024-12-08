@@ -7,7 +7,8 @@ import java.util.List;
 @Data
 public class SendMessageDTO {
     private String conversation;
-    private String content;
+    private String content = null;
+    private String sticker = null;
 
     private String replyTo = null; // message id
     private String redirectFrom = null; // message id

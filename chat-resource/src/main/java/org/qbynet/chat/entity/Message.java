@@ -19,9 +19,9 @@ public class Message implements Serializable {
     private Member sender; // set to null to send messages anonymous
     @DBRef
     private Conversation conversation;
-    private String content;
+    private String content = null;
     @DBRef
-    private Sticker sticker;
+    private Sticker sticker = null;
 
     @DBRef
     private Message reply;
@@ -37,7 +37,7 @@ public class Message implements Serializable {
     private Instant sentAt = Instant.now();
     private Instant editAt = null; // null = never edited
 
-    private MessageType type = MessageType.TEXT_MESSAGE;
+    private MessageType type = MessageType.NORMAL_MESSAGE;
 
     private Instant expiresAt = null; // set to Instant.now() to delete message
     private boolean pinned = false;

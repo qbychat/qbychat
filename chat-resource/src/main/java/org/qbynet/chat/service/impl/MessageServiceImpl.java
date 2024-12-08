@@ -1,5 +1,9 @@
 package org.qbynet.chat.service.impl;
 
+import com.google.common.base.Optional;
+import com.optimaize.langdetect.LanguageDetector;
+import com.optimaize.langdetect.i18n.LdLocale;
+import com.optimaize.langdetect.text.TextObjectFactory;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +41,9 @@ public class MessageServiceImpl implements MessageService {
     ConversationRepository conversationRepository;
 
     @Resource
+    StickerRepository stickerRepository;
+
+    @Resource
     LinkPreviewService linkPreviewService;
 
     @Resource
@@ -44,6 +51,12 @@ public class MessageServiceImpl implements MessageService {
 
     @Resource(name = "messagesQueue")
     Queue messagesQueue;
+
+    @Resource
+    LanguageDetector languageDetector;
+
+    @Resource
+    TextObjectFactory textObjectFactory;
 
     @Override
     public Message send(Message source) {
@@ -59,8 +72,23 @@ public class MessageServiceImpl implements MessageService {
 
         Message message = new Message();
         message.setConversation(conversation);
-        message.setContent(dto.getContent());
+        // add content
+        if (dto.getContent() != null) {
+            message.setContent(dto.getContent());
+        } else if (dto.getSticker() != null) {
+            message.setSticker(stickerRepository.findById(dto.getSticker()).orElseThrow());
+        } else {
+            throw new IllegalStateException("Please provide a content");
+        }
+        // add medias
         message.setMedias(dto.getMedias().stream().map(it -> mediaRepository.findById(it).orElse(null)).filter(Objects::nonNull).toList());
+        // set type
+        message.setType(MessageType.NORMAL_MESSAGE);
+        // detect language
+        Optional<LdLocale> lang = languageDetector.detect(message.getContent());
+        if (lang.isPresent()) {
+            message.setLanguage(lang.get().getLanguage());
+        }
 
         // enable auto delete timer
         if (conversation.getAutoDeleteTimer() != -1) {

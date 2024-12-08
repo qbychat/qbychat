@@ -31,8 +31,12 @@ public class MessageController {
         if (!messageService.canSendMessage(conversation, user)) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(RestBean.failure(503, "Cannot send message"));
         }
-        Message msg = messageService.send(message, user);
-        return ResponseEntity.ok(RestBean.success(MessageVO.from(msg)));
+        try {
+            Message msg = messageService.send(message, user);
+            return ResponseEntity.ok(RestBean.success(MessageVO.from(msg)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, e.getMessage()));
+        }
     }
 
     @PostMapping("read")
