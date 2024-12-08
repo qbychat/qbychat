@@ -9,6 +9,7 @@ import org.qbynet.authorization.repository.AccountRepository;
 import org.qbynet.authorization.repository.VerifyRepository;
 import org.qbynet.authorization.service.AccountService;
 import org.qbynet.authorization.service.MailService;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -37,7 +38,7 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
         return User.withUsername(account.getId())
                 .password(account.getPassword())
-                .roles(account.getRoles().stream().map(Enum::name).toList().toArray(new String[0]))
+                .authorities(account.getRoles().stream().map(it -> new SimpleGrantedAuthority("ROLE_" + it)).toList().toArray(SimpleGrantedAuthority[]::new))
                 .accountLocked(account.isLocked())
                 .build();
     }

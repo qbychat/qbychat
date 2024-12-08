@@ -180,7 +180,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public List<Member> listMembers(Conversation conversation) {
-        return memberRepository.findAllByConversationAndBanUntilBefore(conversation, Instant.now());
+        return memberRepository.findAllByConversationAndBanUntilNullOrBanUntilGreaterThan(conversation, Instant.now());
     }
 
     @Override

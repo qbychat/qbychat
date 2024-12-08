@@ -58,7 +58,11 @@ public class ConversationController {
 
     @PostMapping("invite")
     public ResponseEntity<RestBean<InviteLinkVO>> invite(@RequestBody InviteDTO dto, @RequestAttribute("user") User user) {
-        InviteLink inviteLink = conversationService.invite(conversationService.findConversationById(dto.getConversation()), user);
+        Conversation conversation = conversationService.findConversationById(dto.getConversation());
+        if (conversation == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RestBean.failure(404, "Conversation not found"));
+        }
+        InviteLink inviteLink = conversationService.invite(conversation, user);
         if (inviteLink == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "You have no permission to invite"));
         }

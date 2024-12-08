@@ -15,6 +15,9 @@ spring:
   servlet:
     multipart:
       enabled: false
+  mvc:
+    async:
+      request-timeout: -1
 
 qbychat:
   link:

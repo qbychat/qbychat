@@ -58,9 +58,9 @@ public class Member implements Serializable {
         if (real == NotificationPreferment.NOTHING) return false;
         // judge is mentioned or replied
         Message reply = message.getReply();
-        if (reply.getSender() != null && reply.getSender().getId().equals(id)) {
+        if (reply != null && reply.getSender() != null && reply.getSender().getId().equals(id)) {
             return true;
         }
-        return message.getContent().contains("@" + user.getId() + " ");
+        return message.getContent().contains("@" + user.getId() + " ") || message.getContent().endsWith("@" + user.getId());
     }
 }

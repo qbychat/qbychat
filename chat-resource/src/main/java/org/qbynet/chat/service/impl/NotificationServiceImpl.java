@@ -59,6 +59,7 @@ public class NotificationServiceImpl implements NotificationService {
             if (member.shouldPush(message)) {
                 NotificationDestination dest = new NotificationDestination();
                 dest.setNotification(notification.getId());
+                dest.setUser(member.getUser().getId());
                 return dest;
             }
             return null;
