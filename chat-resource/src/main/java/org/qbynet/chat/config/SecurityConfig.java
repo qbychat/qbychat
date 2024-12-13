@@ -34,6 +34,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(conf -> conf
+                        .requestMatchers("/actuator", "/actuator/**").permitAll()
                         .requestMatchers("/api/media/*/raw", "/api/media/*/info", "/api/avatar/image", "/api/avatar/list").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAuthority("SCOPE_profile.read")
                         .requestMatchers(HttpMethod.POST, "/api/user/profile").hasAuthority("SCOPE_profile.edit")

@@ -1,3 +1,3 @@
 # QbyChat
 
-Simplicity is not crudeness
+An opensource and powerful chat application

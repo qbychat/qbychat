@@ -1,8 +1,9 @@
 server:
   port: 9000
+
 spring:
   application:
-    name: authorization-server
+    name: authorization-service
   data:
     mongodb:
       uri: mongodb://localhost/qby-authorization-server

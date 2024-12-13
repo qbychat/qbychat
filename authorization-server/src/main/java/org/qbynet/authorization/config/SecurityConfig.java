@@ -14,8 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -25,7 +23,6 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 @EnableWebSecurity
@@ -50,7 +47,14 @@ public class SecurityConfig {
         DeviceClientAuthenticationProvider deviceClientAuthenticationProvider =
                 new DeviceClientAuthenticationProvider(registeredClientRepository);
 
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+                OAuth2AuthorizationServerConfigurer.authorizationServer();
+        http
+                .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+                .with(authorizationServerConfigurer, Customizer.withDefaults())
+                .authorizeHttpRequests((authorize) ->
+                        authorize.anyRequest().authenticated()
+                );
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .deviceAuthorizationEndpoint(deviceAuthorizationEndpoint ->
                         deviceAuthorizationEndpoint.verificationUri("/activate")
@@ -84,6 +88,7 @@ public class SecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(conf -> conf
+                        .requestMatchers("/actuator", "/actuator/**").permitAll()
                         .requestMatchers("/assets/**", "/favicon.ico", "/user/login").permitAll()
                         .requestMatchers("/user/register", "/user/register/admin", "/user/confirm").anonymous()
                         .anyRequest().authenticated()
@@ -99,25 +104,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SessionRegistry sessionRegistry() {
-        return new SessionRegistryImpl();
-    }
-
-    @Bean
-    public HttpSessionEventPublisher httpSessionEventPublisher() {
-        return new HttpSessionEventPublisher();
-    }
-
-    @Bean
     public JWKSource<SecurityContext> jwkSource() throws Exception {
         JWKSet jwkSet = new JWKSet(jwks.getRSAKey());
         return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
     }
-
-//    @Bean
-//    OAuth2AuthorizationService authorizationService() {
-//        return new InMemoryOAuth2AuthorizationService();
-//    }
 
     @Bean
     public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {

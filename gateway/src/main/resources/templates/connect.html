@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Connect to QbyChat</title>
+    <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="container">
+    <h1>Connect to QbyChat</h1>
+    <div class="qr-code-container">
+        <div id="qr"></div>
+        <p>Scan to connect</p>
+    </div>
+
+    <div class="manual-steps">
+        <h2>Manual Add Server</h2>
+        <ol>
+            <li>Open a QbyChat client</li>
+            <li>Input following information</li>
+            <ul>
+                <li>API Address: <strong th:text="${api}">UNKNOWN</strong></li>
+                <li>OAuth Server: <strong th:text="${auth}">UNKNOWN</strong></li>
+            </ul>
+            <li>Click "Next" to connect</li>
+        </ol>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const api = /*[[${api}]]*/ "unknown api";
+    const auth = /*[[${auth}]]*/ "unknown api";
+    let data = {
+        api: api,
+        auth: auth
+    }
+    const qrCode = new QRCodeStyling(
+        {
+            "type": "canvas",
+            "shape": "square",
+            "width": 300,
+            "height": 300,
+            "data": JSON.stringify(data),
+            "margin": 0,
+            "qrOptions": {"typeNumber": "0", "mode": "Byte", "errorCorrectionLevel": "Q"},
+            "imageOptions": {"saveAsBlob": true, "hideBackgroundDots": true, "imageSize": 0.4, "margin": 0},
+            "dotsOptions": {
+                "type": "classy-rounded",
+                "color": "#6a1a4c",
+                "roundSize": true,
+                "gradient": {
+                    "type": "linear",
+                    "rotation": 0,
+                    "colorStops": [{"offset": 0, "color": "#8ff0a4"}, {"offset": 1, "color": "#e5a50a"}]
+                }
+            },
+            "backgroundOptions": {"round": 0, "color": "#ffffff", "gradient": null},
+            "image": null,
+            "dotsOptionsHelper": {
+                "colorType": {"single": true, "gradient": false},
+                "gradient": {"linear": true, "radial": false, "color1": "#6a1a4c", "color2": "#6a1a4c", "rotation": "0"}
+            },
+            "cornersSquareOptions": {
+                "type": "extra-rounded",
+                "color": "#000000",
+                "gradient": {
+                    "type": "linear",
+                    "rotation": 0.17453292519943295,
+                    "colorStops": [{"offset": 0, "color": "#26a269"}, {"offset": 1, "color": "#f9f06b"}]
+                }
+            },
+            "cornersSquareOptionsHelper": {
+                "colorType": {"single": true, "gradient": false},
+                "gradient": {"linear": true, "radial": false, "color1": "#000000", "color2": "#000000", "rotation": "0"}
+            },
+            "cornersDotOptions": {
+                "type": "dot",
+                "color": "#dc8add",
+                "gradient": {
+                    "type": "linear",
+                    "rotation": 0,
+                    "colorStops": [{"offset": 0, "color": "#8ff0a4"}, {"offset": 1, "color": "#e5a50a"}]
+                }
+            },
+            "cornersDotOptionsHelper": {
+                "colorType": {"single": true, "gradient": false},
+                "gradient": {"linear": true, "radial": false, "color1": "#000000", "color2": "#000000", "rotation": "0"}
+            },
+            "backgroundOptionsHelper": {
+                "colorType": {"single": true, "gradient": false},
+                "gradient": {"linear": true, "radial": false, "color1": "#ffffff", "color2": "#ffffff", "rotation": "0"}
+            }
+        }
+    );
+
+    qrCode.append(document.getElementById("qr"));
+
+    var hue = 0;
+    var last = 0;
+
+    setInterval(function () {
+        hue = (hue + 10) % 360; // 每次增加10度，循环到360
+    }, 100);
+
+    function updateColor() {
+        last = hue;
+        const color = `hsl(${hue}, 100%, 50%)`; // 生成新的 HSL 颜色
+        const lastColor = `hsl(${last}, 100%, 50%)`; // 生成新的 HSL 颜色
+        qrCode.update({
+            "dotsOptions": {
+                "color": color,
+                "gradient": {
+                    "type": "linear",
+                    "rotation": 0,
+                    "colorStops": [{"offset": 0, "color": lastColor}, {"offset": 1, "color": color}]
+                }
+            },
+            "cornersDotOptions": {
+                "type": "dot",
+                "color": "#dc8add",
+                "gradient": {
+                    "type": "linear",
+                    "rotation": 0,
+                    "colorStops": [{"offset": 0, "color": lastColor}, {"offset": 1, "color": color}]
+                }
+            },
+            "dotsOptionsHelper": {
+                "colorType": {"single": true, "gradient": false},
+                "gradient": {"linear": true, "radial": false, "color1": lastColor, "color2": color, "rotation": "0"}
+            },
+            "cornersSquareOptions": {
+                "type": "extra-rounded",
+                "color": "#000000",
+                "gradient": {
+                    "type": "linear",
+                    "rotation": 0.17453292519943295,
+                    "colorStops": [{"offset": 0, "color": lastColor}, {"offset": 1, "color": color}]
+                }
+            },
+        });
+    }
+
+    setInterval(updateColor, 100);
+    /*]]>*/
+</script>
+</body>
+</html>
