@@ -34,4 +34,6 @@ public interface UserService {
 
     User findById(String id);
 
+    Bot findBot(String id);
+
 }

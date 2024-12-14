@@ -24,7 +24,7 @@ public interface AvatarService {
 
     boolean isAvatarBelongsTo(Avatar avatar, Conversation conversation);
 
-    List<Avatar> findAllAvatars(User user);
+    List<Avatar> getAllAvatars(User user);
 
-    List<Avatar> findAllAvatars(Conversation conversation);
+    List<Avatar> getAllAvatars(Conversation conversation);
 }

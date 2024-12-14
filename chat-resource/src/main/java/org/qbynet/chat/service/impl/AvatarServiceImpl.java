@@ -77,12 +77,12 @@ public class AvatarServiceImpl implements AvatarService {
     }
 
     @Override
-    public List<Avatar> findAllAvatars(User user) {
+    public List<Avatar> getAllAvatars(User user) {
         return avatarRepository.findAllByUser(user);
     }
 
     @Override
-    public List<Avatar> findAllAvatars(Conversation conversation) {
+    public List<Avatar> getAllAvatars(Conversation conversation) {
         return avatarRepository.findAllByConversation(conversation);
     }
 }

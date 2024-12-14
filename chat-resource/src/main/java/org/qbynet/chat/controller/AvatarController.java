@@ -4,10 +4,8 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
-import org.qbynet.chat.entity.dto.AddConversationAvatarDTO;
-import org.qbynet.chat.entity.dto.AddUserAvatarDTO;
-import org.qbynet.chat.entity.dto.RemoveConversationAvatarDTO;
-import org.qbynet.chat.entity.dto.RemoveUserAvatarDTO;
+import org.qbynet.chat.entity.dto.AddAvatarDTO;
+import org.qbynet.chat.entity.dto.RemoveAvatarDTO;
 import org.qbynet.chat.entity.vo.AvatarVO;
 import org.qbynet.chat.service.AvatarService;
 import org.qbynet.chat.service.ConversationService;
@@ -36,12 +34,12 @@ public class AvatarController {
     AvatarService avatarService;
 
     @GetMapping("list")
-    public ResponseEntity<RestBean<List<AvatarVO>>> list(@RequestParam(name = "user") String userId, @RequestParam(name = "conversation") String conversationId) {
+    public ResponseEntity<RestBean<List<AvatarVO>>> list(@RequestParam(name = "user", required = false) String userId, @RequestParam(name = "conversation", required = false) String conversationId) {
         List<Avatar> avatars;
         if (userId != null) {
-            avatars = avatarService.findAllAvatars(userService.findById(userId));
+            avatars = avatarService.getAllAvatars(userService.findById(userId));
         } else if (conversationId != null) {
-            avatars = avatarService.findAllAvatars(conversationService.findConversationById(conversationId));
+            avatars = avatarService.getAllAvatars(conversationService.findConversationById(conversationId));
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Bad request"));
         }
@@ -73,8 +71,8 @@ public class AvatarController {
         return null;
     }
 
-    @PostMapping("user/add")
-    public ResponseEntity<RestBean<AvatarVO>> addUserAvatar(@RequestBody AddUserAvatarDTO dto, @RequestAttribute("user") User user) {
+    @PostMapping("user")
+    public ResponseEntity<RestBean<AvatarVO>> addUserAvatar(@RequestBody AddAvatarDTO dto, @RequestAttribute("user") User user) {
         try {
             Avatar avatar = avatarService.addAvatar(mediaService.findById(dto.getMedia()), user);
             return ResponseEntity.ok(RestBean.success(AvatarVO.from(avatar)));
@@ -83,8 +81,8 @@ public class AvatarController {
         }
     }
 
-    @DeleteMapping("user/remove")
-    public ResponseEntity<RestBean<?>> removeUserAvatar(@RequestBody RemoveUserAvatarDTO dto, @RequestAttribute("user") User user) {
+    @DeleteMapping("user")
+    public ResponseEntity<RestBean<?>> removeUserAvatar(@RequestBody RemoveAvatarDTO dto, @RequestAttribute("user") User user) {
         Avatar avatar = avatarService.getAvatar(dto.getAvatar());
         if (avatarService.isAvatarBelongsTo(avatar, user)) {
             avatarService.removeAvatar(avatar);
@@ -93,8 +91,8 @@ public class AvatarController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.forbidden("Forbidden"));
     }
 
-    @PostMapping("conversation/add")
-    public ResponseEntity<RestBean<AvatarVO>> addConversationAvatar(@RequestBody AddConversationAvatarDTO dto, @RequestAttribute("user") User user) {
+    @PostMapping("conversation")
+    public ResponseEntity<RestBean<AvatarVO>> addConversationAvatar(@RequestBody AddAvatarDTO dto, @RequestAttribute("user") User user) {
         Conversation conversation = conversationService.findConversationById(dto.getConversation());
         Member member = conversationService.findMember(conversation, user);
         if (member == null || !member.hasPermissions(MemberPermission.MANAGE_AVATARS)) {
@@ -108,8 +106,8 @@ public class AvatarController {
         }
     }
 
-    @PostMapping("conversation/remove")
-    public ResponseEntity<RestBean<?>> removeConversationAvatar(@RequestBody RemoveConversationAvatarDTO dto, @RequestAttribute("user") User user) {
+    @DeleteMapping("conversation")
+    public ResponseEntity<RestBean<?>> removeConversationAvatar(@RequestBody RemoveAvatarDTO dto, @RequestAttribute("user") User user) {
         Conversation conversation = conversationService.findConversationById(dto.getConversation());
         Member member = conversationService.findMember(conversation, user);
         Avatar avatar = avatarService.getAvatar(dto.getAvatar());
@@ -122,5 +120,33 @@ public class AvatarController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, e.getMessage()));
         }
+    }
+
+    @PostMapping("bot")
+    public ResponseEntity<RestBean<AvatarVO>> addBotAvatar(@RequestBody AddAvatarDTO dto, @RequestAttribute("user") User user) {
+        Bot bot = userService.findBot(dto.getBot());
+        if (!bot.isBelongTo(user)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.failure(403, "Forbidden"));
+        }
+        try {
+            Avatar avatar = avatarService.addAvatar(mediaService.findById(dto.getMedia()), bot.getBot());
+            return ResponseEntity.ok(RestBean.success(AvatarVO.from(avatar)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("bot")
+    public ResponseEntity<RestBean<?>> removeBotAvatar(@RequestBody RemoveAvatarDTO dto, @RequestAttribute("user") User user) {
+        Bot bot = userService.findBot(dto.getBot());
+        Avatar avatar = avatarService.getAvatar(dto.getAvatar());
+        if (bot == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RestBean.failure(404, "Bot not found"));
+        }
+        if (!bot.isBelongTo(user) || !avatarService.isAvatarBelongsTo(avatar, bot.getBot())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.failure(403, "Forbidden"));
+        }
+        avatarService.removeAvatar(avatar);
+        return ResponseEntity.ok(RestBean.success("Ok"));
     }
 }

@@ -139,4 +139,8 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    @Override
+    public Bot findBot(String id) {
+        return botRepository.findById(id).orElse(null);
+    }
 }
