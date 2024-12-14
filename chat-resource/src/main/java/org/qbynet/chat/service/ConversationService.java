@@ -34,8 +34,6 @@ public interface ConversationService {
 
     JoinConversationDetails join(Conversation conversation, User user);
 
-    boolean hasAllPermissions(Member member, MemberPermission... permissions);
-
     boolean canApproveJoinRequest(Member member);
 
     void approveJoinRequest(JoinRequest request);
@@ -63,10 +61,6 @@ public interface ConversationService {
      * @param duration     the timer. set to -1 to disable the timer (Unit: days)
      */
     void switchAutoDeleteTimer(Conversation conversation, int duration);
-
-    Avatar findLatestAvatar(Conversation conversation);
-
-    List<Avatar> findAllAvatars(Conversation conversation);
 
     @Data
     @Builder

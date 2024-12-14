@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -64,5 +65,9 @@ public class Member implements Serializable {
             return true;
         }
         return message.getContent().contains("@" + user.getId() + " ") || message.getContent().endsWith("@" + user.getId());
+    }
+
+    public boolean hasPermissions(@NotNull MemberPermission... requiredPermissions) {
+        return new HashSet<>(this.getPermissions()).containsAll(List.of(requiredPermissions));
     }
 }

@@ -5,15 +5,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
-import org.jetbrains.annotations.NotNull;
-import org.qbynet.chat.entity.*;
-import org.qbynet.chat.repository.AvatarRepository;
+import org.qbynet.chat.entity.Bot;
+import org.qbynet.chat.entity.BotToken;
+import org.qbynet.chat.entity.CreateBot;
+import org.qbynet.chat.entity.User;
 import org.qbynet.chat.repository.BotRepository;
 import org.qbynet.chat.repository.UserRepository;
 import org.qbynet.chat.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MimeType;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -32,9 +32,6 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     BotRepository botRepository;
-
-    @Resource
-    AvatarRepository avatarRepository;
 
     @Resource
     PasswordEncoder passwordEncoder;
@@ -142,35 +139,4 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).orElse(null);
     }
 
-    @Override
-    public Avatar findLatestAvatar(User user) {
-        return avatarRepository.findFirstByUser(user).orElse(null);
-    }
-
-    @Override
-    public List<Avatar> findAllAvatars(User user) {
-        return avatarRepository.findAllByUser(user);
-    }
-
-    @Override
-    public Avatar addAvatar(@NotNull Media media, User user) {
-        Avatar avatar = new Avatar();
-        avatar.setUser(user);
-        if (!MimeType.valueOf("image/*").isCompatibleWith(MimeType.valueOf(media.getContentType()))) {
-            throw new IllegalArgumentException("Unsupported image type: " + media.getContentType());
-        }
-        avatar.setMedia(media);
-        log.info("Add avatar for user {} (media: {})", user.getNickname(), media.getName());
-        return avatarRepository.save(avatar);
-    }
-
-    @Override
-    public void removeAvatar(String id) {
-        avatarRepository.deleteById(id);
-    }
-
-    @Override
-    public boolean isAvatarBelongsTo(String avatarId, User user) {
-        return avatarRepository.findById(avatarId).map(it -> it.getUser().equals(user)).orElse(false);
-    }
 }

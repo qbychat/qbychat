@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,9 +34,6 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Resource
     MessageRepository messageRepository;
-
-    @Resource
-    AvatarRepository avatarRepository;
 
     @Value("${qbychat.conversation.invite.expire}")
     int inviteExpire;
@@ -141,11 +137,6 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public boolean hasAllPermissions(@NotNull Member member, MemberPermission... permissions) {
-        return new HashSet<>(member.getPermissions()).containsAll(List.of(permissions));
-    }
-
-    @Override
     public boolean canApproveJoinRequest(@NotNull Member member) {
         return member.getPermissions().contains(MemberPermission.APPROVE_JOIN_REQUESTS);
     }
@@ -217,13 +208,4 @@ public class ConversationServiceImpl implements ConversationService {
         }).toList());
     }
 
-    @Override
-    public Avatar findLatestAvatar(Conversation conversation) {
-        return avatarRepository.findFirstByConversation(conversation).orElse(null);
-    }
-
-    @Override
-    public List<Avatar> findAllAvatars(Conversation conversation) {
-        return avatarRepository.findAllByConversation(conversation);
-    }
 }
