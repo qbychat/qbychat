@@ -16,6 +16,16 @@ public class RabbitConfig {
     }
 
     @Bean
+    Queue joinRequestQueue() {
+        return new Queue("qc-join-request");
+    }
+
+    @Bean
+    Queue eventsQueue() {
+        return new Queue("qc-events");
+    }
+
+    @Bean
     public MessageConverter jsonToMapMessageConverter() {
         DefaultClassMapper defaultClassMapper = new DefaultClassMapper();
         defaultClassMapper.setTrustedPackages("org.qbynet.chat.entity");

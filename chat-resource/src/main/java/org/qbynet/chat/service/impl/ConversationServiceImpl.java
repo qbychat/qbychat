@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.repository.*;
+import org.qbynet.chat.service.AuditLogService;
 import org.qbynet.chat.service.ConversationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,9 @@ public class ConversationServiceImpl implements ConversationService {
     @Resource
     MessageRepository messageRepository;
 
+    @Resource
+    AuditLogService auditLogService;
+
     @Value("${qbychat.conversation.invite.expire}")
     int inviteExpire;
 
@@ -57,6 +61,7 @@ public class ConversationServiceImpl implements ConversationService {
         member.setOwner(true);
         memberRepository.save(member);
         log.info("Conversation {} was created", conversation.getName());
+        auditLogService.createConversation(savedConversation, user);
         return savedConversation;
     }
 
@@ -66,7 +71,9 @@ public class ConversationServiceImpl implements ConversationService {
         member.setUser(user);
         member.setConversation(conversation);
         log.info("Add user {} to conversation {}", user.getNickname(), conversation.getName());
-        return memberRepository.save(member);
+        Member saved = memberRepository.save(member);
+        auditLogService.memberJoined(saved);
+        return saved;
     }
 
     @Override
@@ -74,7 +81,7 @@ public class ConversationServiceImpl implements ConversationService {
         log.info("User {} was removed from conversation {}", member.getUser().getNickname(), member.getConversation().getName());
         member.setNickname(null); // restore nickname
         member.setQuit(true);
-        memberRepository.save(member);
+        auditLogService.memberQuit(memberRepository.save(member));
     }
 
     @Override
@@ -125,6 +132,16 @@ public class ConversationServiceImpl implements ConversationService {
                     .conversation(conversation)
                     .build();
         }
+        Optional<JoinRequest> exist = joinRequestRepository.findByConversationAndUser(conversation, user);
+        if (exist.isPresent()) {
+            // already requested
+            return JoinConversationDetails.builder()
+                    .joined(false)
+                    .banned(false)
+                    .conversation(conversation)
+                    .joinRequest(exist.get())
+                    .build();
+        }
         JoinRequest joinRequest = new JoinRequest();
         joinRequest.setConversation(conversation);
         joinRequest.setUser(user);
@@ -138,12 +155,13 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public boolean canApproveJoinRequest(@NotNull Member member) {
-        return member.getPermissions().contains(MemberPermission.APPROVE_JOIN_REQUESTS);
+        return member.getPermissions().contains(MemberPermission.PROCESS_JOIN_REQUESTS);
     }
 
     @Override
-    public void approveJoinRequest(@NotNull JoinRequest request) {
+    public void approveJoinRequest(@NotNull JoinRequest request, User operator) {
         addMember(request.getConversation(), request.getUser());
+        auditLogService.approveJoinRequest(request, operator);
         joinRequestRepository.delete(request);
     }
 
@@ -159,6 +177,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public Member findMember(Conversation conversation, User user) {
+        if (conversation == null || user == null) return null;
         return memberRepository.findByUserAndConversation(user, conversation).orElse(null);
     }
 
@@ -196,9 +215,14 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public void switchAutoDeleteTimer(@NotNull Conversation conversation, int duration) {
+    public void switchAutoDeleteTimer(@NotNull Conversation conversation, int duration, User operator) {
         conversation.setAutoDeleteTimer(duration);
         // apply for exist messages
+        if (duration == -1) {
+            log.info("Disabled auto delete timer for {}", conversation.getName());
+        } else {
+            log.info("Set auto delete timer for {} (duration={}d)", conversation.getName(), duration);
+        }
         messageRepository.saveAll(messageRepository.findAllByExpiresAtNullOrExpiresAtGreaterThan(Instant.now()).stream().peek(it -> {
             if (duration == -1) {
                 it.setExpiresAt(null); // disable timer
@@ -206,6 +230,27 @@ public class ConversationServiceImpl implements ConversationService {
                 it.setExpiresAt(Instant.now().plus(duration, ChronoUnit.DAYS));
             }
         }).toList());
+        auditLogService.configAutoDeleteTimer(conversation, operator);
+    }
+
+    @Override
+    public List<Member> listMembersWithPermissions(Conversation conversation, MemberPermission... permissions) {
+        return memberRepository.findAllByConversationAndPermissionsNotNullOrConversationAndOwnerIsTrue(conversation, conversation).stream().filter(it -> it.hasPermissions(permissions)).toList();
+    }
+
+    @Override
+    public List<JoinRequest> findAllJoinRequests(Conversation conversation) {
+        return joinRequestRepository.findAllByConversation(conversation);
+    }
+
+    @Override
+    public JoinRequest findJoinRequest(Conversation conversation, User user) {
+        return joinRequestRepository.findByConversationAndUser(conversation, user).orElse(null);
+    }
+
+    @Override
+    public int countJoinRequests(Conversation conversation) {
+        return joinRequestRepository.countByConversation(conversation);
     }
 
 }

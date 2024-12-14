@@ -3,12 +3,10 @@ package org.qbynet.chat.controller;
 import jakarta.annotation.Resource;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.dto.ApproveJoinRequestDTO;
+import org.qbynet.chat.entity.dto.ConfigAutoDeleteTimerDTO;
 import org.qbynet.chat.entity.dto.CreateConversationDTO;
 import org.qbynet.chat.entity.dto.InviteDTO;
-import org.qbynet.chat.entity.vo.ConversationUserVO;
-import org.qbynet.chat.entity.vo.ConversationVO;
-import org.qbynet.chat.entity.vo.InviteLinkVO;
-import org.qbynet.chat.entity.vo.JoinConversationVO;
+import org.qbynet.chat.entity.vo.*;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
@@ -22,6 +20,31 @@ import java.util.List;
 public class ConversationController {
     @Resource
     ConversationService conversationService;
+
+    @GetMapping("session")
+    public ResponseEntity<RestBean<ConversationSession>> session(@RequestParam(name = "id") String id, @RequestAttribute("user") User user) {
+        Conversation conversation = conversationService.findConversationById(id);
+        Member member = conversationService.findMember(conversation, user);
+        if (member == null) {
+            JoinRequest joinRequest = conversationService.findJoinRequest(conversation, user);
+            return ResponseEntity.ok(RestBean.success(ConversationSession.builder()
+                    .conversation(ConversationVO.from(conversation))
+                    .member(null)
+                    .joined(false)
+                    .joinRequest(JoinRequestVO.from(joinRequest))
+                    .build()));
+        }
+        int joinRequests = -1;
+        if (member.hasPermissions(MemberPermission.PROCESS_JOIN_REQUESTS)) {
+            joinRequests = conversationService.countJoinRequests(conversation);
+        }
+        return ResponseEntity.ok(RestBean.success(ConversationSession.builder()
+                .conversation(ConversationVO.from(conversation))
+                .member(MemberVO.from(member))
+                .joined(true)
+                .joinRequests(joinRequests)
+                .build()));
+    }
 
     @GetMapping("list")
     public ResponseEntity<RestBean<List<ConversationUserVO>>> list(@RequestAttribute("user") User user) {
@@ -79,7 +102,17 @@ public class ConversationController {
         return ResponseEntity.ok(RestBean.success(InviteLinkVO.from(inviteLink)));
     }
 
-    @PostMapping("approve")
+    @GetMapping("join-request")
+    public ResponseEntity<RestBean<List<JoinRequestVO>>> listJoinRequests(@RequestParam(name = "conversation") String conversationId, @RequestAttribute("user") User user) {
+        Conversation conversation = conversationService.findConversationById(conversationId);
+        if (!conversationService.findMember(conversation, user).hasPermissions(MemberPermission.PROCESS_JOIN_REQUESTS)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.failure(403, "You have no permission to view join requests"));
+        }
+        List<JoinRequest> requests = conversationService.findAllJoinRequests(conversation);
+        return ResponseEntity.ok(RestBean.success(requests.stream().map(JoinRequestVO::from).toList()));
+    }
+
+    @PostMapping("join-request")
     public ResponseEntity<RestBean<String>> approveJoinRequest(@RequestBody ApproveJoinRequestDTO dto, @RequestAttribute("user") User user) {
         JoinRequest joinRequest = conversationService.findJoinRequest(dto.getRequest());
         if (joinRequest == null) {
@@ -91,7 +124,18 @@ public class ConversationController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.failure(403, "No permission to approve this request"));
         }
         // do approve
-        conversationService.approveJoinRequest(joinRequest);
+        conversationService.approveJoinRequest(joinRequest, user);
         return ResponseEntity.ok(RestBean.success("Request approved"));
+    }
+
+    @PostMapping("auto-delete-timer")
+    public ResponseEntity<RestBean<?>> configAutoDeleteTimer(@RequestBody ConfigAutoDeleteTimerDTO dto, @RequestAttribute("user") User user) {
+        Conversation conversation = conversationService.findConversationById(dto.getConversation());
+        Member member = conversationService.findMember(conversation, user);
+        if (member == null || !member.hasPermissions(MemberPermission.MANAGE_AUTO_DELETE_TIMER)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.failure(403, "Forbidden"));
+        }
+        conversationService.switchAutoDeleteTimer(conversation, dto.getDuration(), user);
+        return ResponseEntity.ok(RestBean.success("Ok"));
     }
 }

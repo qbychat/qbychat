@@ -68,6 +68,7 @@ public class Member implements Serializable {
     }
 
     public boolean hasPermissions(@NotNull MemberPermission... requiredPermissions) {
+        if (owner) return true;
         return new HashSet<>(this.getPermissions()).containsAll(List.of(requiredPermissions));
     }
 }

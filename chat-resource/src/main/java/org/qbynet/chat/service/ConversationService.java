@@ -36,7 +36,7 @@ public interface ConversationService {
 
     boolean canApproveJoinRequest(Member member);
 
-    void approveJoinRequest(JoinRequest request);
+    void approveJoinRequest(JoinRequest request, User operator);
 
     boolean isBanned(Conversation conversation, User user);
 
@@ -60,7 +60,15 @@ public interface ConversationService {
      * @param conversation the conversation
      * @param duration     the timer. set to -1 to disable the timer (Unit: days)
      */
-    void switchAutoDeleteTimer(Conversation conversation, int duration);
+    void switchAutoDeleteTimer(Conversation conversation, int duration, User operator);
+
+    List<Member> listMembersWithPermissions(Conversation conversation, MemberPermission... permissions);
+
+    List<JoinRequest> findAllJoinRequests(Conversation conversation);
+
+    JoinRequest findJoinRequest(Conversation conversation, User user);
+
+    int countJoinRequests(Conversation conversation);
 
     @Data
     @Builder

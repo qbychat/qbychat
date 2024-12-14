@@ -21,4 +21,6 @@ public interface MemberRepository extends MongoRepository<Member, String> {
     List<Member> findAllByConversation(Conversation conversation);
 
     List<Member> findAllByConversationAndBanUntilNullOrBanUntilGreaterThan(Conversation conversation, Instant banUntilAfter);
+
+    List<Member> findAllByConversationAndPermissionsNotNullOrConversationAndOwnerIsTrue(Conversation conversation, Conversation same);
 }

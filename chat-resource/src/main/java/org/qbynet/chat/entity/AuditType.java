@@ -1,0 +1,23 @@
+package org.qbynet.chat.entity;
+
+public enum AuditType {
+    CREATE_CONVERSATION,
+
+    DENY_JOIN_REQUEST,
+    APPROVE_JOIN_REQUEST,
+
+    JOIN_CONVERSATION,
+    QUIT_CONVERSATION,
+    PIN_MESSAGE,
+
+    ADD_ADMIN,
+    REMOVE_ADMIN,
+    MODIFY_RIGHTS,
+
+    BAN_MEMBER,
+    MUTE_MEMBER,
+    INVITE_MEMBER,
+    REMOVE_MEMBER,
+
+    CHANGE_AUTO_DELETE_TIMER
+}
