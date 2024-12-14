@@ -65,7 +65,44 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
                         .build())
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
+
+        RegisteredClient qbychatAndroid = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("qbychat-android")
+                .clientSecret(passwordEncoder.encode("secret"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
+                .authorizationGrantType(AuthorizationGrantType.TOKEN_EXCHANGE)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .redirectUri("qbychat://oauth/authorize")
+                .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
+                .scope("bot.create")
+                .scope("bot.delete")
+                .scope("bot.list")
+                .scope("profile.read")
+                .scope("profile.edit")
+                .scope("message.send")
+                .scope("media.upload")
+                .scope("conversation.join")
+                .scope("conversation.list")
+                .scope("conversation.create")
+                .scope("avatar.manage")
+                .scope("search")
+                .scope("link")
+                .tokenSettings(TokenSettings.builder()
+                        .refreshTokenTimeToLive(Duration.ofDays(7))
+                        .accessTokenTimeToLive(Duration.ofDays(1))
+                        .build())
+                .clientSettings(ClientSettings.builder()
+                        .requireAuthorizationConsent(false)
+                        .build()
+                )
+                .build();
         save(hoppscotch);
+        save(qbychatAndroid);
     }
 
     @Override

@@ -19,8 +19,7 @@
             <li>Open a QbyChat client</li>
             <li>Input following information</li>
             <ul>
-                <li>API Address: <strong th:text="${api}">UNKNOWN</strong></li>
-                <li>OAuth Server: <strong th:text="${auth}">UNKNOWN</strong></li>
+                <li>Config: <strong th:text="${configEndpoint}">/config</strong></li>
             </ul>
             <li>Click "Next" to connect</li>
         </ol>
@@ -29,19 +28,14 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    const api = /*[[${api}]]*/ "unknown api";
-    const auth = /*[[${auth}]]*/ "unknown api";
-    let data = {
-        api: api,
-        auth: auth
-    }
+    const api = /*[[${configEndpoint}]]*/ "unknown api";
     const qrCode = new QRCodeStyling(
         {
             "type": "canvas",
             "shape": "square",
             "width": 300,
             "height": 300,
-            "data": JSON.stringify(data),
+            "data": api,
             "margin": 0,
             "qrOptions": {"typeNumber": "0", "mode": "Byte", "errorCorrectionLevel": "Q"},
             "imageOptions": {"saveAsBlob": true, "hideBackgroundDots": true, "imageSize": 0.4, "margin": 0},

@@ -1,7 +1,5 @@
 package org.qbychat.gateway.controller;
 
-import jakarta.annotation.Resource;
-import org.qbychat.gateway.util.GatewayAddressConfig;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,9 +10,6 @@ import java.net.URI;
 
 @Controller
 public class IndexController {
-    @Resource
-    GatewayAddressConfig gatewayAddressConfig;
-
     @GetMapping
     public String index() {
         return "index";
@@ -24,9 +19,8 @@ public class IndexController {
     public String qr(Model model, ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
         URI uri = request.getURI();
-        String baseUrl = uri.getScheme() + "//" + uri.getHost() + ":" + uri.getPort();
-        model.addAttribute("api", baseUrl + gatewayAddressConfig.getApi());
-        model.addAttribute("auth", gatewayAddressConfig.getAuth());
+        String baseUrl = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
+        model.addAttribute("configEndpoint", baseUrl + "/config/json");
         return "connect";
     }
 }
