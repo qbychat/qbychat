@@ -32,7 +32,7 @@ public class NotificationController {
     @GetMapping("fetch")
     public DeferredResult<ResponseEntity<RestBean<List<NotificationVO>>>> fetch(HttpServletRequest request, @RequestAttribute("user") User user) {
         DeferredResult<ResponseEntity<RestBean<List<NotificationVO>>>> result = new DeferredResult<>();
-        executorService.execute(() -> {
+        executorService.submit(() -> {
             try {
                 while (!notificationService.hasNotifications(user)) {
                     TimeUnit.SECONDS.sleep(2);

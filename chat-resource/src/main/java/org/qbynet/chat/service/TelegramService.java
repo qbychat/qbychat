@@ -1,6 +1,7 @@
 package org.qbynet.chat.service;
 
 import org.qbynet.chat.entity.Media;
+import org.qbynet.chat.entity.StickerPack;
 
 import java.util.function.Consumer;
 
@@ -10,7 +11,7 @@ public interface TelegramService {
      *
      * @param name Sticker pack in share link
      */
-    void importStickerPack(String name);
+    StickerPack importStickerPack(String name);
 
     void downloadFile(String fileId, Consumer<Media> consumer);
 }

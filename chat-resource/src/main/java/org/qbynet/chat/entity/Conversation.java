@@ -31,7 +31,7 @@ public class Conversation implements Serializable {
     private int autoDeleteTimer = -1; // How long do we delete all messages? (Unit: days)
 
     @DBRef
-    private Member owner = null; // private message and secreted chat have no owner
+    private StickerPack stickerPack = null; // bound sticker pack
 
     public List<MemberPermission> getDefaultPermissions() {
         return MemberPermission.calculate(defaultPermissions);

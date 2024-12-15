@@ -14,5 +14,7 @@ public class StickerPack {
     private String name;
     @DBRef
     private User owner;
-    private String link; // http://resource-server/view/sticker/<link>
+    private String link;
+
+    private String telegramUpstream = null;
 }

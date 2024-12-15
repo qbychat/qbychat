@@ -34,7 +34,7 @@ public class TelegramServiceImpl implements TelegramService {
     StickerService stickerService;
 
     @Override
-    public void importStickerPack(String name) {
+    public StickerPack importStickerPack(String name) {
         log.info("Importing sticker pack {} from Telegram", name);
         URI uri = URI.create("https://api.telegram.org/bot" + telegramToken + "/getStickerSet?name=" + name);
         try (Response response = okHttpClient.newCall(new Request.Builder()
@@ -58,6 +58,7 @@ public class TelegramServiceImpl implements TelegramService {
                 log.info("Imported the {} sticker from set {}", sticker.getAlternativeEmoji(), pack.getName());
             }));
 
+            return pack;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -16,7 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @RestController
 @RequestMapping("/api/message")
@@ -26,6 +27,8 @@ public class MessageController {
 
     @Resource
     ConversationService conversationService;
+
+    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     @PostMapping("send")
     public DeferredResult<ResponseEntity<RestBean<MessageVO>>> sendMessage(@RequestBody SendMessageDTO message, @RequestAttribute("user") User user) {
@@ -46,7 +49,7 @@ public class MessageController {
 
         result.onTimeout(() -> result.setResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(RestBean.failure(408, "Timeout"))));
 
-        ForkJoinPool.commonPool().execute(() -> {
+        executorService.submit(() -> {
             try {
                 Message msg = messageService.send(message, user);
                 result.setResult(ResponseEntity.ok(RestBean.success(MessageVO.from(msg))));
@@ -60,7 +63,7 @@ public class MessageController {
     @PostMapping("edit")
     public DeferredResult<ResponseEntity<RestBean<MessageVO>>> editMessage(@RequestBody EditMessageDTO dto, @RequestAttribute("user") User user) {
         DeferredResult<ResponseEntity<RestBean<MessageVO>>> result = new DeferredResult<>();
-        ForkJoinPool.commonPool().execute(() -> {
+        executorService.submit(() -> {
             Message message = messageService.findMessageById(dto.getMessage());
             if (!message.isBelongsTo(user)) {
                 result.setErrorResult(ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.failure(403, "Forbidden")));
