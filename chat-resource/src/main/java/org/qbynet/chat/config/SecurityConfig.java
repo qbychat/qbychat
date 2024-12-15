@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/conversation/list").hasAuthority("SCOPE_conversation.list")
                         .requestMatchers("/api/conversation/*/join").hasAuthority("SCOPE_conversation.join")
                         .requestMatchers("/api/avatar/**").hasAuthority("SCOPE_avatar.manage")
+                        .requestMatchers("/api/sticker/tg-import", "/api/sticker/addStickers", "/api/sticker/createPack", "/api/sticker/editPack").hasAuthority("SCOPE_sticker.manage")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(conf -> conf
