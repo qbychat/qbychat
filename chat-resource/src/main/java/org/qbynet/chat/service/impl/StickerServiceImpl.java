@@ -158,4 +158,9 @@ public class StickerServiceImpl implements StickerService {
         }
         return stickerPackRepository.save(pack);
     }
+
+    @Override
+    public Sticker findStickerById(String id) {
+        return stickerRepository.findById(id).orElse(null);
+    }
 }

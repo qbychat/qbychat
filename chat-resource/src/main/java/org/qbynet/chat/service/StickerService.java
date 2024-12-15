@@ -29,4 +29,6 @@ public interface StickerService {
     int countUses(StickerPack pack);
 
     StickerPack editPack(StickerPack pack, String name, String title);
+
+    Sticker findStickerById(String id);
 }

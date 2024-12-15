@@ -30,8 +30,14 @@ public class StickerController {
     @Resource
     StickerService stickerService;
 
+    @GetMapping("info")
+    public ResponseEntity<RestBean<StickerVO>> info(@RequestParam String id) {
+        Sticker sticker = stickerService.findStickerById(id);
+        return ResponseEntity.ok(RestBean.success(StickerVO.from(sticker)));
+    }
+
     @GetMapping("pack/info")
-    public ResponseEntity<RestBean<StickerPackVO>> info(@RequestParam(required = false) String id, @RequestParam(required = false) String name) {
+    public ResponseEntity<RestBean<StickerPackVO>> packInfo(@RequestParam(required = false) String id, @RequestParam(required = false) String name) {
         StickerPack pack = null;
         if (id != null) {
             pack = stickerService.findPackById(id);
