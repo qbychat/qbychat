@@ -252,5 +252,4 @@ public class ConversationServiceImpl implements ConversationService {
     public int countJoinRequests(Conversation conversation) {
         return joinRequestRepository.countByConversation(conversation);
     }
-
 }

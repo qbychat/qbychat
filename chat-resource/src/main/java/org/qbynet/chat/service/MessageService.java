@@ -14,7 +14,9 @@ public interface MessageService {
 
     boolean canSendMessage(Conversation conversation, User user);
 
-    Conversation findConversationById(String id);
-
     void markAsRead(List<String> messages, User user);
+
+    Message findMessageById(String id);
+
+    void editMessage(Message message, String content, String sticker, List<String> medias, boolean linkPreview);
 }

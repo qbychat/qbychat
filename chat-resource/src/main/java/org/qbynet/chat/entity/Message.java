@@ -1,6 +1,7 @@
 package org.qbynet.chat.entity;
 
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,7 +17,7 @@ public class Message implements Serializable {
     private String id; // http://resource-server/view/m/<id>
 
     @DBRef
-    private Member sender; // set to null to send messages anonymous
+    private Member sender;
     @DBRef
     private Conversation conversation;
     private String content = null;
@@ -41,4 +42,10 @@ public class Message implements Serializable {
 
     private Instant expiresAt = null; // set to Instant.now() to delete message
     private boolean pinned = false;
+
+    private boolean anonymous = false;
+
+    public boolean isBelongsTo(@NotNull User user) {
+        return this.sender.getUser().getId().equals(user.getId());
+    }
 }

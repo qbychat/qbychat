@@ -34,7 +34,7 @@ public class MessageVO {
         if (source.getLinkPreview() != null) {
             vo.setLinkPreview(LinkPreviewVO.from(source.getLinkPreview()));
         }
-        if (source.getSender() != null) {
+        if (source.isAnonymous()) {
             vo.setSender(SenderVO.from(source.getSender()));
         }
         if (source.getReply() != null) {

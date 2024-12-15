@@ -91,9 +91,8 @@ public class MessageServiceImpl implements MessageService {
             message.setExpiresAt(Instant.now().plus(conversation.getAutoDeleteTimer(), ChronoUnit.DAYS));
         }
         // sender info
-        if (!(member.isAnonymous() && dto.isAnonymous())) {
-            message.setSender(member);
-        }
+        message.setSender(member);
+        message.setAnonymous(member.isAnonymous() && dto.isAnonymous());
         if (dto.getRedirectFrom() != null) {
             message.setRedirect(messageRepository.findById(dto.getRedirectFrom()).orElseThrow());
         }
@@ -128,11 +127,6 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Conversation findConversationById(String id) {
-        return conversationRepository.findById(id).orElse(null);
-    }
-
-    @Override
     public void markAsRead(@NotNull List<String> messageIds, User user) {
         List<Message> messages = messageIds.stream().map(messageId -> messageRepository.findById(messageId).orElse(null)).filter(Objects::nonNull).toList();
         readRepository.saveAll(messages.stream().map(it -> {
@@ -151,5 +145,28 @@ public class MessageServiceImpl implements MessageService {
     private void autoDeleteExpiredMessages() {
         log.debug("Delete expired messages");
         messageRepository.deleteAllByExpiresAtLessThan(Instant.now());
+    }
+
+    @Override
+    public Message findMessageById(String id) {
+        return messageRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public void editMessage(@NotNull Message message, String content, String sticker, List<String> medias, boolean linkPreview) {
+        message.setEditAt(Instant.now());
+        message.setContent(content);
+        message.setMedias(mediaRepository.findAllById(medias));
+        message.setSticker(stickerRepository.findById(sticker).orElse(null));
+        if (linkPreview) {
+            message.setLinkPreview(linkPreviewService.fromText(message.getContent()));
+        } else {
+            message.setLinkPreview(null);
+        }
+        Optional<LdLocale> lang = languageDetector.detect(message.getContent());
+        if (lang.isPresent()) {
+            message.setLanguage(lang.get().getLanguage());
+        }
+        rabbitTemplate.convertAndSend(messagesQueue.getName(), messageRepository.save(message));
     }
 }
