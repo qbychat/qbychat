@@ -82,7 +82,7 @@ public class TelegramServiceImpl implements TelegramService {
             String filePath = result.getResult().getFilePath();
             URI remote = URI.create("https://api.telegram.org/file/bot" + telegramToken + "/" + filePath);
             if (!isLottie) {
-                mediaService.fromRemote(remote, consumer);
+                mediaService.fromRemote(remote, "image/webp", consumer);
                 return;
             }
             // process lottie

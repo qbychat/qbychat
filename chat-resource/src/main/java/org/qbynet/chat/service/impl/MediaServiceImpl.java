@@ -68,13 +68,26 @@ public class MediaServiceImpl implements MediaService {
     }
 
     private @Nullable Media saveMedia0(URI remote, Response response) throws IOException {
-        return saveMedia0(remote, response, false);
+        return saveMedia0(remote, response, null, false);
     }
 
-    private @Nullable Media saveMedia0(URI remote, @NotNull Response response, boolean decompressGzip) throws IOException {
+    @SuppressWarnings("SameParameterValue")
+    private @Nullable Media saveMedia0(URI remote, Response response, boolean decompressGzip) throws IOException {
+        return saveMedia0(remote, response, null, decompressGzip);
+    }
+
+    private @Nullable Media saveMedia0(URI remote, String contentType, Response response) throws IOException {
+        return saveMedia0(remote, response, contentType, false);
+    }
+
+    private @Nullable Media saveMedia0(URI remote, @NotNull Response response, String contentType, boolean decompressGzip) throws IOException {
         Media media = new Media();
         if (response.isSuccessful()) {
-            media.setContentType(response.header("Content-Type"));
+            if (contentType == null) {
+                media.setContentType(response.header("Content-Type"));
+            } else {
+                media.setContentType(contentType);
+            }
             // save to local
             assert response.body() != null;
             InputStream inputStream = response.body().byteStream();
@@ -104,7 +117,7 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public void fromRemote(URI remote, Consumer<Media> consumer) throws MalformedURLException {
+    public void fromRemote(URI remote, String contentType, Consumer<Media> consumer) throws MalformedURLException {
         log.info("Download {} (async)", remote);
         okHttpClient.newCall(new Request.Builder()
                 .url(remote.toURL())
@@ -118,7 +131,7 @@ public class MediaServiceImpl implements MediaService {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                Media media = mediaRepository.save(Objects.requireNonNull(saveMedia0(remote, response)));
+                Media media = mediaRepository.save(Objects.requireNonNull(saveMedia0(remote, contentType, response)));
                 consumer.accept(media);
             }
         });

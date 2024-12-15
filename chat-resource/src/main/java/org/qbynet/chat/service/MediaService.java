@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 public interface MediaService {
     Media fromRemote(URI remote);
 
-    void fromRemote(URI remote, Consumer<Media> consumer) throws MalformedURLException;
+    void fromRemote(URI remote, String contentType, Consumer<Media> consumer) throws MalformedURLException;
 
     Media findById(String id);
 
