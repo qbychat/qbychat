@@ -1,12 +1,18 @@
 package org.qbynet.chat.service;
 
-import org.qbynet.chat.entity.Media;
-import org.qbynet.chat.entity.Sticker;
-import org.qbynet.chat.entity.StickerPack;
-import org.qbynet.chat.entity.TelegramStickerSet;
+import org.qbynet.chat.entity.*;
+import org.qbynet.chat.entity.dto.AddStickersDTO;
+
+import java.util.List;
 
 public interface StickerService {
-    StickerPack create(TelegramStickerSet telegramStickerSet);
+    StickerPack createPack(TelegramStickerSet telegramStickerSet);
 
-    Sticker create(StickerPack pack, String emoji, Media media);
+    StickerPack createPack(String title, String name, User owner);
+
+    Sticker createSticker(StickerPack pack, String emoji, Media media);
+
+    StickerPack findPack(String id);
+
+    List<Sticker> createStickers(StickerPack pack, List<AddStickersDTO.StickerDTO> stickers);
 }

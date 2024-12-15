@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface StickerPackRepository extends MongoRepository<StickerPack, String> {
-    boolean existsByLink(String link);
+    boolean existsByName(String link);
 
     Optional<StickerPack> findByTelegramUpstream(String telegramUpstream);
 }

@@ -13,7 +13,7 @@ public class Sticker implements Serializable {
     @Id
     private String id;
 
-    private String alternativeEmoji;
+    private String emoji;
     @DBRef
     private Media media; // link to a lottie json, image or gif file
 

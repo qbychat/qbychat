@@ -51,10 +51,10 @@ public class TelegramServiceImpl implements TelegramService {
             }
             TelegramStickerSet stickerSet = json.getResult();
             log.info("Importing {}", stickerSet.getTitle());
-            StickerPack pack = stickerService.create(stickerSet);
+            StickerPack pack = stickerService.createPack(stickerSet);
             stickerSet.getStickers().forEach(s -> this.downloadFile(s.getFileId(), s.isAnimated(), (media) -> {
-                Sticker sticker = stickerService.create(pack, s.getEmoji(), media);
-                log.info("Imported the {} sticker from set {}", sticker.getAlternativeEmoji(), pack.getName());
+                Sticker sticker = stickerService.createSticker(pack, s.getEmoji(), media);
+                log.info("Imported the {} sticker from set {}", sticker.getEmoji(), pack.getTitle());
             }));
 
             return pack;
