@@ -5,9 +5,11 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+
 @Data
 @Document
-public class FavoriteSticker {
+public class FavoriteStickerPack {
     @Id
     private String id;
 
@@ -16,4 +18,7 @@ public class FavoriteSticker {
 
     @DBRef
     private StickerPack stickerPack;
+
+    private Instant lastUse = null;
+    private Instant timestamp = Instant.now();
 }

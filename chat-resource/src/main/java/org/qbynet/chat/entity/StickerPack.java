@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+
 @Data
 @Document
 public class StickerPack {
@@ -21,6 +23,8 @@ public class StickerPack {
     private Sticker thumbnail;
 
     private String telegramUpstream = null;
+
+    private Instant timestamp = Instant.now(); // create at
 
     public boolean isBelongsTo(@NotNull User user) {
         if (this.owner == null) return false;

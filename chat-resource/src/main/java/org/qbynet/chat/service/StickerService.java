@@ -12,7 +12,21 @@ public interface StickerService {
 
     Sticker createSticker(StickerPack pack, String emoji, Media media);
 
-    StickerPack findPack(String id);
+    StickerPack findPackById(String id);
 
     List<Sticker> createStickers(StickerPack pack, List<AddStickersDTO.StickerDTO> stickers);
+
+    List<StickerPack> findFavorites(User user);
+
+    void addFavorite(StickerPack pack, User user);
+
+    void removeFavorite(StickerPack pack, User user);
+
+    StickerPack findPackByName(String name);
+
+    List<Sticker> findStickers(StickerPack pack);
+
+    int countUses(StickerPack pack);
+
+    StickerPack editPack(StickerPack pack, String name, String title);
 }

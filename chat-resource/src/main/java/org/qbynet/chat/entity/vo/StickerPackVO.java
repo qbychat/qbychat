@@ -1,10 +1,18 @@
 package org.qbynet.chat.entity.vo;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.StickerPack;
 
+import java.util.List;
+
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class StickerPackVO {
     private String id;
 
@@ -12,17 +20,20 @@ public class StickerPackVO {
     private String link;
     private String thumbnail;
 
+    @Builder.Default
+    private List<String> stickers = List.of();
+    @Builder.Default
+    private int uses = -1;
+
     private String telegramUpstream;
 
-    public static @NotNull StickerPackVO from(@NotNull StickerPack source) {
-        StickerPackVO vo = new StickerPackVO();
-        vo.setId(source.getId());
-        vo.setName(source.getTitle());
-        vo.setLink(source.getName());
+    public static @NotNull StickerPackVOBuilder from(@NotNull StickerPack source) {
+        StickerPackVO.StickerPackVOBuilder builder = StickerPackVO.builder()
+                .id(source.getId()).name(source.getTitle())
+                .link(source.getName());
         if (source.getThumbnail() != null) {
-            vo.setThumbnail(source.getThumbnail().getId());
+            builder.thumbnail(source.getThumbnail().getId());
         }
-        vo.setTelegramUpstream(source.getTelegramUpstream());
-        return vo;
+        return builder.telegramUpstream(source.getTelegramUpstream());
     }
 }

@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.dto.AddStickersDTO;
+import org.qbynet.chat.repository.FavoriteStickerPackRepository;
 import org.qbynet.chat.repository.StickerPackRepository;
 import org.qbynet.chat.repository.StickerRepository;
 import org.qbynet.chat.service.MediaService;
@@ -27,6 +28,9 @@ public class StickerServiceImpl implements StickerService {
 
     @Resource
     StickerPackRepository stickerPackRepository;
+
+    @Resource
+    FavoriteStickerPackRepository favoriteStickerPackRepository;
 
     @Override
     public StickerPack createPack(@NotNull TelegramStickerSet telegramStickerSet) {
@@ -51,10 +55,8 @@ public class StickerServiceImpl implements StickerService {
         if (stickerPackRepository.existsByName(name)) {
             throw new IllegalArgumentException("Name already exists");
         }
-        if (name.startsWith("tg_")) {
-            throw new IllegalArgumentException("Name must not start with 'tg_'");
-        }
-        if (!Pattern.matches("^[a-zA-Z0-9_]+$", name)) {
+
+        if (isBadName(name)) {
             throw new IllegalArgumentException("Bad name");
         }
 
@@ -63,6 +65,13 @@ public class StickerServiceImpl implements StickerService {
         stickerPack.setName(name);
         stickerPack.setOwner(owner);
         return stickerPackRepository.save(stickerPack);
+    }
+
+    private boolean isBadName(@NotNull String name) {
+        if (name.startsWith("tg_")) {
+            return true;
+        }
+        return !Pattern.matches("^[a-zA-Z0-9_]+$", name);
     }
 
     @Override
@@ -83,7 +92,7 @@ public class StickerServiceImpl implements StickerService {
     }
 
     @Override
-    public StickerPack findPack(String id) {
+    public StickerPack findPackById(String id) {
         return stickerPackRepository.findById(id).orElse(null);
     }
 
@@ -98,5 +107,55 @@ public class StickerServiceImpl implements StickerService {
             sticker.setMedia(media);
             return sticker;
         }).filter(Objects::nonNull).toList());
+    }
+
+    @Override
+    public List<StickerPack> findFavorites(User user) {
+        return favoriteStickerPackRepository.findAllByUser(user).stream().map(FavoriteStickerPack::getStickerPack).toList();
+    }
+
+    @Override
+    public void addFavorite(StickerPack pack, User user) {
+        if (favoriteStickerPackRepository.existsByStickerPackAndUser(pack, user)) {
+            return;
+        }
+        FavoriteStickerPack fav = new FavoriteStickerPack();
+        fav.setStickerPack(pack);
+        fav.setUser(user);
+        favoriteStickerPackRepository.save(fav);
+    }
+
+    @Override
+    public void removeFavorite(StickerPack pack, User user) {
+        favoriteStickerPackRepository.removeByStickerPackAndUser(pack, user);
+    }
+
+    @Override
+    public StickerPack findPackByName(String name) {
+        return stickerPackRepository.findByName(name).orElse(null);
+    }
+
+    @Override
+    public List<Sticker> findStickers(StickerPack pack) {
+        return stickerRepository.findAllByPack(pack);
+    }
+
+    @Override
+    public int countUses(StickerPack pack) {
+        return favoriteStickerPackRepository.countByStickerPack(pack);
+    }
+
+    @Override
+    public StickerPack editPack(StickerPack pack, String name, String title) {
+        if (name != null) {
+            if (isBadName(name)) {
+                throw new IllegalArgumentException("Bad name");
+            }
+            pack.setName(name);
+        }
+        if (title != null) {
+            pack.setTitle(title);
+        }
+        return stickerPackRepository.save(pack);
     }
 }

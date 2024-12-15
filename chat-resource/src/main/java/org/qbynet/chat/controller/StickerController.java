@@ -4,9 +4,7 @@ import jakarta.annotation.Resource;
 import org.qbynet.chat.entity.Sticker;
 import org.qbynet.chat.entity.StickerPack;
 import org.qbynet.chat.entity.User;
-import org.qbynet.chat.entity.dto.AddStickersDTO;
-import org.qbynet.chat.entity.dto.CreateStickerPackDTO;
-import org.qbynet.chat.entity.dto.ImportTelegramStickerDTO;
+import org.qbynet.chat.entity.dto.*;
 import org.qbynet.chat.entity.vo.StickerPackVO;
 import org.qbynet.chat.entity.vo.StickerVO;
 import org.qbynet.chat.service.StickerService;
@@ -32,13 +30,31 @@ public class StickerController {
     @Resource
     StickerService stickerService;
 
+    @GetMapping("pack/info")
+    public ResponseEntity<RestBean<StickerPackVO>> info(@RequestParam(required = false) String id, @RequestParam(required = false) String name) {
+        StickerPack pack = null;
+        if (id != null) {
+            pack = stickerService.findPackById(id);
+        } else if (name != null) {
+            pack = stickerService.findPackByName(name);
+        }
+        if (pack == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RestBean.failure(404, "Sticker pack not found"));
+        }
+        return ResponseEntity.ok(RestBean.success(StickerPackVO.from(pack)
+                .stickers(stickerService.findStickers(pack).stream().map(Sticker::getId).toList())
+                .uses(stickerService.countUses(pack))
+                .build()
+        ));
+    }
+
     @PostMapping("tg-import")
     public DeferredResult<ResponseEntity<RestBean<StickerPackVO>>> importStickers(@RequestBody ImportTelegramStickerDTO dto) {
         DeferredResult<ResponseEntity<RestBean<StickerPackVO>>> result = new DeferredResult<>();
         executorService.submit(() -> {
             try {
                 StickerPack stickerPack = telegramService.importStickerPack(dto.getName());
-                result.setResult(ResponseEntity.ok(RestBean.success(StickerPackVO.from(stickerPack))));
+                result.setResult(ResponseEntity.ok(RestBean.success(StickerPackVO.from(stickerPack).build())));
             } catch (Exception e) {
                 result.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, e.getMessage())));
             }
@@ -50,19 +66,55 @@ public class StickerController {
     public ResponseEntity<RestBean<StickerPackVO>> createStickerPack(@RequestBody CreateStickerPackDTO dto, @RequestAttribute("user") User user) {
         try {
             StickerPack stickerPack = stickerService.createPack(dto.getTitle(), dto.getName(), user);
-            return ResponseEntity.ok(RestBean.success(StickerPackVO.from(stickerPack)));
+            return ResponseEntity.ok(RestBean.success(StickerPackVO.from(stickerPack).build()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, e.getMessage()));
         }
     }
 
+    @PostMapping("editPack")
+    public ResponseEntity<RestBean<StickerPackVO>> editStickerPack(@RequestBody EditStickerPackDTO dto, @RequestAttribute("user") User user) {
+        StickerPack pack = stickerService.findPackById(dto.getPack());
+        if (!pack.isBelongsTo(user)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.forbidden("Forbidden"));
+        }
+        StickerPack newPack = stickerService.editPack(pack, dto.getName(), dto.getTitle());
+        return ResponseEntity.ok(RestBean.success(StickerPackVO.from(newPack).build()));
+    }
+
     @PostMapping("addStickers")
     public ResponseEntity<RestBean<List<StickerVO>>> addStickers(@RequestBody AddStickersDTO dto, @RequestAttribute("user") User user) {
-        StickerPack pack = stickerService.findPack(dto.getPack());
+        StickerPack pack = stickerService.findPackById(dto.getPack());
         if (!pack.isBelongsTo(user)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.forbidden("Forbidden"));
         }
         List<Sticker> stickers = stickerService.createStickers(pack, dto.getStickers());
         return ResponseEntity.ok(RestBean.success(stickers.stream().map(StickerVO::from).toList()));
+    }
+
+    @GetMapping("favorite")
+    public ResponseEntity<RestBean<List<StickerPackVO>>> listFavoritePacks(@RequestAttribute("user") User user) {
+        List<StickerPackVO> vos = stickerService.findFavorites(user).stream().map(it -> StickerPackVO.from(it).build()).toList();
+        return ResponseEntity.ok(RestBean.success(vos));
+    }
+
+    @PostMapping("favorite")
+    public ResponseEntity<RestBean<?>> addFavoritePack(@RequestBody AddFavoriteStickerPackDTO dto, @RequestAttribute("user") User user) {
+        StickerPack pack = stickerService.findPackById(dto.getPack());
+        if (pack == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Pack not found"));
+        }
+        stickerService.addFavorite(pack, user);
+        return ResponseEntity.ok(RestBean.success("Ok"));
+    }
+
+    @DeleteMapping("favorite")
+    public ResponseEntity<RestBean<?>> removeFavoritePack(@RequestBody RemoteFavoriteStickerPackDTO dto, @RequestAttribute("user") User user) {
+        StickerPack pack = stickerService.findPackById(dto.getPack());
+        if (pack == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Pack not found"));
+        }
+        stickerService.removeFavorite(pack, user);
+        return ResponseEntity.ok(RestBean.success("Ok"));
     }
 }

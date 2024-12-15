@@ -11,4 +11,6 @@ public interface StickerPackRepository extends MongoRepository<StickerPack, Stri
     boolean existsByName(String link);
 
     Optional<StickerPack> findByTelegramUpstream(String telegramUpstream);
+
+    Optional<StickerPack> findByName(String name);
 }
