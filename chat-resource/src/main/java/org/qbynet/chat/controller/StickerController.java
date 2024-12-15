@@ -1,6 +1,7 @@
 package org.qbynet.chat.controller;
 
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import org.qbynet.chat.entity.Sticker;
 import org.qbynet.chat.entity.StickerPack;
 import org.qbynet.chat.entity.User;
@@ -33,7 +34,20 @@ public class StickerController {
     @GetMapping("info")
     public ResponseEntity<RestBean<StickerVO>> info(@RequestParam String id) {
         Sticker sticker = stickerService.findStickerById(id);
+        if (sticker == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RestBean.failure(404, "No sticker with id " + id));
+        }
         return ResponseEntity.ok(RestBean.success(StickerVO.from(sticker)));
+    }
+
+    @GetMapping("raw")
+    public ResponseEntity<RestBean<List<StickerVO>>> raw(@RequestParam String id, HttpServletResponse response) throws Exception {
+        Sticker sticker = stickerService.findStickerById(id);
+        if (sticker == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RestBean.failure(404, "No sticker with id " + id));
+        }
+        response.sendRedirect("/api/media/" + sticker.getMedia().getId() + "/raw");
+        return null;
     }
 
     @GetMapping("pack/info")
