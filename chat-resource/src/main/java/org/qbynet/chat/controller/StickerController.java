@@ -11,6 +11,7 @@ import org.qbynet.chat.entity.vo.StickerVO;
 import org.qbynet.chat.service.StickerService;
 import org.qbynet.chat.service.TelegramService;
 import org.qbynet.shared.entity.RestBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,9 @@ public class StickerController {
 
     @Resource
     StickerService stickerService;
+
+    @Value("${qbychat.telegram.enabled}")
+    boolean telegramEnabled;
 
     @GetMapping("info")
     public ResponseEntity<RestBean<StickerVO>> info(@RequestParam String id) {
@@ -71,6 +75,10 @@ public class StickerController {
     @PostMapping("tg-import")
     public DeferredResult<ResponseEntity<RestBean<StickerPackVO>>> importStickers(@RequestBody ImportTelegramStickerDTO dto) {
         DeferredResult<ResponseEntity<RestBean<StickerPackVO>>> result = new DeferredResult<>();
+        if (!telegramEnabled) {
+            result.setErrorResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(RestBean.failure(503, "Telegram feature is not enabled")));
+            return result;
+        }
         executorService.submit(() -> {
             try {
                 StickerPack stickerPack = telegramService.importStickerPack(dto.getName());
