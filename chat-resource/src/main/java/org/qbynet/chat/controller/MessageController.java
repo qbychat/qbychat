@@ -75,7 +75,7 @@ public class MessageController {
     }
 
     @PostMapping("read")
-    public ResponseEntity<RestBean<String>> markAsRead(@RequestBody ReadMessageDTO dto, @RequestAttribute("user") User user) {
+    public ResponseEntity<RestBean<?>> markAsRead(@RequestBody ReadMessageDTO dto, @RequestAttribute("user") User user) {
         messageService.markAsRead(dto.getMessages(), user);
         return ResponseEntity.ok(RestBean.success("Ok"));
     }
