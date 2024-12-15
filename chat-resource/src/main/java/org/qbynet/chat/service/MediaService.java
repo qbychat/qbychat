@@ -2,6 +2,7 @@ package org.qbynet.chat.service;
 
 import lombok.Builder;
 import lombok.Data;
+import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Media;
 import org.qbynet.chat.entity.User;
@@ -27,6 +28,8 @@ public interface MediaService {
     boolean hasFile(String sha256);
 
     @NotNull Optional<Media> fromExist(User user, String hash, String name, String contentType);
+
+    Media extractGzip(URI remote, @NotNull Response response) throws IOException;
 
     @Data
     @Builder

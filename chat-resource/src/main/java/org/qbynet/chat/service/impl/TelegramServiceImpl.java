@@ -4,9 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.service.MediaService;
 import org.qbynet.chat.service.StickerService;
@@ -53,7 +52,7 @@ public class TelegramServiceImpl implements TelegramService {
             TelegramStickerSet stickerSet = json.getResult();
             log.info("Importing {}", stickerSet.getTitle());
             StickerPack pack = stickerService.create(stickerSet);
-            stickerSet.getStickers().forEach(s -> this.downloadFile(s.getFileId(), (media) -> {
+            stickerSet.getStickers().forEach(s -> this.downloadFile(s.getFileId(), s.isAnimated(), (media) -> {
                 Sticker sticker = stickerService.create(pack, s.getEmoji(), media);
                 log.info("Imported the {} sticker from set {}", sticker.getAlternativeEmoji(), pack.getName());
             }));
@@ -65,7 +64,7 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    public void downloadFile(String fileId, Consumer<Media> consumer) {
+    public void downloadFile(String fileId, boolean isLottie, Consumer<Media> consumer) {
         URI uri = URI.create("https://api.telegram.org/bot" + telegramToken + "/getFile?file_id=" + fileId);
         try (Response response = okHttpClient.newCall(new Request.Builder()
                 .get()
@@ -81,7 +80,26 @@ public class TelegramServiceImpl implements TelegramService {
                 throw new RuntimeException(result.getDescription());
             }
             String filePath = result.getResult().getFilePath();
-            mediaService.fromRemote(URI.create("https://api.telegram.org/file/bot" + telegramToken + "/" + filePath), consumer);
+            URI remote = URI.create("https://api.telegram.org/file/bot" + telegramToken + "/" + filePath);
+            if (!isLottie) {
+                mediaService.fromRemote(remote, consumer);
+                return;
+            }
+            // process lottie
+            okHttpClient.newCall(new Request.Builder()
+                    .url(remote.toURL())
+                    .get().build()
+            ).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    log.error("Failed to download {} (tg service)", remote, e);
+                }
+
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    consumer.accept(mediaService.extractGzip(remote, response));
+                }
+            });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

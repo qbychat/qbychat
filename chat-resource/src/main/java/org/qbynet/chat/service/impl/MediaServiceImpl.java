@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 @Log4j2
 @Service
@@ -66,19 +67,32 @@ public class MediaServiceImpl implements MediaService {
         return existFile.orElseGet(() -> mediaRepository.save(media));
     }
 
-    private @Nullable Media saveMedia0(URI remote, @NotNull Response response) throws IOException {
+    private @Nullable Media saveMedia0(URI remote, Response response) throws IOException {
+        return saveMedia0(remote, response, false);
+    }
+
+    private @Nullable Media saveMedia0(URI remote, @NotNull Response response, boolean decompressGzip) throws IOException {
         Media media = new Media();
         if (response.isSuccessful()) {
             media.setContentType(response.header("Content-Type"));
             // save to local
             assert response.body() != null;
-            FileMetadata metadata = saveToLocal(response.body().byteStream());
+            InputStream inputStream = response.body().byteStream();
+            if (decompressGzip) {
+                inputStream = new GZIPInputStream(inputStream);
+            }
+            FileMetadata metadata = saveToLocal(inputStream);
             String parsedFileName = parseFileName(response.header("Content-Disposition"));
             if (parsedFileName != null) {
                 media.setName(parsedFileName);
             } else {
                 String[] path = remote.getPath().split("/");
                 media.setName(path[path.length - 1]);
+            }
+            if (media.getName().endsWith(".tgs") && decompressGzip && media.getContentType().equals("application/octet-stream")) {
+                media.setContentType("application/json"); // lottie animation from Telegram
+                String filename = media.getName();
+                media.setName(filename.substring(0, filename.length() - 4) + ".json");
             }
             media.setHash(metadata.getHash());
             compress(media.getContentType(), null, media);
@@ -215,6 +229,14 @@ public class MediaServiceImpl implements MediaService {
         media.setUploader(user);
         media.setContentType(contentType);
         return Optional.of(mediaRepository.save(media));
+    }
+
+    @Override
+    public Media extractGzip(URI remote, @NotNull Response response) throws IOException {
+        Media media = saveMedia0(remote, response, true);
+        if (media == null) return null;
+        Optional<Media> existFile = mediaRepository.findByHashAndName(media.getHash(), media.getName());
+        return existFile.orElseGet(() -> mediaRepository.save(media));
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

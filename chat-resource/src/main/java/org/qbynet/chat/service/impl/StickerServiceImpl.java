@@ -43,7 +43,7 @@ public class StickerServiceImpl implements StickerService {
 
     @Override
     public Sticker create(StickerPack pack, String emoji, Media media) {
-        Optional<Sticker> exist = stickerRepository.findByPackAndAlternativeEmoji(pack, emoji);
+        Optional<Sticker> exist = stickerRepository.findByPackAndMedia(pack, media);
         Sticker sticker;
         if (exist.isPresent()) {
             sticker = exist.get();
