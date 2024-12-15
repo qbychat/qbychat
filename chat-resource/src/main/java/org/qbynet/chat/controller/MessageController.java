@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -78,5 +79,14 @@ public class MessageController {
     public ResponseEntity<RestBean<?>> markAsRead(@RequestBody ReadMessageDTO dto, @RequestAttribute("user") User user) {
         messageService.markAsRead(dto.getMessages(), user);
         return ResponseEntity.ok(RestBean.success("Ok"));
+    }
+
+    @GetMapping("fetch")
+    public ResponseEntity<RestBean<List<MessageVO>>> fetchMessages(@RequestParam String conversation, @RequestAttribute("user") User user) {
+        Conversation conversation1 = conversationService.findConversationById(conversation);
+        if (conversation1 == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Conversation not found"));
+        }
+        return null; // TODO fetch messages
     }
 }
