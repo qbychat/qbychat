@@ -19,7 +19,6 @@ repositories {
 dependencies {
     implementation(project(":"))
     implementation(project(":languagedetection-core"))
-    implementation("org.apache.commons:commons-compress:1.27.1")
     implementation("org.sejda.imageio:webp-imageio:0.1.6")
     implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
     implementation("cn.hutool:hutool-crypto:5.8.34")
