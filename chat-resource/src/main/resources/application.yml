@@ -20,22 +20,40 @@ spring:
       request-timeout: -1
 
 qbychat:
+  # Telegram Features
+  # Please disable it if your region blocked Telegram
+  telegram:
+    enabled: false
+    # Your telegram bot token
+    # Create with https://t.me/BotFather
+    token: tgtoken
+  # Link preview features
   link:
     # How long do links expire (Unit: days)
     ttl: 7
+    instant-view:
+      # Should generate instant-view files?
+      enabled: true
+    special:
+      # Should the servlet generate modern link preview for some special websites?
+      bilibili: true
+  # OkHttp
   request:
     # The User-Agent header
     user-agent: qbychat
+  # Conversation Feature
   conversation:
     invite:
       # Default invite link expire time (Unit: days)
       expire: 7
+  # Search Feature
   search:
     # Allow users search medias
     media: true
     page:
       # Limit pre page
       limit: 50
+  # Bot Feature
   bot:
     # Should this qbychat instance allow bots?
     state: true

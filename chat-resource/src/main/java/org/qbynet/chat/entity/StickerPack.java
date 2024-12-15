@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class StickerPack {
     @Id
-    private String id; // http://resource-server/view/sticker/<id>
+    private String id;
 
     private String name;
     @DBRef

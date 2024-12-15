@@ -16,4 +16,7 @@ public class Sticker implements Serializable {
     private String alternativeEmoji;
     @DBRef
     private Media media; // link to a lottie json, image or gif file
+
+    @DBRef
+    private StickerPack pack;
 }

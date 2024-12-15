@@ -4,13 +4,12 @@ import cn.hutool.crypto.SecureUtil;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.TeeInputStream;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.qbynet.chat.entity.Media;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.repository.MediaRepository;
@@ -23,9 +22,12 @@ import org.springframework.util.MimeType;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,29 +48,15 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public Media fromRemote(URI remote) {
-        Media media = new Media();
         log.info("Download {}", remote);
+        Media media;
         try (Response response = okHttpClient.newCall(new Request.Builder()
                 .url(remote.toURL())
                 .header("User-Agent", userAgent)
                 .build()).execute()) {
-            if (response.isSuccessful()) {
-                media.setContentType(response.header("Content-Type"));
-                // save to local
-                assert response.body() != null;
-                FileMetadata metadata = saveToLocal(response.body().byteStream());
-                String parsedFileName = parseFileName(response.header("Content-Disposition"));
-                if (parsedFileName != null) {
-                    media.setName(parsedFileName);
-                } else {
-                    String[] path = remote.getPath().split("/");
-                    media.setName(path[path.length - 1]);
-                }
-                media.setHash(metadata.getHash());
-                compress(media.getContentType(), null, media);
-            } else {
-                log.info("Failed to download file from {} ({})", remote, response.code());
-                return null;
+            media = saveMedia0(remote, response);
+            if (media == null) {
+                throw new RuntimeException("Failed to save media");
             }
         } catch (Exception e) {
             log.info("Failed to download file from {}", remote, e);
@@ -76,6 +64,50 @@ public class MediaServiceImpl implements MediaService {
         }
         Optional<Media> existFile = mediaRepository.findByHashAndName(media.getHash(), media.getName());
         return existFile.orElseGet(() -> mediaRepository.save(media));
+    }
+
+    private @Nullable Media saveMedia0(URI remote, @NotNull Response response) throws IOException {
+        Media media = new Media();
+        if (response.isSuccessful()) {
+            media.setContentType(response.header("Content-Type"));
+            // save to local
+            assert response.body() != null;
+            FileMetadata metadata = saveToLocal(response.body().byteStream());
+            String parsedFileName = parseFileName(response.header("Content-Disposition"));
+            if (parsedFileName != null) {
+                media.setName(parsedFileName);
+            } else {
+                String[] path = remote.getPath().split("/");
+                media.setName(path[path.length - 1]);
+            }
+            media.setHash(metadata.getHash());
+            compress(media.getContentType(), null, media);
+        } else {
+            log.info("Failed to download file from {} ({})", remote, response.code());
+            return null;
+        }
+        return media;
+    }
+
+    @Override
+    public void fromRemote(URI remote, Consumer<Media> consumer) throws MalformedURLException {
+        log.info("Download {} (async)", remote);
+        okHttpClient.newCall(new Request.Builder()
+                .url(remote.toURL())
+                .header("User-Agent", userAgent)
+                .build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                log.info("Failed to download file from {}", remote, e);
+                consumer.accept(null);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                Media media = mediaRepository.save(Objects.requireNonNull(saveMedia0(remote, response)));
+                consumer.accept(media);
+            }
+        });
     }
 
     @Override
@@ -114,7 +146,10 @@ public class MediaServiceImpl implements MediaService {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void compress(String contentType, User uploader, Media media) throws IOException {
-        if (MimeType.valueOf("image/*").isCompatibleWith(MimeType.valueOf(contentType))) {
+        MimeType givenContentType = MimeType.valueOf(contentType);
+        MimeType imageType = MimeType.valueOf("image/*");
+        MimeType webpType = MimeType.valueOf("image/webp");
+        if (imageType.isCompatibleWith(givenContentType) && !webpType.isCompatibleWith(givenContentType)) {
             log.info("Generate compressed image for {}", media.getName());
             Media compressed = new Media();
             compressed.setName(media.getName().substring(0, media.getName().lastIndexOf(".")) + "-compressed.webp");

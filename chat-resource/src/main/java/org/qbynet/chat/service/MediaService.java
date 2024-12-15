@@ -8,11 +8,15 @@ import org.qbynet.chat.entity.User;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public interface MediaService {
     Media fromRemote(URI remote);
+
+    void fromRemote(URI remote, Consumer<Media> consumer) throws MalformedURLException;
 
     Media findById(String id);
 
