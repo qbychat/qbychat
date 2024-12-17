@@ -1,4 +1,4 @@
-package org.qbynet.chat.util;
+package org.qbynet.chat.util.listener;
 
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;

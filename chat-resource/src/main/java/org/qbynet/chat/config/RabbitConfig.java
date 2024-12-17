@@ -16,6 +16,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    Queue messageReadQueue() {
+        return new Queue("qc-message-read");
+    }
+
+    @Bean
     Queue joinRequestQueue() {
         return new Queue("qc-join-request");
     }

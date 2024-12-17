@@ -13,6 +13,8 @@ import org.qbynet.chat.service.LinkPreviewService;
 import org.qbynet.chat.service.MessageService;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +52,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Resource(name = "messagesQueue")
     Queue messagesQueue;
+
+    @Resource(name = "messageReadQueue")
+    Queue messageReadQueue;
 
     @Resource
     LanguageDetector languageDetector;
@@ -130,15 +135,19 @@ public class MessageServiceImpl implements MessageService {
     public void markAsRead(@NotNull List<String> messageIds, User user) {
         List<Message> messages = messageIds.stream().map(messageId -> messageRepository.findById(messageId).orElse(null)).filter(Objects::nonNull).toList();
         readRepository.saveAll(messages.stream().map(it -> {
-            Read read = new Read();
-            read.setMessage(it);
             Member member = memberRepository.findByUserAndConversation(user, it.getConversation()).orElse(null);
             if (member == null) {
                 return null;
             }
-            read.setMember(member);
-            return read;
+            return Read.builder().message(it).member(member).build();
         }).filter(Objects::nonNull).toList());
+    }
+
+    @Override
+    public void markAsRead(Message message, User user) {
+        Member member = memberRepository.findByUserAndConversation(user, message.getConversation()).orElse(null);
+
+        readRepository.save(Read.builder().message(message).member(member).build());
     }
 
     @Scheduled(cron = "0 0 */6 * * *")
@@ -168,5 +177,16 @@ public class MessageServiceImpl implements MessageService {
             message.setLanguage(lang.get().getLanguage());
         }
         rabbitTemplate.convertAndSend(messagesQueue.getName(), messageRepository.save(message));
+    }
+
+    @Override
+    public Page<Message> fetchMessages(Conversation conversation, User user, Pageable pageable) {
+        Member member = memberRepository.findByUserAndConversation(user, conversation).orElse(null);
+        if(member==null) return null;
+        Page<Message> messages = messageRepository.findAllByConversation(conversation, pageable);
+        if(messages.getContent().isEmpty()) return null;
+        for(Message message : messages.getContent())
+            rabbitTemplate.convertAndSend(messageReadQueue.getName(), message);
+        return messages;
     }
 }

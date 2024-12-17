@@ -1,5 +1,6 @@
 package org.qbynet.chat.entity;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -9,6 +10,7 @@ import java.time.Instant;
 
 @Data
 @Document
+@Builder
 public class Read {
     @Id
     private String id;

@@ -12,4 +12,6 @@ public interface BotRepository extends MongoRepository<Bot, String> {
     boolean existsByBot(User bot);
 
     List<Bot> findAllByOwner(User owner);
+
+    Bot findByBot(User user);
 }
