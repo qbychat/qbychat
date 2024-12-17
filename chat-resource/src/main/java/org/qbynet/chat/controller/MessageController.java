@@ -28,13 +28,11 @@ import java.util.concurrent.Executors;
 @RestController
 @RequestMapping("/api/message")
 public class MessageController {
+    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
     @Resource
     MessageService messageService;
-
     @Resource
     ConversationService conversationService;
-
-    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     @PostMapping("send")
     public DeferredResult<ResponseEntity<RestBean<MessageVO>>> sendMessage(@RequestBody SendMessageDTO message, @RequestAttribute("user") User user) {
@@ -94,7 +92,7 @@ public class MessageController {
         }
         Pageable pageable = PageRequest.of(dto.getPage(), dto.getSize());
         Page<Message> messages = messageService.fetchMessages(conversation1, user, pageable);
-        if(messages==null){
+        if (messages == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RestBean.failure(404, "Not found"));
         }
         List<MessageVO> result = new ArrayList<>();

@@ -182,10 +182,10 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Page<Message> fetchMessages(Conversation conversation, User user, Pageable pageable) {
         Member member = memberRepository.findByUserAndConversation(user, conversation).orElse(null);
-        if(member==null) return null;
+        if (member == null) return null;
         Page<Message> messages = messageRepository.findAllByConversation(conversation, pageable);
-        if(messages.getContent().isEmpty()) return null;
-        for(Message message : messages.getContent())
+        if (messages.getContent().isEmpty()) return null;
+        for (Message message : messages.getContent())
             rabbitTemplate.convertAndSend(messageReadQueue.getName(), message);
         return messages;
     }

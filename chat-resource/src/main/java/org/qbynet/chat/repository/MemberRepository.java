@@ -2,10 +2,7 @@ package org.qbynet.chat.repository;
 
 import org.qbynet.chat.entity.Conversation;
 import org.qbynet.chat.entity.Member;
-import org.qbynet.chat.entity.Message;
 import org.qbynet.chat.entity.User;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

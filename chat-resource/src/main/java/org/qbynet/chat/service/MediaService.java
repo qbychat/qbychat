@@ -27,7 +27,8 @@ public interface MediaService {
 
     boolean hasFile(String sha256);
 
-    @NotNull Optional<Media> fromExist(User user, String hash, String name, String contentType);
+    @NotNull
+    Optional<Media> fromExist(User user, String hash, String name, String contentType);
 
     Media extractGzip(URI remote, @NotNull Response response) throws IOException;
 
