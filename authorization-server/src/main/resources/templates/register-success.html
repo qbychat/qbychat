@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" class="mdui-theme-auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html class="mdui-theme-auto" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title th:text="#{register.success}">Register successful</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
+    <link href="https://unpkg.com/mdui@2/mdui.css" rel="stylesheet">
     <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
-    <link rel="stylesheet" href="/assets/css/register-success.css" th:href="@{/assets/css/register-success.css}"/>
+    <link href="/assets/css/register-success.css" rel="stylesheet" th:href="@{/assets/css/register-success.css}"/>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             lottie.loadAnimation({
@@ -24,8 +24,9 @@
     <mdui-card class="card">
         <div id="lottie-animation"></div>
         <h1 th:text="#{register.success.headline}">Congratulations! Your registration is successful!</h1>
-        <p th:text="#{register.success.tip(${email})}">If you want to log in, please use your email {user@example.com} to proceed.</p>
-        <mdui-button th:text="#{login.link}" href="/user/login" th:href="@{/user/login}">Login</mdui-button>
+        <p th:text="#{register.success.tip(${email})}">If you want to log in, please use your email {user@example.com}
+            to proceed.</p>
+        <mdui-button href="/user/login" th:href="@{/user/login}" th:text="#{login.link}">Login</mdui-button>
     </mdui-card>
 </div>
 </body>

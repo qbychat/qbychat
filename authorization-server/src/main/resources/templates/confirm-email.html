@@ -3,29 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="#{register.confirm.title}">Email confirmation required</title>
-    <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
+    <link href="https://unpkg.com/mdui@2/mdui.css" rel="stylesheet">
     <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/confirm.css" th:href="@{/assets/css/confirm.css}"/>
+    <link href="/assets/css/confirm.css" rel="stylesheet" th:href="@{/assets/css/confirm.css}"/>
 </head>
 <body>
 <div class="container">
     <mdui-card class="animate__animated animate__fadeInUpBig">
-        <form th:action="@{/user/confirm}" method="post" class="form-confirm">
-            <h1 th:text="#{register.confirm.headline}" class="animate__animated animate__fadeInDown animate__delay-1s">
+        <form class="form-confirm" method="post" th:action="@{/user/confirm}">
+            <h1 class="animate__animated animate__fadeInDown animate__delay-1s" th:text="#{register.confirm.headline}">
                 Email confirmation required</h1>
-            <p th:if="${hasError}" th:text="#{register.confirm.error}" class="alert-danger animate__animated animate__bounceIn animate__delay-2s">Email not
+            <p class="alert-danger animate__animated animate__bounceIn animate__delay-2s" th:if="${hasError}"
+               th:text="#{register.confirm.error}">Email not
                 found or token expired</p>
-            <p th:if="${!hasError}" th:text="#{register.confirm.tip}" class="animate__animated animate__bounceIn animate__delay-1s">Please check your email</p>
-            <mdui-text-field th:label="#{register.email}" label="Email" name="email" type="email"
-                             th:value="${param.email}"
-                             class="animate__animated animate__fadeInDown animate__delay-1s" required></mdui-text-field>
-            <mdui-text-field th:label="#{register.confirm.token}" label="Token" name="token" maxlength="6"
-                             pattern="\d{6}" th:value="${param.token}"
-                             class="animate__animated animate__fadeInDown animate__delay-1s" required></mdui-text-field>
-            <mdui-button th:text="#{register.confirm.button}" type="submit"
-                         class="animate__animated animate__bounceIn animate__delay-1s">Verify
+            <p class="animate__animated animate__bounceIn animate__delay-1s" th:if="${!hasError}"
+               th:text="#{register.confirm.tip}">Please check your email</p>
+            <mdui-text-field class="animate__animated animate__fadeInDown animate__delay-1s" label="Email" name="email"
+                             required
+                             th:label="#{register.email}"
+                             th:value="${param.email}" type="email"></mdui-text-field>
+            <mdui-text-field class="animate__animated animate__fadeInDown animate__delay-1s" label="Token" maxlength="6"
+                             name="token"
+                             pattern="\d{6}" required
+                             th:label="#{register.confirm.token}" th:value="${param.token}"></mdui-text-field>
+            <mdui-button class="animate__animated animate__bounceIn animate__delay-1s"
+                         th:text="#{register.confirm.button}"
+                         type="submit">Verify
             </mdui-button>
         </form>
     </mdui-card>

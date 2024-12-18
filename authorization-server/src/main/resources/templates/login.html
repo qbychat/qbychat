@@ -1,55 +1,56 @@
 <!DOCTYPE html>
-<html lang="en" class="mdui-theme-auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html class="mdui-theme-auto" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"/>
-    <meta name="renderer" content="webkit"/>
-    <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport"/>
+    <meta content="webkit" name="renderer"/>
+    <link href="https://unpkg.com/mdui@2/mdui.css" rel="stylesheet">
     <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
 
     <title th:text="#{login.title}">qbychat - Login</title>
-    <link rel="stylesheet" href="/assets/css/signin.css" th:href="@{/assets/css/signin.css}"/>
+    <link href="/assets/css/signin.css" rel="stylesheet" th:href="@{/assets/css/signin.css}"/>
 </head>
 <body>
 <div class="container animate__animated animate__fadeInDown">
     <mdui-card>
         <form class="form-signin w-100 m-auto" method="post" th:action="@{/user/login}">
-            <div th:if="${param.error}" th:text="#{login.error}"
-                 class="alert alert-danger animate__animated animate__fadeIn animate__delay-1s" role="alert">
+            <div class="alert alert-danger animate__animated animate__fadeIn animate__delay-1s" role="alert"
+                 th:if="${param.error}" th:text="#{login.error}">
                 Invalid email or password.
             </div>
-            <div th:if="${param.logout}" th:text="#{login.logout}"
-                 class="alert alert-success animate__animated animate__fadeIn animate__delay-1s" role="alert">
+            <div class="alert alert-success animate__animated animate__fadeIn animate__delay-1s" role="alert"
+                 th:if="${param.logout}" th:text="#{login.logout}">
                 You have been logged out.
             </div>
             <h1 class="h3 mb-3 fw-normal animate__animated animate__fadeInUp animate__delay-1s"
                 th:text="#{login.headline}">Please sign in</h1>
             <div>
-            <mdui-text-field id="username" label="Email" th:label="#{login.email}" type="email"
-                             autofocus name="username" tabindex="0"
-                             class="form-control animate__animated animate__fadeInUp animate__delay-1s" required>
-                <mdui-button-icon icon="email" slot="icon"></mdui-button-icon>
-            </mdui-text-field>
-                <mdui-text-field id="password"
-                                 label="Password"
-                                 name="password" tabindex="1" th:label="#{login.password}" type="password"
-                             class="form-control animate__animated animate__fadeInUp animate__delay-1s" required>
-                <mdui-button-icon slot="icon" icon="password"></mdui-button-icon>
-            </mdui-text-field>
+                <mdui-text-field autofocus class="form-control animate__animated animate__fadeInUp animate__delay-1s"
+                                 id="username" label="Email"
+                                 name="username" required tabindex="0"
+                                 th:label="#{login.email}" type="email">
+                    <mdui-button-icon icon="email" slot="icon"></mdui-button-icon>
+                </mdui-text-field>
+                <mdui-text-field class="form-control animate__animated animate__fadeInUp animate__delay-1s"
+                                 id="password"
+                                 label="Password" name="password" required tabindex="1"
+                                 th:label="#{login.password}" type="password">
+                    <mdui-button-icon icon="password" slot="icon"></mdui-button-icon>
+                </mdui-text-field>
             </div>
             <div>
                 <mdui-button
                         class="w-100 btn btn-lg btn-primary btn-block animate__animated animate__bounceIn animate__delay-1s"
-                        type="submit" th:text="#{login.button}">
+                        th:text="#{login.button}" type="submit">
                     Sign in
                 </mdui-button>
                 <mdui-button
-                        th:text="#{register.link}"
+                        class="animate__animated animate__bounceIn animate__delay-1s"
                         th:href="@{/user/register}"
-                        variant="outlined"
-                        class="animate__animated animate__bounceIn animate__delay-1s">
+                        th:text="#{register.link}"
+                        variant="outlined">
                     Register
                 </mdui-button>
             </div>

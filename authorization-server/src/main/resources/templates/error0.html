@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" class="mdui-theme-auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html class="mdui-theme-auto" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"/>
-    <meta name="renderer" content="webkit"/>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport"/>
+    <meta content="webkit" name="renderer"/>
     <title th:text="#{error.title}">Error</title>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
+    <link href="https://unpkg.com/mdui@2/mdui.css" rel="stylesheet">
     <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/error.css" th:href="@{/assets/css/error.css}"/>
+    <link href="/assets/css/error.css" rel="stylesheet" th:href="@{/assets/css/error.css}"/>
 </head>
 <body>
 <div class="container">
@@ -21,7 +21,9 @@
         <div class="card-body animate__animated animate__backInUp animate__delay-1s">
             <p th:text="${errorMessage}"></p>
         </div>
-        <mdui-button class="animate__animated animate__backInUp animate__delay-1s" th:text="#{error.back}" onclick="window.history.back()" href="javascript:">Back</mdui-button>
+        <mdui-button class="animate__animated animate__backInUp animate__delay-1s" href="javascript:"
+                     onclick="window.history.back()" th:text="#{error.back}">Back
+        </mdui-button>
     </mdui-card>
 </div>
 </body>

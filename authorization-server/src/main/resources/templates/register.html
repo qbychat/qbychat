@@ -1,47 +1,52 @@
 <!DOCTYPE html>
-<html lang="en" class="mdui-theme-auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html class="mdui-theme-auto" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"/>
-    <meta name="renderer" content="webkit"/>
-    <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport"/>
+    <meta content="webkit" name="renderer"/>
+    <link href="https://unpkg.com/mdui@2/mdui.css" rel="stylesheet">
     <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <title th:text="#{register.title}">Register</title>
 
-    <link rel="stylesheet" href="/assets/css/register.css" th:href="@{/assets/css/register.css}"/>
+    <link href="/assets/css/register.css" rel="stylesheet" th:href="@{/assets/css/register.css}"/>
 </head>
 <body>
 <div class="container animate__animated animate__fadeInDown">
     <mdui-card>
-        <form th:action="@{/user/register}" method="post" class="form-register">
+        <form class="form-register" method="post" th:action="@{/user/register}">
             <h1 class="h3 mb-3 fw-normal animate__animated animate__fadeInUp animate__delay-1s"
                 th:text="#{register.headline}">Register</h1>
-            <div th:if="${param.error}" class="alert alert-danger animate__animated animate__bounceIn animate__delay-1s">
+            <div class="alert alert-danger animate__animated animate__bounceIn animate__delay-1s"
+                 th:if="${param.error}">
                 <p th:text="#{register.error}">Email always exists</p>
             </div>
-            <mdui-text-field autofocus class="animate__animated animate__backInUp animate__delay-1s" label="Email" name="email" required
+            <mdui-text-field autofocus class="animate__animated animate__backInUp animate__delay-1s" label="Email"
+                             name="email" required
                              tabindex="0" th:label="#{register.email}" type="email">
-                <mdui-button-icon slot="icon" icon="email"></mdui-button-icon>
+                <mdui-button-icon icon="email" slot="icon"></mdui-button-icon>
             </mdui-text-field>
-            <mdui-text-field class="animate__animated animate__backInUp animate__delay-1s" label="Password" name="password" required
+            <mdui-text-field class="animate__animated animate__backInUp animate__delay-1s" label="Password"
+                             name="password" required
                              tabindex="1" th:label="#{login.password}" type="password">
-                <mdui-button-icon slot="icon" icon="password"></mdui-button-icon>
+                <mdui-button-icon icon="password" slot="icon"></mdui-button-icon>
             </mdui-text-field>
-            <mdui-button th:text="#{register.button}" type="submit" class="animate__animated animate__bounceIn animate__delay-1s">Register</mdui-button>
+            <mdui-button class="animate__animated animate__bounceIn animate__delay-1s" th:text="#{register.button}"
+                         type="submit">Register
+            </mdui-button>
             <mdui-button
-                    th:text="#{login.link}"
+                    class="animate__animated animate__bounceIn animate__delay-1s"
                     th:href="@{/user/login}"
-                    variant="outlined"
-                    class="animate__animated animate__bounceIn animate__delay-1s">
+                    th:text="#{login.link}"
+                    variant="outlined">
                 Login
             </mdui-button>
             <mdui-button
-                    th:text="#{register.confirm.link}"
+                    class="animate__animated animate__bounceIn animate__delay-1s"
                     th:href="@{/user/confirm}"
-                    variant="outlined"
-                    class="animate__animated animate__bounceIn animate__delay-1s">
+                    th:text="#{register.confirm.link}"
+                    variant="outlined">
                 Go Verify
             </mdui-button>
         </form>
