@@ -179,6 +179,7 @@ public class MessageServiceImpl implements MessageService {
         rabbitTemplate.convertAndSend(messagesQueue.getName(), messageRepository.save(message));
     }
 
+    // no test!
     @Override
     public Page<Message> fetchMessages(Conversation conversation, User user, Pageable pageable) {
         Member member = memberRepository.findByUserAndConversation(user, conversation).orElse(null);
