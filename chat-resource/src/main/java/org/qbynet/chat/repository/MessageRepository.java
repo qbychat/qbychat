@@ -22,5 +22,5 @@ public interface MessageRepository extends MongoRepository<Message, String> {
 
     Page<Message> findAllByContentContainingIgnoreCaseAndExpiresAtNullOrExpiresAtGreaterThan(String content, Pageable pageable, Instant now);
 
-    Page<Message> findAllByConversationOrderByIdDesc(Conversation conversation, Pageable pageable);
+    Page<Message> findAllByConversationOrderBySentAtDesc(Conversation conversation, Pageable pageable);
 }
