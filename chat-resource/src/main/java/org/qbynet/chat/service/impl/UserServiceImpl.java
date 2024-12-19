@@ -5,11 +5,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
-import org.qbynet.chat.entity.Bot;
-import org.qbynet.chat.entity.BotToken;
-import org.qbynet.chat.entity.CreateBot;
-import org.qbynet.chat.entity.User;
+import org.qbynet.chat.entity.*;
 import org.qbynet.chat.repository.BotRepository;
+import org.qbynet.chat.repository.StatusRepository;
 import org.qbynet.chat.repository.UserRepository;
 import org.qbynet.chat.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +33,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     PasswordEncoder passwordEncoder;
+
+    @Resource
+    StatusRepository statusRepository;
 
     @Override
     public User createProfile(String remoteId, String nickname) {
@@ -142,5 +143,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public Bot findBot(String id) {
         return botRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Status getUserStatus(User user) {
+        return statusRepository.findByUser(user).orElse(Status.builder().status(0).build());
+    }
+
+    @Override
+    public void setUserStatus(Status status) {
+        statusRepository.save(status);
     }
 }
