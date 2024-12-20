@@ -28,22 +28,22 @@ public class ConversationController {
         if (member == null) {
             JoinRequest joinRequest = conversationService.findJoinRequest(conversation, user);
             return ResponseEntity.ok(RestBean.success(ConversationSession.builder()
-                    .conversation(ConversationVO.from(conversation))
-                    .member(null)
-                    .joined(false)
-                    .joinRequest(JoinRequestVO.from(joinRequest))
-                    .build()));
+                .conversation(ConversationVO.from(conversation))
+                .member(null)
+                .joined(false)
+                .joinRequest(JoinRequestVO.from(joinRequest))
+                .build()));
         }
         int joinRequests = -1;
         if (member.hasPermissions(MemberPermission.PROCESS_JOIN_REQUESTS)) {
             joinRequests = conversationService.countJoinRequests(conversation);
         }
         return ResponseEntity.ok(RestBean.success(ConversationSession.builder()
-                .conversation(ConversationVO.from(conversation))
-                .member(MemberVO.from(member))
-                .joined(true)
-                .joinRequests(joinRequests)
-                .build()));
+            .conversation(ConversationVO.from(conversation))
+            .member(MemberVO.from(member))
+            .joined(true)
+            .joinRequests(joinRequests)
+            .build()));
     }
 
     @GetMapping("list")
@@ -51,12 +51,12 @@ public class ConversationController {
         return ResponseEntity.ok(RestBean.success(conversationService.list(user).stream().map((conversation -> {
             Member member = conversationService.findMember(conversation, user);
             return ConversationUserVO.builder()
-                    .id(conversation.getId())
-                    .name(conversation.getName())
-                    .type(conversation.getType())
-                    .notificationPreferment(member.getNotifications())
-                    .pinned(member.isPinned())
-                    .build();
+                .id(conversation.getId())
+                .name(conversation.getName())
+                .type(conversation.getType())
+                .notificationPreferment(member.getNotifications())
+                .pinned(member.isPinned())
+                .build();
         })).toList()));
     }
 
@@ -84,9 +84,9 @@ public class ConversationController {
         }
         ConversationService.JoinConversationDetails details = conversationService.join(conversation, user);
         return ResponseEntity.ok(RestBean.success(JoinConversationVO.builder()
-                .joined(details.isJoined())
-                .banned(details.isBanned())
-                .build()));
+            .joined(details.isJoined())
+            .banned(details.isBanned())
+            .build()));
     }
 
     @PostMapping("invite")

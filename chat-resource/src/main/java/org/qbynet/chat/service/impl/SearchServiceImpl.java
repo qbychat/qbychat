@@ -60,9 +60,9 @@ public class SearchServiceImpl implements SearchService {
         } else if (content.startsWith("+")) {
             // match invite links
             Optional<SearchResult> linkOptional = inviteLinkRepository.findByLinkAndExpireAtAfter(content, Instant.now()).map(it -> SearchResult.builder()
-                    .inviteLink(InviteLinkVO.from(it))
-                    .conversation(ConversationVO.from(it.getCreateBy().getConversation()))
-                    .type(SearchResultType.INVITE_LINK).build()
+                .inviteLink(InviteLinkVO.from(it))
+                .conversation(ConversationVO.from(it.getCreateBy().getConversation()))
+                .type(SearchResultType.INVITE_LINK).build()
             );
             linkOptional.ifPresent(results::add);
         }
@@ -99,9 +99,9 @@ public class SearchServiceImpl implements SearchService {
             pageObj = mediaRepository.findAllByNameContainingIgnoreCaseAndContentType(content, contentType, PageRequest.of(page, searchPageLimit));
         }
         return new ArrayList<>(pageObj.stream().map(it -> SearchResult.builder()
-                .media(MediaVO.from(it))
-                .type(SearchResultType.MEDIA)
-                .build()
+            .media(MediaVO.from(it))
+            .type(SearchResultType.MEDIA)
+            .build()
         ).toList());
     }
 
@@ -109,8 +109,8 @@ public class SearchServiceImpl implements SearchService {
     public List<SearchResult> tag(@NotNull String tag, User user, int page) {
         String realTag = (tag.startsWith("#") ? tag : "#" + tag) + " ";
         return messageRepository.findAllByContentContainingIgnoreCaseAndExpiresAtNullOrExpiresAtGreaterThan(realTag, PageRequest.of(page, searchPageLimit), Instant.now()).stream()
-                .filter(it -> it.getConversation().isPreview() || conversationService.hasJoined(it.getConversation(), user))
-                .map(it -> SearchResult.builder().message(MessageVO.from(it)).type(SearchResultType.MESSAGE).build())
-                .toList();
+            .filter(it -> it.getConversation().isPreview() || conversationService.hasJoined(it.getConversation(), user))
+            .map(it -> SearchResult.builder().message(MessageVO.from(it)).type(SearchResultType.MESSAGE).build())
+            .toList();
     }
 }

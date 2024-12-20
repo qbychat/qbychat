@@ -66,9 +66,9 @@ public class StickerController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RestBean.failure(404, "Sticker pack not found"));
         }
         return ResponseEntity.ok(RestBean.success(StickerPackVO.from(pack)
-                .stickers(stickerService.findStickers(pack).stream().map(Sticker::getId).toList())
-                .uses(stickerService.countUses(pack))
-                .build()
+            .stickers(stickerService.findStickers(pack).stream().map(Sticker::getId).toList())
+            .uses(stickerService.countUses(pack))
+            .build()
         ));
     }
 

@@ -24,14 +24,14 @@ package com.optimaize.langdetect.ngram;
 public class NgramExtractors {
 
     private static final NgramExtractor STANDARD = NgramExtractor
-            .gramLengths(1, 2, 3)
-            .filter(StandardNgramFilter.getInstance())
-            .textPadding(' ');
+        .gramLengths(1, 2, 3)
+        .filter(StandardNgramFilter.getInstance())
+        .textPadding(' ');
 
     private static final NgramExtractor BACKWARDS = NgramExtractor
-            .gramLengths(1, 2, 3)
-            .filter(BackwardsCompatibleNgramFilter.getInstance())
-            .textPadding(' ');
+        .gramLengths(1, 2, 3)
+        .filter(BackwardsCompatibleNgramFilter.getInstance())
+        .textPadding(' ');
 
 
     /**

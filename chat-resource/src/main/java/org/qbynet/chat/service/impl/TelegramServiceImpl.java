@@ -37,9 +37,9 @@ public class TelegramServiceImpl implements TelegramService {
         log.info("Importing sticker pack {} from Telegram", name);
         URI uri = URI.create("https://api.telegram.org/bot" + telegramToken + "/getStickerSet?name=" + name);
         try (Response response = okHttpClient.newCall(new Request.Builder()
-                .url(uri.toURL())
-                .get()
-                .build()).execute()) {
+            .url(uri.toURL())
+            .get()
+            .build()).execute()) {
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             }
@@ -67,9 +67,9 @@ public class TelegramServiceImpl implements TelegramService {
     public void downloadFile(String fileId, boolean isLottie, Consumer<Media> consumer) {
         URI uri = URI.create("https://api.telegram.org/bot" + telegramToken + "/getFile?file_id=" + fileId);
         try (Response response = okHttpClient.newCall(new Request.Builder()
-                .get()
-                .url(uri.toURL())
-                .build()).execute()) {
+            .get()
+            .url(uri.toURL())
+            .build()).execute()) {
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             }
@@ -87,8 +87,8 @@ public class TelegramServiceImpl implements TelegramService {
             }
             // process lottie
             okHttpClient.newCall(new Request.Builder()
-                    .url(remote.toURL())
-                    .get().build()
+                .url(remote.toURL())
+                .get().build()
             ).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {

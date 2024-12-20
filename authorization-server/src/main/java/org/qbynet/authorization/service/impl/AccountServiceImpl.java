@@ -37,10 +37,10 @@ public class AccountServiceImpl implements AccountService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
         return User.withUsername(account.getId())
-                .password(account.getPassword())
-                .authorities(account.getRoles().stream().map(it -> new SimpleGrantedAuthority("ROLE_" + it)).toList().toArray(SimpleGrantedAuthority[]::new))
-                .accountLocked(account.isLocked())
-                .build();
+            .password(account.getPassword())
+            .authorities(account.getRoles().stream().map(it -> new SimpleGrantedAuthority("ROLE_" + it)).toList().toArray(SimpleGrantedAuthority[]::new))
+            .accountLocked(account.isLocked())
+            .build();
     }
 
     @Override

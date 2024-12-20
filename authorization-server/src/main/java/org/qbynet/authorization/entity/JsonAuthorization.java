@@ -65,11 +65,11 @@ public class JsonAuthorization {
 
     public OAuth2Authorization convent(RegisteredClient registeredClient) {
         OAuth2Authorization.Builder builder = OAuth2Authorization.withRegisteredClient(registeredClient)
-                .id(id)
-                .principalName(principalName)
-                .authorizationGrantType(authorizationGrantType)
-                .authorizedScopes(authorizedScopes)
-                .attributes((it) -> it.putAll(attributes));
+            .id(id)
+            .principalName(principalName)
+            .authorizationGrantType(authorizationGrantType)
+            .authorizedScopes(authorizedScopes)
+            .attributes((it) -> it.putAll(attributes));
         tokens.forEach(token -> builder.token(token.conventToOriginToken()));
         return builder.build();
     }

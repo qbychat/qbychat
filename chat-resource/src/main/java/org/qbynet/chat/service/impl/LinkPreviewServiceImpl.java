@@ -65,10 +65,10 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
         Metadata metadata = new Metadata();
         metadata.setLink(link);
         try (Response response = okHttpClient.newCall(new Request.Builder()
-                .get()
-                .url(link.toURL())
-                .header("User-Agent", userAgent)
-                .build()).execute()) {
+            .get()
+            .url(link.toURL())
+            .header("User-Agent", userAgent)
+            .build()).execute()) {
             assert response.body() != null;
             Document document = Jsoup.parse(response.body().string());
             metadata.setTitle(document.title());
@@ -94,10 +94,10 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
         lp.setLink(link.toString());
         log.info("Generate link preview for {}", link);
         try (Response response = okHttpClient.newCall(new Request.Builder()
-                .head()
-                .url(link.toURL())
-                .header("User-Agent", userAgent)
-                .build()).execute()) {
+            .head()
+            .url(link.toURL())
+            .header("User-Agent", userAgent)
+            .build()).execute()) {
             int code = response.code();
             lp.setStatus(code); // response status code
             // metadata

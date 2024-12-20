@@ -41,29 +41,29 @@ public final class DeviceClientAuthenticationConverter implements Authentication
 
     public DeviceClientAuthenticationConverter(String deviceAuthorizationEndpointUri) {
         RequestMatcher clientIdParameterMatcher = request ->
-                request.getParameter(OAuth2ParameterNames.CLIENT_ID) != null;
+            request.getParameter(OAuth2ParameterNames.CLIENT_ID) != null;
         this.deviceAuthorizationRequestMatcher = new AndRequestMatcher(
-                new AntPathRequestMatcher(
-                        deviceAuthorizationEndpointUri, HttpMethod.POST.name()),
-                clientIdParameterMatcher);
+            new AntPathRequestMatcher(
+                deviceAuthorizationEndpointUri, HttpMethod.POST.name()),
+            clientIdParameterMatcher);
         this.deviceAccessTokenRequestMatcher = request ->
-                AuthorizationGrantType.DEVICE_CODE.getValue().equals(request.getParameter(OAuth2ParameterNames.GRANT_TYPE)) &&
-                        request.getParameter(OAuth2ParameterNames.DEVICE_CODE) != null &&
-                        request.getParameter(OAuth2ParameterNames.CLIENT_ID) != null;
+            AuthorizationGrantType.DEVICE_CODE.getValue().equals(request.getParameter(OAuth2ParameterNames.GRANT_TYPE)) &&
+                request.getParameter(OAuth2ParameterNames.DEVICE_CODE) != null &&
+                request.getParameter(OAuth2ParameterNames.CLIENT_ID) != null;
     }
 
     @Nullable
     @Override
     public Authentication convert(HttpServletRequest request) {
         if (!this.deviceAuthorizationRequestMatcher.matches(request) &&
-                !this.deviceAccessTokenRequestMatcher.matches(request)) {
+            !this.deviceAccessTokenRequestMatcher.matches(request)) {
             return null;
         }
 
         // client_id (REQUIRED)
         String clientId = request.getParameter(OAuth2ParameterNames.CLIENT_ID);
         if (!StringUtils.hasText(clientId) ||
-                request.getParameterValues(OAuth2ParameterNames.CLIENT_ID).length != 1) {
+            request.getParameterValues(OAuth2ParameterNames.CLIENT_ID).length != 1) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
         }
 

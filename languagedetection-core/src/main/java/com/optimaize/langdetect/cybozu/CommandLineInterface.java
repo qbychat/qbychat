@@ -297,11 +297,11 @@ public class CommandLineInterface {
         List<LanguageProfile> languageProfiles = new LanguageProfileReader().readAll(new File(profileDirectory));
 
         return LanguageDetectorBuilder.create(NgramExtractors.standard())
-                .alpha(alpha)
-                .seed(seed)
-                .shortTextAlgorithm(50)
-                .withProfiles(languageProfiles)
-                .build();
+            .alpha(alpha)
+            .seed(seed)
+            .shortTextAlgorithm(50)
+            .withProfiles(languageProfiles)
+            .build();
     }
 
 }

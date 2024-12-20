@@ -50,9 +50,9 @@ public final class DeviceClientAuthenticationProvider implements AuthenticationP
 
     private static void throwInvalidClient(String parameterName) {
         OAuth2Error error = new OAuth2Error(
-                OAuth2ErrorCodes.INVALID_CLIENT,
-                "Device client authentication failed: " + parameterName,
-                ERROR_URI
+            OAuth2ErrorCodes.INVALID_CLIENT,
+            "Device client authentication failed: " + parameterName,
+            ERROR_URI
         );
         throw new OAuth2AuthenticationException(error);
     }
@@ -60,7 +60,7 @@ public final class DeviceClientAuthenticationProvider implements AuthenticationP
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         DeviceClientAuthenticationToken deviceClientAuthentication =
-                (DeviceClientAuthenticationToken) authentication;
+            (DeviceClientAuthenticationToken) authentication;
 
         if (!ClientAuthenticationMethod.NONE.equals(deviceClientAuthentication.getClientAuthenticationMethod())) {
             return null;
@@ -78,7 +78,7 @@ public final class DeviceClientAuthenticationProvider implements AuthenticationP
 
         assert registeredClient != null;
         if (!registeredClient.getClientAuthenticationMethods().contains(
-                deviceClientAuthentication.getClientAuthenticationMethod())) {
+            deviceClientAuthentication.getClientAuthenticationMethod())) {
             throwInvalidClient("authentication_method");
         }
 
@@ -91,7 +91,7 @@ public final class DeviceClientAuthenticationProvider implements AuthenticationP
         }
 
         return new DeviceClientAuthenticationToken(registeredClient,
-                deviceClientAuthentication.getClientAuthenticationMethod(), null);
+            deviceClientAuthentication.getClientAuthenticationMethod(), null);
     }
 
     @Override

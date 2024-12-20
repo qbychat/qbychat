@@ -1,13 +1,13 @@
 server:
-  port: 8761
+    port: 8761
 
 spring:
-  application:
-    name: discovery-server
+    application:
+        name: discovery-server
 
 eureka:
-  client:
-    register-with-eureka: false
-    fetch-registry: false
-  instance:
-    prefer-ip-address: true
+    client:
+        register-with-eureka: false
+        fetch-registry: false
+    instance:
+        prefer-ip-address: true

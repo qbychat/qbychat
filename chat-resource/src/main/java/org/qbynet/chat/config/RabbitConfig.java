@@ -17,7 +17,7 @@ public class RabbitConfig {
 
     @Bean
     Queue messageReadQueue() {
-        return new Queue("qc-message-read");
+        return new Queue("qc-message-reads");
     }
 
     @Bean

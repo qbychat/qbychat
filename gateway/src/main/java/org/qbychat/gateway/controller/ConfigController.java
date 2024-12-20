@@ -23,8 +23,8 @@ public class ConfigController {
         URI uri = request.getURI();
         String baseUrl = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
         return ServiceConfig.builder()
-                .api(baseUrl + gatewayAddressConfig.getApi())
-                .auth(gatewayAddressConfig.getAuth())
-                .build();
+            .api(baseUrl + gatewayAddressConfig.getApi())
+            .auth(gatewayAddressConfig.getAuth())
+            .build();
     }
 }

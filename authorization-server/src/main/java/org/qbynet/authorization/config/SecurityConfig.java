@@ -50,44 +50,44 @@ public class SecurityConfig {
     @Order(1)
     SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http, RegisteredClientRepository registeredClientRepository, AuthorizationServerSettings authorizationServerSettings) throws Exception {
         DeviceClientAuthenticationConverter deviceClientAuthenticationConverter =
-                new DeviceClientAuthenticationConverter(
-                        authorizationServerSettings.getDeviceAuthorizationEndpoint());
+            new DeviceClientAuthenticationConverter(
+                authorizationServerSettings.getDeviceAuthorizationEndpoint());
         DeviceClientAuthenticationProvider deviceClientAuthenticationProvider =
-                new DeviceClientAuthenticationProvider(registeredClientRepository);
+            new DeviceClientAuthenticationProvider(registeredClientRepository);
 
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-                OAuth2AuthorizationServerConfigurer.authorizationServer();
+            OAuth2AuthorizationServerConfigurer.authorizationServer();
         http
-                .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
-                .with(authorizationServerConfigurer, Customizer.withDefaults())
-                .authorizeHttpRequests((authorize) ->
-                        authorize.anyRequest().authenticated()
-                );
+            .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+            .with(authorizationServerConfigurer, Customizer.withDefaults())
+            .authorizeHttpRequests((authorize) ->
+                authorize.anyRequest().authenticated()
+            );
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .deviceAuthorizationEndpoint(deviceAuthorizationEndpoint ->
-                        deviceAuthorizationEndpoint.verificationUri("/activate")
-                )
-                .deviceVerificationEndpoint(deviceVerificationEndpoint ->
-                        deviceVerificationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI)
-                )
-                .clientAuthentication(clientAuthentication ->
-                        clientAuthentication
-                                .authenticationConverter(deviceClientAuthenticationConverter)
-                                .authenticationProvider(deviceClientAuthenticationProvider)
-                )
-                .authorizationEndpoint(authorizationEndpoint ->
-                        authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI))
-                .oidc(Customizer.withDefaults());
+            .deviceAuthorizationEndpoint(deviceAuthorizationEndpoint ->
+                deviceAuthorizationEndpoint.verificationUri("/activate")
+            )
+            .deviceVerificationEndpoint(deviceVerificationEndpoint ->
+                deviceVerificationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI)
+            )
+            .clientAuthentication(clientAuthentication ->
+                clientAuthentication
+                    .authenticationConverter(deviceClientAuthenticationConverter)
+                    .authenticationProvider(deviceClientAuthenticationProvider)
+            )
+            .authorizationEndpoint(authorizationEndpoint ->
+                authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI))
+            .oidc(Customizer.withDefaults());
         http
-                .oauth2ResourceServer(conf -> conf
-                        .jwt(Customizer.withDefaults())
+            .oauth2ResourceServer(conf -> conf
+                .jwt(Customizer.withDefaults())
+            )
+            .exceptionHandling((conf) -> conf
+                .defaultAuthenticationEntryPointFor(
+                    new LoginUrlAuthenticationEntryPoint("/user/login"),
+                    new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
                 )
-                .exceptionHandling((conf) -> conf
-                        .defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("/user/login"),
-                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-                        )
-                );
+            );
         return http.build();
     }
 
@@ -95,20 +95,20 @@ public class SecurityConfig {
     @Order(2)
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .authorizeHttpRequests(conf -> conf
-                        .requestMatchers("/actuator", "/actuator/**").permitAll()
-                        .requestMatchers("/assets/**", "/favicon.ico", "/user/login").permitAll()
-                        .requestMatchers("/user/register", "/user/register/admin", "/user/confirm").anonymous()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(conf -> conf
-                        .loginPage("/user/login")
-                )
-                .logout(conf -> conf
-                        .logoutUrl("/user/logout")
-                        .logoutSuccessUrl("/user/login?logout")
-                )
-                .build();
+            .authorizeHttpRequests(conf -> conf
+                .requestMatchers("/actuator", "/actuator/**").permitAll()
+                .requestMatchers("/assets/**", "/favicon.ico", "/user/login").permitAll()
+                .requestMatchers("/user/register", "/user/register/admin", "/user/confirm").anonymous()
+                .anyRequest().authenticated()
+            )
+            .formLogin(conf -> conf
+                .loginPage("/user/login")
+            )
+            .logout(conf -> conf
+                .logoutUrl("/user/logout")
+                .logoutSuccessUrl("/user/login?logout")
+            )
+            .build();
     }
 
     @Bean
@@ -133,8 +133,8 @@ public class SecurityConfig {
             if (context.getTokenType() == OAuth2TokenType.ACCESS_TOKEN) {
                 Authentication principal = context.getPrincipal();
                 Set<String> authorities = principal.getAuthorities().stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toSet());
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toSet());
                 context.getClaims().claim("roles", authorities);
             }
         };

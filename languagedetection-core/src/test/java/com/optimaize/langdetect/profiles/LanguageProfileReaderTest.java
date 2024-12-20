@@ -88,9 +88,9 @@ public class LanguageProfileReaderTest {
     @Test
     public void readFromDirWithClassloader() throws IOException {
         List<LanguageProfile> read = new LanguageProfileReader().read(
-                LanguageProfileReaderTest.class.getClassLoader(),
-                "languages",
-                ImmutableList.of("de", "fr")
+            LanguageProfileReaderTest.class.getClassLoader(),
+            "languages",
+            ImmutableList.of("de", "fr")
         );
         assertEquals(2, read.size());
     }

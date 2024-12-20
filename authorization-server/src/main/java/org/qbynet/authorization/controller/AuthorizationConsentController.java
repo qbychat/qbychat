@@ -66,7 +66,7 @@ public class AuthorizationConsentController {
         RegisteredClient registeredClient = this.registeredClientRepository.findByClientId(clientId);
         assert registeredClient != null;
         OAuth2AuthorizationConsent currentAuthorizationConsent =
-                this.authorizationConsentService.findById(registeredClient.getId(), principal.getName());
+            this.authorizationConsentService.findById(registeredClient.getId(), principal.getName());
         Set<String> authorizedScopes;
         if (currentAuthorizationConsent != null) {
             authorizedScopes = currentAuthorizationConsent.getScopes();
@@ -104,15 +104,15 @@ public class AuthorizationConsentController {
         String maskedUsername = username;
         if (username.length() > 2) {
             maskedUsername = username.charAt(0) +
-                    username.substring(1, username.length() - 1).replaceAll(".", "*") +
-                    username.charAt(username.length() - 1);
+                username.substring(1, username.length() - 1).replaceAll(".", "*") +
+                username.charAt(username.length() - 1);
         }
         String domain = email.split("@")[1];
         String[] domainParts = domain.split("\\.");
         String maskedDomain = domainParts[0];
         if (maskedDomain.length() > 2) {
             maskedDomain = domainParts[0].substring(0, 2) +
-                    domainParts[0].substring(2).replaceAll(".", "*");
+                domainParts[0].substring(2).replaceAll(".", "*");
         }
         return maskedUsername + "@" + maskedDomain + "." + domainParts[1];
     }
@@ -123,24 +123,24 @@ public class AuthorizationConsentController {
 
         static {
             scopeDescriptions.put(
-                    OidcScopes.PROFILE,
-                    "This application will be able to read your profile information."
+                OidcScopes.PROFILE,
+                "This application will be able to read your profile information."
             );
             scopeDescriptions.put(
-                    "message.read",
-                    "This application will be able to read your message."
+                "message.read",
+                "This application will be able to read your message."
             );
             scopeDescriptions.put(
-                    "message.write",
-                    "This application will be able to add new messages. It will also be able to edit and delete existing messages."
+                "message.write",
+                "This application will be able to add new messages. It will also be able to edit and delete existing messages."
             );
             scopeDescriptions.put(
-                    "user.read",
-                    "This application will be able to read your user information."
+                "user.read",
+                "This application will be able to read your user information."
             );
             scopeDescriptions.put(
-                    "other.scope",
-                    "This is another scope example of a scope description."
+                "other.scope",
+                "This is another scope example of a scope description."
             );
         }
 

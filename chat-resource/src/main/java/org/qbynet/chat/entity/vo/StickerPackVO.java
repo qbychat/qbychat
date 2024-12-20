@@ -29,8 +29,8 @@ public class StickerPackVO {
 
     public static @NotNull StickerPackVOBuilder from(@NotNull StickerPack source) {
         StickerPackVO.StickerPackVOBuilder builder = StickerPackVO.builder()
-                .id(source.getId()).name(source.getTitle())
-                .link(source.getName());
+            .id(source.getId()).name(source.getTitle())
+            .link(source.getName());
         if (source.getThumbnail() != null) {
             builder.thumbnail(source.getThumbnail().getId());
         }
