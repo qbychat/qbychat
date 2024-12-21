@@ -3,15 +3,17 @@ package org.qbynet.chat.controller;
 import jakarta.annotation.Resource;
 import org.qbynet.chat.entity.Conversation;
 import org.qbynet.chat.entity.Message;
+import org.qbynet.chat.entity.ReadMessage;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.entity.dto.EditMessageDTO;
-import org.qbynet.chat.entity.dto.FetchMessageDTO;
 import org.qbynet.chat.entity.dto.ReadMessageDTO;
 import org.qbynet.chat.entity.dto.SendMessageDTO;
 import org.qbynet.chat.entity.vo.MessageVO;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.MessageService;
 import org.qbynet.shared.entity.RestBean;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,10 +31,18 @@ import java.util.concurrent.Executors;
 @RequestMapping("/api/message")
 public class MessageController {
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
+
     @Resource
     MessageService messageService;
+
     @Resource
     ConversationService conversationService;
+
+    @Resource
+    RabbitTemplate rabbitTemplate;
+
+    @Resource(name = "messageReadQueue")
+    Queue messageReadQueue;
 
     @PostMapping("send")
     public DeferredResult<ResponseEntity<RestBean<MessageVO>>> sendMessage(@RequestBody SendMessageDTO message, @RequestAttribute("user") User user) {
@@ -81,16 +91,21 @@ public class MessageController {
     @PostMapping("read")
     public ResponseEntity<RestBean<?>> markAsRead(@RequestBody ReadMessageDTO dto, @RequestAttribute("user") User user) {
         messageService.markAsRead(dto.getMessages(), user);
+        rabbitTemplate.convertAndSend(messageReadQueue.getName(), ReadMessage.builder().messages(dto.getMessages()).user(user).build());
         return ResponseEntity.ok(RestBean.success("Ok"));
     }
 
     @GetMapping("fetch")
-    public ResponseEntity<RestBean<List<MessageVO>>> fetchMessages(@RequestParam FetchMessageDTO dto, @RequestAttribute("user") User user) {
-        Conversation conversation1 = conversationService.findConversationById(dto.getConversationId());
+    public ResponseEntity<RestBean<List<MessageVO>>> fetchMessages(@RequestParam String conversation, @RequestParam(required = false) String since, @RequestParam int page, @RequestParam(required = false, defaultValue = "100") int size, @RequestAttribute("user") User user) {
+        Conversation conversation1 = conversationService.findConversationById(conversation);
+        if (since != null) {
+            Message sinceMessage = messageService.findMessageById(since);
+            // TODO find by sinceMessage
+        }
         if (conversation1 == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Conversation not found"));
         }
-        Pageable pageable = PageRequest.of(dto.getPage(), dto.getSize());
+        Pageable pageable = PageRequest.of(page, size);
         Page<Message> messages = messageService.fetchMessages(conversation1, user, pageable);
         if (messages == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RestBean.failure(404, "Not found"));

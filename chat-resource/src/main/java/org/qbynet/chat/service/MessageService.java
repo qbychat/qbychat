@@ -18,8 +18,6 @@ public interface MessageService {
 
     void markAsRead(List<String> messages, User user);
 
-    void markAsRead(Message message, User user);
-
     Message findMessageById(String id);
 
     void editMessage(Message message, String content, String sticker, List<String> medias, boolean linkPreview);
