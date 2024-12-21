@@ -26,27 +26,27 @@ public class CommonTextObjectFactories {
 
     public static TextObjectFactory forDetectingOnLargeText() {
         return new TextObjectFactoryBuilder()
-                .maxTextLength(10000)
-                .withTextFilter(UrlTextFilter.getInstance())
-                .withTextFilter(RemoveMinorityScriptsTextFilter.forThreshold(0.3))
-                .build();
+            .maxTextLength(10000)
+            .withTextFilter(UrlTextFilter.getInstance())
+            .withTextFilter(RemoveMinorityScriptsTextFilter.forThreshold(0.3))
+            .build();
     }
 
     public static TextObjectFactory forDetectingShortCleanText() {
         return new TextObjectFactoryBuilder()
-                .build();
+            .build();
     }
 
     public static TextObjectFactory forIndexing() {
         return new TextObjectFactoryBuilder()
-                .withTextFilter(UrlTextFilter.getInstance())
-                .withTextFilter(RemoveMinorityScriptsTextFilter.forThreshold(0.3))
-                .build();
+            .withTextFilter(UrlTextFilter.getInstance())
+            .withTextFilter(RemoveMinorityScriptsTextFilter.forThreshold(0.3))
+            .build();
     }
 
     public static TextObjectFactory forIndexingCleanText() {
         return new TextObjectFactoryBuilder()
-                .build();
+            .build();
     }
 
 }

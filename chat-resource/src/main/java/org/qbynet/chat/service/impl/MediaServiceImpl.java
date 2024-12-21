@@ -52,9 +52,9 @@ public class MediaServiceImpl implements MediaService {
         log.info("Download {}", remote);
         Media media;
         try (Response response = okHttpClient.newCall(new Request.Builder()
-                .url(remote.toURL())
-                .header("User-Agent", userAgent)
-                .build()).execute()) {
+            .url(remote.toURL())
+            .header("User-Agent", userAgent)
+            .build()).execute()) {
             media = saveMedia0(remote, response);
             if (media == null) {
                 throw new RuntimeException("Failed to save media");
@@ -120,9 +120,9 @@ public class MediaServiceImpl implements MediaService {
     public void fromRemote(URI remote, String contentType, Consumer<Media> consumer) throws MalformedURLException {
         log.info("Download {} (async)", remote);
         okHttpClient.newCall(new Request.Builder()
-                .url(remote.toURL())
-                .header("User-Agent", userAgent)
-                .build()).enqueue(new Callback() {
+            .url(remote.toURL())
+            .header("User-Agent", userAgent)
+            .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 log.info("Failed to download file from {}", remote, e);
@@ -152,9 +152,9 @@ public class MediaServiceImpl implements MediaService {
             return null;
         }
         return StreamMetadata.builder()
-                .inputStream(FileUtils.openInputStream(file))
-                .size(file.length())
-                .build();
+            .inputStream(FileUtils.openInputStream(file))
+            .size(file.length())
+            .build();
     }
 
     @Override

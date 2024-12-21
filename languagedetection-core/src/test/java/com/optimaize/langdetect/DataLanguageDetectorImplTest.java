@@ -48,14 +48,14 @@ public class DataLanguageDetectorImplTest {
         List<LanguageProfile> languageProfiles = new LanguageProfileReader().readAllBuiltIn();
 
         shortDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
-                .shortTextAlgorithm(100)
-                .withProfiles(languageProfiles)
-                .build();
+            .shortTextAlgorithm(100)
+            .withProfiles(languageProfiles)
+            .build();
 
         longDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
-                .shortTextAlgorithm(0)
-                .withProfiles(new LanguageProfileReader().readAllBuiltIn())
-                .build();
+            .shortTextAlgorithm(0)
+            .withProfiles(new LanguageProfileReader().readAllBuiltIn())
+            .build();
     }
 
     @Test(dataProvider = "shortCleanTexts")
@@ -79,13 +79,13 @@ public class DataLanguageDetectorImplTest {
     @DataProvider
     protected Object[][] shortCleanTexts() {
         return new Object[][]{
-                {"en", shortCleanText("This is some English text.")},
-                {"fr", shortCleanText("Ceci est un texte français.")},
-                {"nl", shortCleanText("Dit is een Nederlandse tekst.")},
-                {"de", shortCleanText("Dies ist eine deutsche Text")},
-                {"km", shortCleanText("សព្វវចនាធិប្បាយសេរីសម្រាប់អ្នកទាំងអស់គ្នា។" + "នៅក្នុងវិគីភីឌាភាសាខ្មែរឥឡូវនេះមាន ១១៩៨រូបភាព សមាជិក១៥៣៣៣នាក់ និងមាន៤៥៨៣អត្ថបទ។")},
-                {"bg", shortCleanText("Европа не трябва да стартира нов конкурентен маратон и изход с приватизация")},
-                {"wa", shortCleanText("Çouchal c' est on tecse pår e walon.")},
+            {"en", shortCleanText("This is some English text.")},
+            {"fr", shortCleanText("Ceci est un texte français.")},
+            {"nl", shortCleanText("Dit is een Nederlandse tekst.")},
+            {"de", shortCleanText("Dies ist eine deutsche Text")},
+            {"km", shortCleanText("សព្វវចនាធិប្បាយសេរីសម្រាប់អ្នកទាំងអស់គ្នា។" + "នៅក្នុងវិគីភីឌាភាសាខ្មែរឥឡូវនេះមាន ១១៩៨រូបភាព សមាជិក១៥៣៣៣នាក់ និងមាន៤៥៨៣អត្ថបទ។")},
+            {"bg", shortCleanText("Европа не трябва да стартира нов конкурентен маратон и изход с приватизация")},
+            {"wa", shortCleanText("Çouchal c' est on tecse pår e walon.")},
         };
     }
 
@@ -96,9 +96,9 @@ public class DataLanguageDetectorImplTest {
     @DataProvider
     protected Object[][] longerWikipediaTexts() {
         return new Object[][]{
-                {"de", largeText(readText("/texts/de-wikipedia-Deutschland.txt"))},
-                {"fr", largeText(readText("/texts/fr-wikipedia-France.txt"))},
-                {"it", largeText(readText("/texts/it-wikipedia-Italia.txt"))},
+            {"de", largeText(readText("/texts/de-wikipedia-Deutschland.txt"))},
+            {"fr", largeText(readText("/texts/fr-wikipedia-France.txt"))},
+            {"it", largeText(readText("/texts/it-wikipedia-Italia.txt"))},
         };
     }
 

@@ -52,18 +52,18 @@ public class LanguageDetectorImplTest {
     @DataProvider
     protected Object[][] confident() {
         return new Object[][]{
-                {"de", "Dies ist eine deutsche Text"},
-                {"de", "deutsche Text"},
-                {"de", CommonTextObjectFactories.forDetectingOnLargeText().create().append("deutsche Text").append(" ").append("http://www.github.com/")},
+            {"de", "Dies ist eine deutsche Text"},
+            {"de", "deutsche Text"},
+            {"de", CommonTextObjectFactories.forDetectingOnLargeText().create().append("deutsche Text").append(" ").append("http://www.github.com/")},
         };
     }
 
 
     private LanguageDetector makeNewDetector() throws IOException {
         LanguageDetectorBuilder builder = LanguageDetectorBuilder.create(NgramExtractors.standard())
-                .shortTextAlgorithm(50)
-                .prefixFactor(1.5)
-                .suffixFactor(2.0);
+            .shortTextAlgorithm(50)
+            .prefixFactor(1.5)
+            .suffixFactor(2.0);
 
         LangProfileReader langProfileReader = new LangProfileReader();
         for (String language : ImmutableList.of("en", "fr", "nl", "de")) {

@@ -34,14 +34,14 @@ public class LanguageProfileBuilderTest {
         TextObjectFactory textObjectFactory = CommonTextObjectFactories.forIndexing();
 
         TextObject inputText = textObjectFactory.create()
-                .append("deutsche Text")
-                .append(" ")
-                .append("http://www.github.com/");
+            .append("deutsche Text")
+            .append(" ")
+            .append("http://www.github.com/");
 
         LanguageProfile languageProfile = new LanguageProfileBuilder("de")
-                .ngramExtractor(NgramExtractors.standard())
-                .addText(inputText)
-                .build();
+            .ngramExtractor(NgramExtractors.standard())
+            .addText(inputText)
+            .build();
 
         assertEquals(languageProfile.getFrequency("sch"), 1);
         assertEquals(languageProfile.getFrequency("www"), 0);
@@ -50,16 +50,16 @@ public class LanguageProfileBuilderTest {
     @Test
     public void profile_equals() {
         LanguageProfile languageProfile1 = new LanguageProfileBuilder("de")
-                .addGram("foo", 1)
-                .build();
+            .addGram("foo", 1)
+            .build();
 
         LanguageProfile languageProfile2 = new LanguageProfileBuilder("de")
-                .addGram("foo", 1)
-                .build();
+            .addGram("foo", 1)
+            .build();
 
         LanguageProfile languageProfile3 = new LanguageProfileBuilder("de")
-                .addGram("bar", 1)
-                .build();
+            .addGram("bar", 1)
+            .build();
 
         assertEquals(languageProfile1, languageProfile2);
         assertNotEquals(languageProfile1, languageProfile3);
@@ -68,8 +68,8 @@ public class LanguageProfileBuilderTest {
     @Test
     public void profile_toString() {
         LanguageProfile languageProfile = new LanguageProfileBuilder("de")
-                .addGram("foo", 1)
-                .build();
+            .addGram("foo", 1)
+            .build();
         assertTrue(languageProfile.toString().contains("de"));
         assertTrue(languageProfile.toString().contains("1"));
     }

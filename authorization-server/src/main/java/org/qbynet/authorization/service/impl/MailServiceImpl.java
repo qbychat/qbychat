@@ -24,8 +24,8 @@ public class MailServiceImpl implements MailService {
         message.setTo(email);
         message.setSubject("Verify your qbychat account - " + token);
         message.setText(String.format("The token is %s, if you haven't request this code, please ignore it.\n", token) +
-                "DO NOT share this code to others.\n" +
-                "Powered by qbychat - https://github.com/qbychat/qbychat");
+            "DO NOT share this code to others.\n" +
+            "Powered by qbychat - https://github.com/qbychat/qbychat");
         log.info("Sending verify token to email {}", email);
         mailSender.send(message);
     }

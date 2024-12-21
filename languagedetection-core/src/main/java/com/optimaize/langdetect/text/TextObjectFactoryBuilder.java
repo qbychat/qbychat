@@ -51,8 +51,8 @@ public class TextObjectFactoryBuilder {
 
     public TextObjectFactory build() {
         return new TextObjectFactory(
-                new MultiTextFilter(textFilters),
-                maxTextLength
+            new MultiTextFilter(textFilters),
+            maxTextLength
         );
     }
 

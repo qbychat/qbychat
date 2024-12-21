@@ -25,9 +25,9 @@ public class Jwks {
 
     public PrivateKey getPrivateKey() throws Exception {
         String privateKeyPEM = privateKey
-                .replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "")
-                .replaceAll("\\s+", "");
+            .replace("-----BEGIN PRIVATE KEY-----", "")
+            .replace("-----END PRIVATE KEY-----", "")
+            .replaceAll("\\s+", "");
 
         byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyPEM);
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
@@ -37,9 +37,9 @@ public class Jwks {
 
     public PublicKey getPublicKey() throws Exception {
         String publicKeyPEM = publicKey
-                .replace("-----BEGIN PUBLIC KEY-----", "")
-                .replace("-----END PUBLIC KEY-----", "")
-                .replaceAll("\\s+", "");
+            .replace("-----BEGIN PUBLIC KEY-----", "")
+            .replace("-----END PUBLIC KEY-----", "")
+            .replaceAll("\\s+", "");
 
         byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyPEM);
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
@@ -49,8 +49,8 @@ public class Jwks {
 
     public RSAKey getRSAKey() throws Exception {
         return new RSAKey.Builder((RSAPublicKey) getPublicKey())
-                .privateKey(getPrivateKey())
-                .keyID(keyId)
-                .build();
+            .privateKey(getPrivateKey())
+            .keyID(keyId)
+            .build();
     }
 }

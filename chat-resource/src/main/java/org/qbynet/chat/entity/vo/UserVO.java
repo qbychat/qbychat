@@ -17,11 +17,11 @@ public class UserVO {
 
     public static UserVO from(User user) {
         return UserVO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .nickname(user.getNickname())
-                .registerTime(user.getRegisterTime().toEpochMilli())
-                .lastLoginTime((user.getLastLoginTime() != null) ? user.getLastLoginTime().toEpochMilli() : -1L)
-                .build();
+            .id(user.getId())
+            .username(user.getUsername())
+            .nickname(user.getNickname())
+            .registerTime(user.getRegisterTime().toEpochMilli())
+            .lastLoginTime((user.getLastLoginTime() != null) ? user.getLastLoginTime().toEpochMilli() : -1L)
+            .build();
     }
 }

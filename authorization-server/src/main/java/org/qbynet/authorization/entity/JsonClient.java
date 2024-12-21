@@ -64,15 +64,15 @@ public class JsonClient implements Serializable {
 
         TokenSettings originTokenSettings = registeredClient.getTokenSettings();
         jsonClient.setTokenSettings(InternalTokenSettings.builder()
-                .accessTokenTimeToLive(originTokenSettings.getAccessTokenTimeToLive())
-                .accessTokenFormat(originTokenSettings.getAccessTokenFormat())
-                .deviceCodeTimeToLive(originTokenSettings.getDeviceCodeTimeToLive())
-                .reuseRefreshTokens(originTokenSettings.isReuseRefreshTokens())
-                .x509CertificateBoundAccessTokens(originTokenSettings.isX509CertificateBoundAccessTokens())
-                .idTokenSignatureAlgorithm(originTokenSettings.getIdTokenSignatureAlgorithm())
-                .refreshTokenTimeToLive(originTokenSettings.getRefreshTokenTimeToLive())
-                .authorizationCodeTimeToLive(originTokenSettings.getAuthorizationCodeTimeToLive())
-                .build());
+            .accessTokenTimeToLive(originTokenSettings.getAccessTokenTimeToLive())
+            .accessTokenFormat(originTokenSettings.getAccessTokenFormat())
+            .deviceCodeTimeToLive(originTokenSettings.getDeviceCodeTimeToLive())
+            .reuseRefreshTokens(originTokenSettings.isReuseRefreshTokens())
+            .x509CertificateBoundAccessTokens(originTokenSettings.isX509CertificateBoundAccessTokens())
+            .idTokenSignatureAlgorithm(originTokenSettings.getIdTokenSignatureAlgorithm())
+            .refreshTokenTimeToLive(originTokenSettings.getRefreshTokenTimeToLive())
+            .authorizationCodeTimeToLive(originTokenSettings.getAuthorizationCodeTimeToLive())
+            .build());
 
         jsonClient.setOwner(optionalOwner);
         return jsonClient;
@@ -84,28 +84,28 @@ public class JsonClient implements Serializable {
 
     public RegisteredClient asRegisteredClient() {
         return RegisteredClient.withId(id)
-                .clientId(clientId)
-                .clientIdIssuedAt(clientIdIssuedAt)
-                .clientSecret(clientSecret)
-                .clientSecretExpiresAt(clientSecretExpiresAt)
-                .clientName(clientName)
-                .clientSettings(clientSettings)
-                .tokenSettings(TokenSettings.builder()
-                        .accessTokenTimeToLive(this.tokenSettings.getAccessTokenTimeToLive())
-                        .accessTokenFormat(this.tokenSettings.getAccessTokenFormat())
-                        .deviceCodeTimeToLive(this.tokenSettings.getDeviceCodeTimeToLive())
-                        .reuseRefreshTokens(this.tokenSettings.isReuseRefreshTokens())
-                        .x509CertificateBoundAccessTokens(this.tokenSettings.isX509CertificateBoundAccessTokens())
-                        .idTokenSignatureAlgorithm(this.tokenSettings.getIdTokenSignatureAlgorithm())
-                        .refreshTokenTimeToLive(this.tokenSettings.getRefreshTokenTimeToLive())
-                        .authorizationCodeTimeToLive(this.tokenSettings.getAuthorizationCodeTimeToLive())
-                        .build())
-                .scopes((it) -> it.addAll(scopes))
-                .redirectUris((it) -> it.addAll(redirectUris))
-                .postLogoutRedirectUris((it) -> it.addAll(postLogoutRedirectUris))
-                .authorizationGrantTypes((it) -> it.addAll(authorizationGrantTypes))
-                .clientAuthenticationMethods((it) -> it.addAll(clientAuthenticationMethods))
-                .build();
+            .clientId(clientId)
+            .clientIdIssuedAt(clientIdIssuedAt)
+            .clientSecret(clientSecret)
+            .clientSecretExpiresAt(clientSecretExpiresAt)
+            .clientName(clientName)
+            .clientSettings(clientSettings)
+            .tokenSettings(TokenSettings.builder()
+                .accessTokenTimeToLive(this.tokenSettings.getAccessTokenTimeToLive())
+                .accessTokenFormat(this.tokenSettings.getAccessTokenFormat())
+                .deviceCodeTimeToLive(this.tokenSettings.getDeviceCodeTimeToLive())
+                .reuseRefreshTokens(this.tokenSettings.isReuseRefreshTokens())
+                .x509CertificateBoundAccessTokens(this.tokenSettings.isX509CertificateBoundAccessTokens())
+                .idTokenSignatureAlgorithm(this.tokenSettings.getIdTokenSignatureAlgorithm())
+                .refreshTokenTimeToLive(this.tokenSettings.getRefreshTokenTimeToLive())
+                .authorizationCodeTimeToLive(this.tokenSettings.getAuthorizationCodeTimeToLive())
+                .build())
+            .scopes((it) -> it.addAll(scopes))
+            .redirectUris((it) -> it.addAll(redirectUris))
+            .postLogoutRedirectUris((it) -> it.addAll(postLogoutRedirectUris))
+            .authorizationGrantTypes((it) -> it.addAll(authorizationGrantTypes))
+            .clientAuthenticationMethods((it) -> it.addAll(clientAuthenticationMethods))
+            .build();
     }
 
     @Data

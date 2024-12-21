@@ -37,15 +37,15 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
     @Override
     public OAuth2Authorization findByToken(String token, OAuth2TokenType tokenType) {
         return authorizationRepository.findAll().stream()
-                .map(it -> it.convent(jsonClientRepository.findById(it.getRegisteredClientId())
-                        .orElseThrow().asRegisteredClient()))
-                .filter(authorization -> {
-                    if (tokenType.getValue().equals("state")) {
-                        return token.equals(authorization.getAttribute("state"));
-                    }
-                    return authorization.getToken(token) != null;
-                })
-                .findFirst()
-                .orElse(null);
+            .map(it -> it.convent(jsonClientRepository.findById(it.getRegisteredClientId())
+                .orElseThrow().asRegisteredClient()))
+            .filter(authorization -> {
+                if (tokenType.getValue().equals("state")) {
+                    return token.equals(authorization.getAttribute("state"));
+                }
+                return authorization.getToken(token) != null;
+            })
+            .findFirst()
+            .orElse(null);
     }
 }

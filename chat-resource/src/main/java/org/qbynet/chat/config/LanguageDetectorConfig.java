@@ -18,8 +18,8 @@ public class LanguageDetectorConfig {
         List<LanguageProfile> languageProfiles = new LanguageProfileReader().readAllBuiltIn();
 
         return LanguageDetectorBuilder.create(NgramExtractors.standard())
-                .withProfiles(languageProfiles)
-                .build();
+            .withProfiles(languageProfiles)
+            .build();
     }
 
 }

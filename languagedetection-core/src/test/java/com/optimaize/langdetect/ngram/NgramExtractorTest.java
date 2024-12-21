@@ -156,10 +156,10 @@ public class NgramExtractorTest {
     public void extractGramsWithPaddingAndFilter_1() {
         String text = "Foo bar";
         List<String> ngrams = NgramExtractor
-                .gramLength(1)
-                .filter(StandardNgramFilter.getInstance())
-                .textPadding(' ')
-                .extractGrams(text);
+            .gramLength(1)
+            .filter(StandardNgramFilter.getInstance())
+            .textPadding(' ')
+            .extractGrams(text);
         assertEquals(ngrams, Arrays.asList("F", "o", "o", "b", "a", "r"));
     }
 

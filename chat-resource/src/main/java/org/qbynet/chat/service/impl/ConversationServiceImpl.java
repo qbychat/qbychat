@@ -111,46 +111,46 @@ public class ConversationServiceImpl implements ConversationService {
             if (existMember.getBanUntil().isAfter(Instant.now())) {
                 // banned
                 return JoinConversationDetails.builder()
-                        .joined(false)
-                        .banned(true)
-                        .conversation(existMember.getConversation())
-                        .build();
+                    .joined(false)
+                    .banned(true)
+                    .conversation(existMember.getConversation())
+                    .build();
             }
             // already joined
             return JoinConversationDetails.builder()
-                    .joined(true)
-                    .banned(false)
-                    .conversation(existMember.getConversation())
-                    .build();
+                .joined(true)
+                .banned(false)
+                .conversation(existMember.getConversation())
+                .build();
         }
         if (!conversation.isMemberVerificationNeeded()) {
             log.info("User {} has joined the conversation {}", user.getNickname(), conversation.getName());
             this.addMember(conversation, user);
             return JoinConversationDetails.builder()
-                    .joined(true)
-                    .banned(false)
-                    .conversation(conversation)
-                    .build();
+                .joined(true)
+                .banned(false)
+                .conversation(conversation)
+                .build();
         }
         Optional<JoinRequest> exist = joinRequestRepository.findByConversationAndUser(conversation, user);
         if (exist.isPresent()) {
             // already requested
             return JoinConversationDetails.builder()
-                    .joined(false)
-                    .banned(false)
-                    .conversation(conversation)
-                    .joinRequest(exist.get())
-                    .build();
+                .joined(false)
+                .banned(false)
+                .conversation(conversation)
+                .joinRequest(exist.get())
+                .build();
         }
         JoinRequest joinRequest = new JoinRequest();
         joinRequest.setConversation(conversation);
         joinRequest.setUser(user);
         return JoinConversationDetails.builder()
-                .joined(false)
-                .banned(false)
-                .conversation(conversation)
-                .joinRequest(joinRequestRepository.save(joinRequest))
-                .build();
+            .joined(false)
+            .banned(false)
+            .conversation(conversation)
+            .joinRequest(joinRequestRepository.save(joinRequest))
+            .build();
     }
 
     @Override

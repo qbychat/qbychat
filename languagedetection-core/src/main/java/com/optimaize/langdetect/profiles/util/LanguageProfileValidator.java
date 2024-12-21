@@ -168,8 +168,8 @@ public class LanguageProfileValidator {
             this.languageProfiles.add(languageProfile);
 
             final LanguageDetector languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
-                    .withProfiles(this.languageProfiles)
-                    .build();
+                .withProfiles(this.languageProfiles)
+                .build();
 
             // remove the newly created LanguageProfile for the next round
             this.languageProfiles.remove(this.languageProfiles.size() - 1);

@@ -48,8 +48,8 @@ public class GenProfile {
         LangProfile profile = new LangProfile(lang);
 
         try (InputStream is = file.getName().endsWith(".gz") ?
-                new GZIPInputStream(new BufferedInputStream(new FileInputStream(file))) :
-                new BufferedInputStream(new FileInputStream(file))) {
+            new GZIPInputStream(new BufferedInputStream(new FileInputStream(file))) :
+            new BufferedInputStream(new FileInputStream(file))) {
 
             TagExtractor tagextractor = new TagExtractor("abstract", 100);
 

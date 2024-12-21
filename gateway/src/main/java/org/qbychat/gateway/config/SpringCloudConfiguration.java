@@ -14,9 +14,9 @@ public class SpringCloudConfiguration {
     @Bean
     public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("apiModule", r -> r.path(apiAddress + "/**")
-                        .uri("lb://api-service/api")
-                )
-                .build();
+            .route("apiModule", r -> r.path(apiAddress + "/**")
+                .uri("lb://api-service/api")
+            )
+            .build();
     }
 }

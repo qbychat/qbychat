@@ -13,7 +13,7 @@ public class JsonConfig {
     @Primary
     ObjectMapper objectMapper() {
         return new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .registerModule(new CoreJackson2Module());
+            .registerModule(new JavaTimeModule())
+            .registerModule(new CoreJackson2Module());
     }
 }

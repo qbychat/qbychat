@@ -36,7 +36,7 @@ public class MultiTextFilterTest {
     @Test
     public void doubleFilter() {
         assertEquals("nBnBnBB", new MultiTextFilter(ImmutableList.of(
-                text -> text.toString().replace("a", "A"), text -> text.toString().replace("A", "B")
+            text -> text.toString().replace("a", "A"), text -> text.toString().replace("A", "B")
         )).filter("nananaa"));
     }
 }
