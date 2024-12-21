@@ -11,6 +11,7 @@ import org.qbynet.chat.entity.dto.SendMessageDTO;
 import org.qbynet.chat.entity.vo.MessageVO;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.MessageService;
+import org.qbynet.chat.service.UserService;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -39,6 +40,9 @@ public class MessageController {
 
     @Resource
     RabbitTemplate rabbitTemplate;
+
+    @Resource
+    UserService userService;
 
     @Resource(name = "messageReadQueue")
     Queue messageReadQueue;
@@ -111,6 +115,10 @@ public class MessageController {
         if (messages == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.failure(403, "No permission to view messages"));
         }
-        return ResponseEntity.ok(RestBean.success(messages.stream().map(MessageVO::from).toList()));
+        return ResponseEntity.ok(RestBean.success(messages.stream().map(message -> MessageVO.builder(message)
+            .bot(userService.isBot(message.getSender().getUser()))
+            .myself(message.getSender().getUser().getId().equals(user.getId()))
+            .build()
+        ).toList()));
     }
 }

@@ -154,4 +154,9 @@ public class UserServiceImpl implements UserService {
     public void setUserStatus(Status status) {
         statusRepository.save(status);
     }
+
+    @Override
+    public boolean isBot(User user) {
+        return botRepository.existsByBot(user);
+    }
 }

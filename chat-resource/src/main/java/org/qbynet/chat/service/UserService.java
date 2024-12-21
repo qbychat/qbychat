@@ -40,4 +40,6 @@ public interface UserService {
     Status getUserStatus(User user);
 
     void setUserStatus(Status status);
+
+    boolean isBot(User user);
 }

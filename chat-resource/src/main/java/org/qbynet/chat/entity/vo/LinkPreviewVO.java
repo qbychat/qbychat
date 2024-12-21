@@ -3,7 +3,7 @@ package org.qbynet.chat.entity.vo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.qbynet.chat.entity.LinkPreview;
 
 @Data
@@ -11,14 +11,15 @@ import org.qbynet.chat.entity.LinkPreview;
 @AllArgsConstructor
 public class LinkPreviewVO {
     private String link;
-    private String title;
-    private String description;
-    private int status;
-    private MediaVO image;
+    private String title; // the title tag
+    private String description; // the description tag
+    private int status; // http status
+    private MediaVO image; // og:image
 
     private long timestamp;
 
-    public static @NotNull LinkPreviewVO from(@NotNull LinkPreview source) {
+    public static @Nullable LinkPreviewVO from(@Nullable LinkPreview source) {
+        if (source == null) return null;
         LinkPreviewVO vo = new LinkPreviewVO();
         vo.setLink(source.getLink());
         vo.setTitle(source.getTitle());
