@@ -43,6 +43,8 @@ public interface UserService {
 
     List<User> collectRelations(@NotNull User user);
 
+    void createTemporaryRelation(User owner, User relation);
+
     boolean canAccessStatus(User target, User operator);
 
     boolean hasContact(User owner, User target);

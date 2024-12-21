@@ -1,4 +1,4 @@
-package org.qbynet.chat.util;
+package org.qbynet.chat.entity.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

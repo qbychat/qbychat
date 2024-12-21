@@ -1,10 +1,10 @@
 package org.qbynet.chat.config;
 
 import jakarta.annotation.Resource;
+import org.qbynet.chat.entity.config.BotConfig;
 import org.qbynet.chat.filter.BotAuthenticationFilter;
 import org.qbynet.chat.filter.UserFilter;
 import org.qbynet.chat.service.UserService;
-import org.qbynet.chat.util.BotConfig;
 import org.qbynet.chat.util.CustomAccessDeniedHandler;
 import org.qbynet.chat.util.CustomAuthenticationEntryPoint;
 import org.qbynet.chat.util.JwtRoleConverter;

@@ -9,23 +9,27 @@ import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.repository.BotRepository;
 import org.qbynet.chat.repository.ContactRepository;
+import org.qbynet.chat.repository.TemporaryRelationRepository;
 import org.qbynet.chat.repository.UserRepository;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.EventService;
 import org.qbynet.chat.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Log4j2
 @Service
 public class UserServiceImpl implements UserService {
+    @Value("${qbychat.user.temp-relations.expire}")
+    int relationExpire;
+
     @Resource
     UserRepository userRepository;
 
@@ -46,6 +50,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     ConversationService conversationService;
+
+    @Resource
+    TemporaryRelationRepository temporaryRelationRepository;
 
     @Override
     public User createProfile(String remoteId, String nickname) {
@@ -182,12 +189,32 @@ public class UserServiceImpl implements UserService {
         joinedConversations.stream().filter(c -> c.getType().equals(ConversationType.GROUP)).forEach(conversation -> users.addAll(conversationService.listMembers(conversation).stream().filter(member -> !member.getUser().equals(user) && member.hasPermissions(MemberPermission.LIST_USERS)).map(Member::getUser).toList()));
         // private chats
         joinedConversations.stream().filter(c -> c.getType().equals(ConversationType.PRIVATE_CHAT)).forEach(conversation -> users.add(conversationService.getPrivateChatMember(conversation, user).getUser()));
-        // TODO temp relations via Redis
+        // temp relations
+        users.addAll(temporaryRelationRepository.findAllByOwner(user.getId()).stream().map(relation -> userRepository.findById(relation.getTarget()).orElse(null)).filter(Objects::nonNull).toList());
         return users;
     }
 
     @Override
-    public boolean canAccessStatus(User target, User operator) {
+    public void createTemporaryRelation(@NotNull User owner, @NotNull User relation) {
+        Optional<TemporaryRelation> current = temporaryRelationRepository.findByOwnerAndTarget(owner.getId(), relation.getId());
+        if (current.isPresent()) {
+            // renew expire
+            log.info("Renew the temporary relation between {} and {}", owner.getNickname(), relation.getNickname());
+            TemporaryRelation temporaryRelation = current.get();
+            temporaryRelation.setExpire(Instant.now().plus(relationExpire, ChronoUnit.DAYS).getEpochSecond());
+            temporaryRelationRepository.save(temporaryRelation);
+            return;
+        }
+        log.info("Create the temporary relation between {} and {}", owner.getNickname(), relation.getNickname());
+        temporaryRelationRepository.save(TemporaryRelation.builder()
+            .owner(owner.getId())
+            .target(relation.getId())
+            .expire(Instant.now().plus(relationExpire, ChronoUnit.DAYS).getEpochSecond())
+            .build());
+    }
+
+    @Override
+    public boolean canAccessStatus(@NotNull User target, User operator) {
         switch (target.getPrivacy().getStatus()) {
             case EVERYONE -> {
                 return true;
