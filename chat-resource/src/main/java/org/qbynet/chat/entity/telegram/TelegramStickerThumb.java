@@ -1,10 +1,10 @@
-package org.qbynet.chat.entity;
+package org.qbynet.chat.entity.telegram;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class TelegramStickerThumbnail {
+public class TelegramStickerThumb {
     @JsonProperty("file_id")
     private String fileId;
     @JsonProperty("file_unique_id")

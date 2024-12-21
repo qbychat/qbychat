@@ -1,7 +1,11 @@
 package org.qbynet.chat.service;
 
-import org.qbynet.chat.entity.*;
+import org.qbynet.chat.entity.Media;
+import org.qbynet.chat.entity.Sticker;
+import org.qbynet.chat.entity.StickerPack;
+import org.qbynet.chat.entity.User;
 import org.qbynet.chat.entity.dto.AddStickersDTO;
+import org.qbynet.chat.entity.telegram.TelegramStickerSet;
 
 import java.util.List;
 

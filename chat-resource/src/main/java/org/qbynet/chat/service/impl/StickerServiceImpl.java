@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.dto.AddStickersDTO;
+import org.qbynet.chat.entity.telegram.TelegramStickerSet;
 import org.qbynet.chat.repository.FavoriteStickerPackRepository;
 import org.qbynet.chat.repository.StickerPackRepository;
 import org.qbynet.chat.repository.StickerRepository;

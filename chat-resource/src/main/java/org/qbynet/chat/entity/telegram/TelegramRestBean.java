@@ -1,4 +1,4 @@
-package org.qbynet.chat.entity;
+package org.qbynet.chat.entity.telegram;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
