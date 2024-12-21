@@ -70,6 +70,8 @@ public interface ConversationService {
 
     int countJoinRequests(Conversation conversation);
 
+    Member getPrivateChatMember(Conversation conversation, User self);
+
     @Data
     @Builder
     class JoinConversationDetails {

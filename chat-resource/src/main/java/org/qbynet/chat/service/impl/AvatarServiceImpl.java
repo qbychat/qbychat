@@ -67,7 +67,7 @@ public class AvatarServiceImpl implements AvatarService {
     @Override
     public boolean isAvatarBelongsTo(Avatar avatar, User user) {
         if (avatar == null) return false;
-        return avatar.getUser().getId().equals(user.getId());
+        return avatar.getUser().equals(user);
     }
 
     @Override

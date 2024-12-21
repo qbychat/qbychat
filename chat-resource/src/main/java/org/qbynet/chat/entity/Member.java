@@ -33,8 +33,9 @@ public class Member implements Serializable {
     private boolean owner = false;
     private boolean anonymous = false;
     private boolean quit = false;
+    private boolean archived = false; // does this chat archive?
 
-    private boolean pinned = false; // does this user pin this conversation
+    private boolean pinned = false; // does this user pin this conversation?
 
     private NotificationPreferment notifications = null; // should we send notifications to this user?
 
@@ -59,7 +60,7 @@ public class Member implements Serializable {
         }
         if (real == NotificationPreferment.EVERYTHING) return true;
         if (real == NotificationPreferment.NOTHING) return false;
-        // judge is mentioned or replied
+        // adjudicate is mentioned or replied
         Message reply = message.getReply();
         if (reply != null && reply.getSender() != null && reply.getSender().getId().equals(id)) {
             return true;

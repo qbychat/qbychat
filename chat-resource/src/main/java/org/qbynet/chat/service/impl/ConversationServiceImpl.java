@@ -49,7 +49,7 @@ public class ConversationServiceImpl implements ConversationService {
         conversation.setType(type);
         if (type == ConversationType.CHANNEL) {
             conversation.setDefaultPermissions(Collections.singletonList(MemberPermission.CHANNEL_DEFAULT));
-        } else if (type == ConversationType.PRIVATE_MESSAGE) {
+        } else if (type == ConversationType.PRIVATE_CHAT) {
             conversation.setDefaultPermissions(Collections.singletonList(MemberPermission.PRIVATE_CHAT_DEFAULT));
         }
         // add member to conversation
@@ -251,5 +251,13 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public int countJoinRequests(Conversation conversation) {
         return joinRequestRepository.countByConversation(conversation);
+    }
+
+    @Override
+    public Member getPrivateChatMember(@NotNull Conversation conversation, User self) {
+        if (!conversation.getType().equals(ConversationType.PRIVATE_CHAT)) {
+            throw new IllegalArgumentException("Only private chat conversations are allowed");
+        }
+        return memberRepository.findAllByConversation(conversation).stream().filter(it -> !it.getUser().equals(self)).findFirst().orElseThrow(() -> new IllegalStateException("Private chat member not found"));
     }
 }

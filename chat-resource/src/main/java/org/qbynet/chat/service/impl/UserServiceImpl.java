@@ -5,16 +5,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.repository.BotRepository;
-import org.qbynet.chat.repository.StatusRepository;
+import org.qbynet.chat.repository.ContactRepository;
 import org.qbynet.chat.repository.UserRepository;
+import org.qbynet.chat.service.ConversationService;
+import org.qbynet.chat.service.EventService;
 import org.qbynet.chat.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +30,9 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Resource
+    ContactRepository contactRepository;
+
+    @Resource
     ObjectMapper objectMapper;
 
     @Resource
@@ -35,7 +42,10 @@ public class UserServiceImpl implements UserService {
     PasswordEncoder passwordEncoder;
 
     @Resource
-    StatusRepository statusRepository;
+    EventService eventService;
+
+    @Resource
+    ConversationService conversationService;
 
     @Override
     public User createProfile(String remoteId, String nickname) {
@@ -64,7 +74,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CreateBot resetBotToken(Bot bot) throws JsonProcessingException {
+    public CreateBot resetBotToken(@NotNull Bot bot) throws JsonProcessingException {
         String token = RandomUtil.randomString(20);
         bot.setToken(passwordEncoder.encode(token));
 
@@ -73,9 +83,9 @@ public class UserServiceImpl implements UserService {
         botToken.setBotId(savedBot.getId());
         botToken.setBotToken(token);
         return CreateBot.builder()
-                .bot(savedBot)
-                .token(Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(botToken)))
-                .build();
+            .bot(savedBot)
+            .token(Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(botToken)))
+            .build();
     }
 
     @Override
@@ -84,7 +94,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User find(Principal principal) {
+    public User find(@NotNull Principal principal) {
         return find(principal.getName());
     }
 
@@ -146,17 +156,54 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Status getUserStatus(User user) {
-        return statusRepository.findByUser(user).orElse(Status.builder().status(0).build());
-    }
-
-    @Override
-    public void setUserStatus(Status status) {
-        statusRepository.save(status);
-    }
-
-    @Override
     public boolean isBot(User user) {
         return botRepository.existsByBot(user);
+    }
+
+    @Override
+    public void setUserStatus(@NotNull User user, String text) {
+        if (text == null || text.isEmpty()) {
+            log.info("Cleared status for user {}", user.getNickname());
+            user.setStatus(null);
+        } else {
+            log.info("Set status for user {} (status: {})", user.getNickname(), text);
+            user.setStatus(new Status(text));
+        }
+        eventService.createEventForRelations(user, EventType.CONTACT_STATUS_CHANGED, user.getStatus());
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<User> collectRelations(@NotNull User user) {
+        // collect group members
+        List<User> users = new ArrayList<>();
+        List<Conversation> joinedConversations = conversationService.list(user);
+        // group admins
+        joinedConversations.stream().filter(c -> c.getType().equals(ConversationType.GROUP)).forEach(conversation -> users.addAll(conversationService.listMembers(conversation).stream().filter(member -> !member.getUser().equals(user) && member.hasPermissions(MemberPermission.LIST_USERS)).map(Member::getUser).toList()));
+        // private chats
+        joinedConversations.stream().filter(c -> c.getType().equals(ConversationType.PRIVATE_CHAT)).forEach(conversation -> users.add(conversationService.getPrivateChatMember(conversation, user).getUser()));
+        // TODO temp relations via Redis
+        return users;
+    }
+
+    @Override
+    public boolean canAccessStatus(User target, User operator) {
+        switch (target.getPrivacy().getStatus()) {
+            case EVERYONE -> {
+                return true;
+            }
+            case NOBODY -> {
+                return false;
+            }
+            case CONTACTS -> {
+                return hasContact(operator, target);
+            }
+        }
+        return false; // unreachable
+    }
+
+    @Override
+    public boolean hasContact(User owner, User target) {
+        return contactRepository.existsByOwnerAndTarget(owner, target);
     }
 }

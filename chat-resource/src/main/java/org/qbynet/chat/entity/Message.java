@@ -46,6 +46,6 @@ public class Message implements Serializable {
     private boolean anonymous = false;
 
     public boolean isBelongsTo(@NotNull User user) {
-        return this.sender.getUser().getId().equals(user.getId());
+        return this.sender.getUser().equals(user);
     }
 }

@@ -117,7 +117,7 @@ public class MessageController {
         }
         return ResponseEntity.ok(RestBean.success(messages.stream().map(message -> MessageVO.builder(message)
             .bot(userService.isBot(message.getSender().getUser()))
-            .myself(message.getSender().getUser().getId().equals(user.getId()))
+            .myself(message.getSender().getUser().equals(user))
             .build()
         ).toList()));
     }

@@ -1,9 +1,9 @@
 package org.qbynet.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Bot;
 import org.qbynet.chat.entity.CreateBot;
-import org.qbynet.chat.entity.Status;
 import org.qbynet.chat.entity.User;
 
 import java.io.IOException;
@@ -37,9 +37,13 @@ public interface UserService {
 
     Bot findBot(String id);
 
-    Status getUserStatus(User user);
-
-    void setUserStatus(Status status);
-
     boolean isBot(User user);
+
+    void setUserStatus(User user, String text);
+
+    List<User> collectRelations(@NotNull User user);
+
+    boolean canAccessStatus(User target, User operator);
+
+    boolean hasContact(User owner, User target);
 }

@@ -30,6 +30,10 @@ public class User implements Principal, Serializable {
     private NotificationPreferment groupNotificationPreferment = NotificationPreferment.MENTION_AND_REPLY;
     private NotificationPreferment channelNotificationPreferment = NotificationPreferment.EVERYTHING;
     private NotificationPreferment pmNotificationPreferment = NotificationPreferment.EVERYTHING;
+    private boolean autoArchive = false;
+
+    private Privacy privacy = new Privacy();
+    private Status status = null;
 
     @Override
     public String getName() {
@@ -40,7 +44,7 @@ public class User implements Principal, Serializable {
         return switch (type) {
             case GROUP -> groupNotificationPreferment;
             case CHANNEL -> channelNotificationPreferment;
-            case PRIVATE_MESSAGE, SECRETED_CHAT -> pmNotificationPreferment;
+            case PRIVATE_CHAT -> pmNotificationPreferment;
         };
     }
 }

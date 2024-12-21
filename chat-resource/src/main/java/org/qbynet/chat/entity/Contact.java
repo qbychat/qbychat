@@ -14,6 +14,6 @@ public class Contact {
     @DBRef
     private User owner;
     @DBRef
-    private User user;
+    private User target;
     private String remark = null; // set to null -> origin nickname
 }

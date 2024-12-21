@@ -3,8 +3,10 @@ package org.qbynet.chat.entity;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
+
 @Data
-public class Event {
+public class Event implements Serializable {
     private String user; // targetUser
     private EventType type;
 
