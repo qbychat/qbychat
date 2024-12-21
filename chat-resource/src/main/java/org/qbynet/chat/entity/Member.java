@@ -71,4 +71,18 @@ public class Member implements Serializable {
         if (owner) return true;
         return new HashSet<>(this.getPermissions()).containsAll(List.of(requiredPermissions));
     }
+
+    public boolean isBanned() {
+        if (banUntil == null) return false;
+        return banUntil.isAfter(Instant.now());
+    }
+
+    public boolean isMuted() {
+        if (muteUntil == null) return false;
+        return muteUntil.isAfter(Instant.now());
+    }
+
+    public boolean hasViewPermission() {
+        return !(quit && !conversation.isPreview()) || !isBanned();
+    }
 }

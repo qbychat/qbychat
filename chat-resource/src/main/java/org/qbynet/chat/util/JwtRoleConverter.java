@@ -19,7 +19,9 @@ public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthor
         if (authorities == null || authorities.isEmpty()) {
             return scopes.stream().map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope)).collect(Collectors.toList());
         }
-        authorities.addAll(scopes.stream().map(it -> "SCOPE_" + it).toList());
+        if (!(scopes == null || scopes.isEmpty())) {
+            authorities.addAll(scopes.stream().map(it -> "SCOPE_" + it).toList());
+        }
         return authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 }

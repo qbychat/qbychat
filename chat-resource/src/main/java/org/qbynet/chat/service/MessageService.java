@@ -22,5 +22,22 @@ public interface MessageService {
 
     void editMessage(Message message, String content, String sticker, List<String> medias, boolean linkPreview);
 
+    /**
+     * Fetch messages
+     *
+     * @param conversation the Conversation
+     * @param user         the User
+     * @param pageable     page
+     */
     Page<Message> fetchMessages(Conversation conversation, User user, Pageable pageable);
+
+    /**
+     * Fetch messages after a message
+     *
+     * @param conversation the Conversation
+     * @param since        where to start
+     * @param user         the User
+     * @param pageable     page
+     */
+    Page<Message> fetchMessages(Conversation conversation, Message since, User user, Pageable pageable);
 }

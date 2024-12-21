@@ -22,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -96,22 +95,22 @@ public class MessageController {
     }
 
     @GetMapping("fetch")
-    public ResponseEntity<RestBean<List<MessageVO>>> fetchMessages(@RequestParam String conversation, @RequestParam(required = false) String since, @RequestParam int page, @RequestParam(required = false, defaultValue = "100") int size, @RequestAttribute("user") User user) {
-        Conversation conversation1 = conversationService.findConversationById(conversation);
+    public ResponseEntity<RestBean<List<MessageVO>>> fetchMessages(@RequestParam(name = "conversation") String conversationId, @RequestParam(required = false) String since, @RequestParam int page, @RequestParam(required = false, defaultValue = "100") int size, @RequestAttribute("user") User user) {
+        Conversation conversation = conversationService.findConversationById(conversationId);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Message> messages;
         if (since != null) {
             Message sinceMessage = messageService.findMessageById(since);
-            // TODO find by sinceMessage
+            messages = messageService.fetchMessages(conversation, sinceMessage, user, pageable);
+        } else {
+            messages = messageService.fetchMessages(conversation, user, pageable);
         }
-        if (conversation1 == null) {
+        if (conversation == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Conversation not found"));
         }
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Message> messages = messageService.fetchMessages(conversation1, user, pageable);
         if (messages == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RestBean.failure(404, "Not found"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.failure(403, "No permission to view messages"));
         }
-        List<MessageVO> result = new ArrayList<>();
-        messages.getContent().forEach(i -> result.add(MessageVO.from(i)));
-        return ResponseEntity.ok(RestBean.success(result));
+        return ResponseEntity.ok(RestBean.success(messages.stream().map(MessageVO::from).toList()));
     }
 }

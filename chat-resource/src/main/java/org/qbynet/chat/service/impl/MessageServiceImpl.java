@@ -173,9 +173,14 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Page<Message> fetchMessages(Conversation conversation, User user, Pageable pageable) {
         Member member = memberRepository.findByUserAndConversation(user, conversation).orElse(null);
-        if (member == null) return null;
-        Page<Message> messages = messageRepository.findAllByConversationOrderBySentAtDesc(conversation, pageable);
-        if (messages.getContent().isEmpty()) return null;
-        return messages;
+        if (member == null || !member.hasViewPermission()) return null;
+        return messageRepository.findAllByConversationOrderBySentAtDesc(conversation, pageable);
+    }
+
+    @Override
+    public Page<Message> fetchMessages(Conversation conversation, Message since, User user, Pageable pageable) {
+        Member member = memberRepository.findByUserAndConversation(user, conversation).orElse(null);
+        if (member == null || !member.hasViewPermission()) return null;
+        return messageRepository.findAllByIdGreaterThanAndConversationOrderBySentAtDesc(since.getId(), conversation, pageable);
     }
 }

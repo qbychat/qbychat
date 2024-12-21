@@ -67,6 +67,37 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
             .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
             .build();
 
+        RegisteredClient intellij = RegisteredClient.withId(UUID.randomUUID().toString())
+            .clientId("intellij")
+            .clientSecret(passwordEncoder.encode("secret"))
+            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+            .redirectUri("https://127.0.0.1:9000/authorized")
+            .scope(OidcScopes.OPENID)
+            .scope(OidcScopes.PROFILE)
+            .scope("bot.create")
+            .scope("bot.delete")
+            .scope("bot.list")
+            .scope("profile.read")
+            .scope("profile.edit")
+            .scope("message.send")
+            .scope("media.upload")
+            .scope("conversation.join")
+            .scope("conversation.list")
+            .scope("conversation.create")
+            .scope("avatar.manage")
+            .scope("sticker.manage")
+            .scope("search")
+            .scope("link")
+            .tokenSettings(TokenSettings.builder()
+                .refreshTokenTimeToLive(Duration.ofDays(7))
+                .accessTokenTimeToLive(Duration.ofDays(1))
+                .build())
+            .clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build())
+            .build();
+
         RegisteredClient qbychatAndroid = RegisteredClient.withId(UUID.randomUUID().toString())
             .clientId("qbychat-android")
             .clientSecret(passwordEncoder.encode("secret"))
@@ -104,6 +135,7 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
             )
             .build();
         save(hoppscotch);
+        save(intellij);
         save(qbychatAndroid);
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface MessageRepository extends MongoRepository<Message, String> {
-    Page<Message> findByIdGreaterThanOrderBySentAt(String id, Pageable pageable);
+    Page<Message> findAllByIdGreaterThanAndConversationOrderBySentAtDesc(String id, Conversation conversation, Pageable pageable);
 
     List<Message> findAllByExpiresAtNullOrExpiresAtGreaterThan(Instant now);
 
