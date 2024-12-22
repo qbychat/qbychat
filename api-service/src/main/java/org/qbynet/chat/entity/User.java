@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
@@ -16,10 +15,9 @@ import java.time.Instant;
 @EqualsAndHashCode(callSuper = false)
 public class User implements Principal, Serializable {
     @Id
-    private String id; // http://resource-server/view/u/<id>/id
+    private String id;
     private String remoteId; // id from OAuth2 Authorization server
 
-    @Indexed(unique = true)
     private String username = null; // the name for user details link http://resource-server/view/u/<username>
     private String nickname = ""; // the name for everyone
     private String bio = null; // a short text to describe yourself

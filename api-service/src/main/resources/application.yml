@@ -15,9 +15,23 @@ spring:
   servlet:
     multipart:
       enabled: false
+  graphql:
+    graphiql:
+      enabled: true
+      path: /graphiql
   mvc:
     async:
       request-timeout: -1
+dgs:
+  graphql:
+    extensions:
+      scalars:
+        enabled: true
+        objects:
+          enabled: true
+        numbers:
+          enabled: true
+
 
 qbychat:
   user:

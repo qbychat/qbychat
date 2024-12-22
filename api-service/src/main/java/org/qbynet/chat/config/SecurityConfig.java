@@ -55,6 +55,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/conversation/*/join").hasAuthority("SCOPE_conversation.join")
                 .requestMatchers("/api/avatar/**").hasAuthority("SCOPE_avatar.manage")
                 .requestMatchers("/api/sticker/tg-import", "/api/sticker/addStickers", "/api/sticker/createPack", "/api/sticker/editPack").hasAuthority("SCOPE_sticker.manage")
+                .requestMatchers("/websocket").permitAll() // todo authorize websockets
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(conf -> conf

@@ -1,0 +1,28 @@
+type Query {
+    settings: ServerSettings
+    myself: User
+}
+
+type ServerSettings {
+    telegram: Boolean # Telegram features flag
+    bot: Boolean # Bot features flag
+}
+
+type User {
+    id: ID
+
+    username: String
+    nickname: String
+    bio: String
+
+    registerTime: Long! # todo this should be Long
+    lastLoginTime: Long!
+
+    status: Status
+}
+
+type Status {
+    text: String
+}
+
+scalar Long
