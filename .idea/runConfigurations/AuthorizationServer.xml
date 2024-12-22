@@ -2,7 +2,7 @@
   <configuration default="false" name="AuthorizationServer" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
     <module name="qbychat.auth-service.main" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="org.qbynet.authorization.AuthorizationServerApplication" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.qbynet.authorization.AuthServiceApplication" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

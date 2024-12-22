@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ChatResourceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+  <configuration default="false" name="APIServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
     <module name="qbychat.api-service.main" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="org.qbynet.chat.ChatResourceApplication" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.qbynet.chat.APIServiceApplication" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
