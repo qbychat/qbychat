@@ -1,6 +1,8 @@
 package org.qbynet.chat.entity;
 
 public enum EventType {
+    TEST,
+
     JOIN_CONVERSATION,
     QUIT_CONVERSATION,
 
