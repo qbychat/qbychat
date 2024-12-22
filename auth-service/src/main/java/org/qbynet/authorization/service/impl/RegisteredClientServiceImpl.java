@@ -74,7 +74,7 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-            .redirectUri("https://127.0.0.1:9000/authorized")
+            .redirectUri("http://127.0.0.1:9000/authorized")
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
             .scope("bot.create")
