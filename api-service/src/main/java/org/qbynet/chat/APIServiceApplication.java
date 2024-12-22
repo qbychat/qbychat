@@ -6,10 +6,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @SpringBootApplication
-public class ChatResourceApplication {
+public class APIServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ChatResourceApplication.class, args);
+        SpringApplication.run(APIServiceApplication.class, args);
     }
 
 }

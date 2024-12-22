@@ -1,10 +1,10 @@
-package org.qbynet.chat;
+package org.qbynet.authorization;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ChatResourceApplicationTests {
+class AuthServiceApplicationTests {
 
     @Test
     void contextLoads() {

@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="AuthorizationServer" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
-    <module name="qbychat.authorization-server.main" />
+    <module name="qbychat.auth-service.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="org.qbynet.authorization.AuthorizationServerApplication" />
     <method v="2">
       <option name="Make" enabled="true" />
