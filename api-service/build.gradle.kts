@@ -42,7 +42,11 @@ dependencies {
 
     implementation("com.netflix.graphql.dgs.codegen:graphql-dgs-codegen-gradle:6.2.1")
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars:10.0.1")
+    implementation("org.springframework.boot:spring-boot-starter-graphql")
+    implementation("com.netflix.graphql.dgs.codegen:graphql-dgs-codegen-gradle:6.2.1")
     testImplementation("org.springframework.amqp:spring-rabbit-test")
+    testImplementation("org.springframework.graphql:spring-graphql-test")
+    testImplementation("org.springframework:spring-webflux")
     testImplementation("org.springframework.graphql:spring-graphql-test")
     testImplementation("org.springframework:spring-webflux")
     compileOnly("org.projectlombok:lombok")
