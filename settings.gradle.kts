@@ -1,6 +1,6 @@
 rootProject.name = "qbychat"
 
-include("authorization-server")
+include("auth-service")
 include("api-service")
 include("languagedetection-core")
 include("gateway")
