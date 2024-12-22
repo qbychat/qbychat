@@ -1,9 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DiscoveryServerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <module name="qbychat.eureka-server.main" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="org.qbychat.discovery.EurekaServerApplication" />
-    <method v="2">
-      <option name="Make" enabled="true" />
-    </method>
-  </configuration>
-</component>
