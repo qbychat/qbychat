@@ -13,5 +13,5 @@ public interface TelegramService {
      */
     StickerPack importStickerPack(String name);
 
-    void downloadFile(String fileId, boolean isLottie, Consumer<Media> consumer);
+    void downloadFile(String fileId, String contentType, Consumer<Media> consumer);
 }
