@@ -22,16 +22,6 @@ spring:
   mvc:
     async:
       request-timeout: -1
-dgs:
-  graphql:
-    extensions:
-      scalars:
-        enabled: true
-        objects:
-          enabled: true
-        numbers:
-          enabled: true
-
 
 qbychat:
   user:
@@ -49,12 +39,6 @@ qbychat:
   link:
     # How long do links expire (Unit: days)
     ttl: 7
-    instant-view:
-      # Should generate instant-view files?
-      enabled: true
-    special:
-      # Should the servlet generate modern link preview for some special websites?
-      bilibili: true
   # OkHttp
   request:
     # The User-Agent header

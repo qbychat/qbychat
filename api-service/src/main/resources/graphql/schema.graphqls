@@ -15,14 +15,17 @@ type User {
     nickname: String
     bio: String
 
-    registerTime: Long! # todo this should be Long
-    lastLoginTime: Long!
+    registerTime: Date
+    lastLoginTime: Date
 
     status: Status
 }
 
+scalar Date
+@specifiedBy(url:
+"https://tools.ietf.org/html/rfc3339"
+)
+
 type Status {
     text: String
 }
-
-scalar Long

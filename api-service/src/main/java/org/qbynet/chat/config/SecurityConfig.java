@@ -11,7 +11,6 @@ import org.qbynet.chat.util.JwtRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -39,23 +38,7 @@ public class SecurityConfig {
         return http
             .authorizeHttpRequests(conf -> conf
                 .requestMatchers("/actuator", "/actuator/**").permitAll()
-                .requestMatchers("/api/media/*/raw", "/api/media/*/info", "/api/avatar/image", "/api/avatar/list").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAuthority("SCOPE_profile.read")
-                .requestMatchers(HttpMethod.POST, "/api/user/profile").hasAuthority("SCOPE_profile.edit")
-                .requestMatchers("/api/link/**").hasAuthority("SCOPE_link")
-                .requestMatchers("/api/search/**").hasAuthority("SCOPE_search")
-                .requestMatchers("/api/bot/create").hasAuthority("SCOPE_bot.create")
-                .requestMatchers("/api/bot/delete").hasAuthority("SCOPE_bot.delete")
-                .requestMatchers("/api/bot/list").hasAuthority("SCOPE_bot.list")
-                .requestMatchers("/api/message/send").hasAuthority("SCOPE_message.send")
-                .requestMatchers("/api/media/upload").hasAuthority("SCOPE_media.upload")
-                .requestMatchers("/api/conversation/create").hasAuthority("SCOPE_conversation.create")
-                .requestMatchers("/api/conversation/list").hasAuthority("SCOPE_conversation.list")
-                .requestMatchers("/api/conversation/*/join").hasAuthority("SCOPE_conversation.join")
-                .requestMatchers("/api/avatar/**").hasAuthority("SCOPE_avatar.manage")
-                .requestMatchers("/api/sticker/tg-import", "/api/sticker/addStickers", "/api/sticker/createPack", "/api/sticker/editPack").hasAuthority("SCOPE_sticker.manage")
-                .requestMatchers("/websocket").permitAll() // todo authorize websockets
+                .requestMatchers("/graphql", "/graphiql").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(conf -> conf

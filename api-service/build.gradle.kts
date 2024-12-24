@@ -6,6 +6,7 @@ plugins {
 }
 
 extra["springCloudVersion"] = "2024.0.0"
+val netflixDgsVersion by extra("9.2.2")
 
 configurations {
     compileOnly {
@@ -40,10 +41,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-graphql")
 
-    implementation("com.netflix.graphql.dgs.codegen:graphql-dgs-codegen-gradle:6.2.1")
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars:10.0.1")
-    implementation("org.springframework.boot:spring-boot-starter-graphql")
     implementation("com.netflix.graphql.dgs.codegen:graphql-dgs-codegen-gradle:6.2.1")
+    implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
+
     testImplementation("org.springframework.amqp:spring-rabbit-test")
     testImplementation("org.springframework.graphql:spring-graphql-test")
     testImplementation("org.springframework:spring-webflux")
@@ -61,12 +62,13 @@ dependencies {
 dependencyManagement {
     imports {
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+        mavenBom("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$netflixDgsVersion")
     }
 }
 
 tasks.generateJava {
     schemaPaths = mutableListOf("${projectDir}/src/main/resources/graphql") // List of directories containing schema files
-    packageName = "org.qbychat.graphiql" // The package name to use to generate sources
+    packageName = "org.qbychat.graphql" // The package name to use to generate sources
     generateClient = false // Enable generating the type safe query API
 }
 
