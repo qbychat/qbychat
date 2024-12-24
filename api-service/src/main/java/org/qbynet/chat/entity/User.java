@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.security.Principal;
 import java.time.Instant;
 
-@Deprecated
 @Data
 @Document
 @EqualsAndHashCode(callSuper = false)
