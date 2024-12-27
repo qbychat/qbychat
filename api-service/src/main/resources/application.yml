@@ -19,9 +19,8 @@ spring:
     server:
       mapping-path: "/rsocket"
       transport: "websocket"
-  mvc:
-    async:
-      request-timeout: -1
+  graphql:
+    path: /graphql
 
 qbychat:
   user:
