@@ -15,10 +15,10 @@ spring:
   servlet:
     multipart:
       enabled: false
-  graphql:
-    graphiql:
-      enabled: false
-      path: /graphiql
+  rsocket:
+    server:
+      mapping-path: "/rsocket"
+      transport: "websocket"
   mvc:
     async:
       request-timeout: -1
