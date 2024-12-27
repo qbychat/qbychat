@@ -8,19 +8,20 @@ import org.qbynet.chat.service.UserService;
 import org.qbynet.chat.util.CustomAccessDeniedHandler;
 import org.qbynet.chat.util.CustomAuthenticationEntryPoint;
 import org.qbynet.chat.util.JwtRoleConverter;
+import org.qbynet.chat.util.ReactiveUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
+@EnableWebFluxSecurity
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
     @Lazy
@@ -28,29 +29,31 @@ public class SecurityConfig {
     UserService userService;
 
     @Resource
+    ReactiveUtil reactiveUtil;
+
+    @Resource
     BotConfig botConfig;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+    SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
+        ReactiveJwtAuthenticationConverter jwtAuthenticationConverter = new ReactiveJwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new JwtRoleConverter());
 
         return http
-            .authorizeHttpRequests(conf -> conf
-                .requestMatchers("/actuator", "/actuator/**").permitAll()
-                .requestMatchers("/graphql", "/graphiql").permitAll()
-                .anyRequest().authenticated()
+            .authorizeExchange(conf -> conf
+                .pathMatchers("/actuator", "/actuator/**").permitAll()
+                .anyExchange().authenticated()
             )
             .oauth2ResourceServer(conf -> conf
                 .jwt(jwt -> jwt
                     .jwtAuthenticationConverter(jwtAuthenticationConverter)
                 )
-                .accessDeniedHandler(new CustomAccessDeniedHandler())
-                .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                .accessDeniedHandler(new CustomAccessDeniedHandler(reactiveUtil))
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(reactiveUtil))
             )
-            .csrf(AbstractHttpConfigurer::disable)
-            .addFilterAfter(new BotAuthenticationFilter(botConfig, userService), BasicAuthenticationFilter.class)
-            .addFilterAfter(new UserFilter(userService), AuthorizationFilter.class)
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
+            .addFilterBefore(new BotAuthenticationFilter(botConfig, userService), SecurityWebFiltersOrder.HTTP_BASIC)
+            .addFilterBefore(new UserFilter(userService, reactiveUtil), SecurityWebFiltersOrder.LAST)
             .build();
     }
 

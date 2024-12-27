@@ -1,19 +1,20 @@
 package org.qbynet.chat.util;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.jetbrains.annotations.NotNull;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
+public class CustomAccessDeniedHandler implements ServerAccessDeniedHandler {
+    private final ReactiveUtil reactiveUtil;
 
-public class CustomAccessDeniedHandler implements AccessDeniedHandler {
-    @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("utf-8");
-        response.getWriter().write(RestBean.failure(403, "Forbidden").toJson());
+    public CustomAccessDeniedHandler(ReactiveUtil reactiveUtil) {
+        this.reactiveUtil = reactiveUtil;
+    }
+
+    public Mono<Void> handle(ServerWebExchange exchange, @NotNull AccessDeniedException ex) {
+        return reactiveUtil.withRestBean(exchange, RestBean.failure(403, ex.getMessage()));
     }
 }

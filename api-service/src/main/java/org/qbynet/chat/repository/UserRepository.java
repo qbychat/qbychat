@@ -1,22 +1,21 @@
 package org.qbynet.chat.repository;
 
 import org.qbynet.chat.entity.User;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Repository
-public interface UserRepository extends MongoRepository<User, String> {
-    Optional<User> findByRemoteId(String remoteId);
+public interface UserRepository extends ReactiveMongoRepository<User, String> {
+    Mono<User> findByRemoteId(String remoteId);
 
-    Optional<User> findByUsername(String username);
+    Mono<User> findByUsername(String username);
 
-    boolean existsByUsername(String username);
+    Mono<Boolean> existsByUsername(String username);
 
-    Page<User> findAllByUsernameStartsWithIgnoreCase(String username, Pageable pageable);
+    Flux<User> findAllByUsernameStartsWithIgnoreCase(String username, Pageable pageable);
 
-    Page<User> findAllByNicknameContainingIgnoreCase(String nickname, Pageable pageable);
+    Flux<User> findAllByNicknameContainingIgnoreCase(String nickname, Pageable pageable);
 }

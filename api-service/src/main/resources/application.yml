@@ -17,7 +17,7 @@ spring:
       enabled: false
   graphql:
     graphiql:
-      enabled: true
+      enabled: false
       path: /graphiql
   mvc:
     async:

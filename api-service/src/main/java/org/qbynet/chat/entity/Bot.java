@@ -21,6 +21,6 @@ public class Bot {
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isBelongTo(@NotNull User user) {
-        return this.getOwner().getId().equals(user.getId());
+        return this.getOwner().equals(user);
     }
 }

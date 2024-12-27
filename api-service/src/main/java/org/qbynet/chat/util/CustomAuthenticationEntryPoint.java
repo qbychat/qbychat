@@ -1,19 +1,21 @@
 package org.qbynet.chat.util;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.jetbrains.annotations.NotNull;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
+public class CustomAuthenticationEntryPoint implements ServerAuthenticationEntryPoint {
+    private final ReactiveUtil reactiveUtil;
 
-public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+    public CustomAuthenticationEntryPoint(ReactiveUtil reactiveUtil) {
+        this.reactiveUtil = reactiveUtil;
+    }
+
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("utf-8");
-        response.getWriter().write(RestBean.failure(401, "Unauthorized").toJson());
+    public Mono<Void> commence(ServerWebExchange exchange, @NotNull AuthenticationException ex) {
+        return reactiveUtil.withRestBean(exchange, RestBean.failure(401, ex.getMessage()));
     }
 }

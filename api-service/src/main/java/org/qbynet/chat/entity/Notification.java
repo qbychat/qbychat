@@ -1,8 +1,6 @@
 package org.qbynet.chat.entity;
 
 import lombok.Data;
-import org.qbynet.chat.entity.vo.JoinRequestVO;
-import org.qbynet.chat.entity.vo.SenderVO;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
@@ -15,8 +13,8 @@ public class Notification {
     private String id;
 
     private String content;
-    private SenderVO sender;
-    private JoinRequestVO joinRequest;
+//    private SenderVO sender; todo
+//    private JoinRequestVO joinRequest;
 
     private NotificationType type;
 }
