@@ -1,6 +1,10 @@
+schema {
+    query: Query
+}
+
 type Query {
     settings: ServerSettings
-    myself: User
+    myself: GraphQlUser
 }
 
 type ServerSettings {
@@ -8,7 +12,7 @@ type ServerSettings {
     bot: Boolean # Bot features flag
 }
 
-type User {
+type GraphQlUser {
     id: ID
 
     username: String
@@ -18,7 +22,7 @@ type User {
     registerTime: Date
     lastLoginTime: Date
 
-    status: Status
+    status: GraphQlStatus
 }
 
 scalar Date
@@ -26,6 +30,6 @@ scalar Date
 "https://tools.ietf.org/html/rfc3339"
 )
 
-type Status {
+type GraphQlStatus {
     text: String
 }

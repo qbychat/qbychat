@@ -22,7 +22,6 @@ dependencies {
     implementation(project(":"))
     implementation(project(":languagedetection-core"))
     implementation("org.sejda.imageio:webp-imageio:0.1.6")
-    implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
     implementation("cn.hutool:hutool-crypto:5.8.34")
     implementation("commons-io:commons-io:2.18.0")
     implementation("org.jsoup:jsoup:1.18.2")
@@ -37,7 +36,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
-    implementation("org.springframework.boot:spring-boot-starter-graphql")
 
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars:10.0.1")
     implementation("com.netflix.graphql.dgs.codegen:graphql-dgs-codegen-gradle:6.2.1")

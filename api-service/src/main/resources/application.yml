@@ -19,8 +19,10 @@ spring:
     server:
       mapping-path: "/rsocket"
       transport: "websocket"
+dgs:
   graphql:
-    path: /graphql
+    graphiql:
+      enabled: false
 
 qbychat:
   user:

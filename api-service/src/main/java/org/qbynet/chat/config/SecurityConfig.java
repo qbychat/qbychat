@@ -41,7 +41,7 @@ public class SecurityConfig {
 
         return http
             .authorizeExchange(conf -> conf
-                .pathMatchers("/actuator", "/actuator/**").permitAll()
+                .pathMatchers("/actuator", "/actuator/**", "/graphql").permitAll()
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(conf -> conf
