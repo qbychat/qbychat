@@ -2,6 +2,7 @@ scalar Date
 
 schema {
     query: Query
+    mutation: Mutation
 }
 
 type Query {
@@ -9,9 +10,21 @@ type Query {
     myself: GraphQlUser
 }
 
+type Mutation {
+    updateProfile(input: UpdateProfileInput): GraphQlUser
+}
+
+input UpdateProfileInput {
+    username: String
+    nickname: String!
+    bio: String
+}
+
 type ServerSettings {
     telegram: Boolean # Telegram features flag
     bot: Boolean # Bot features flag
+
+    minUsernameLength: Int
 }
 
 type GraphQlUser {

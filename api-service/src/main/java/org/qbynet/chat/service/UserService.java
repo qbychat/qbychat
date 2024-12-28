@@ -1,5 +1,7 @@
 package org.qbynet.chat.service;
 
+import graphql.schema.DataFetchingEnvironment;
+import org.qbychat.graphql.types.UpdateProfileInput;
 import org.qbynet.chat.entity.Bot;
 import org.qbynet.chat.entity.User;
 import reactor.core.publisher.Mono;
@@ -17,4 +19,7 @@ public interface UserService {
 
     Mono<User> findByUsername(String username);
 
+    User find(DataFetchingEnvironment dfe);
+
+    Mono<User> updateProfile(User user, UpdateProfileInput input);
 }
