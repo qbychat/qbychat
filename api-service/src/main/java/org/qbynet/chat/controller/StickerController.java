@@ -14,6 +14,7 @@ import org.qbynet.shared.entity.RestBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -73,6 +74,7 @@ public class StickerController {
     }
 
     @PostMapping("tg-import")
+    @Secured("SCOPE_sticker.manage")
     public DeferredResult<ResponseEntity<RestBean<StickerPackVO>>> importStickers(@RequestBody ImportTelegramStickerDTO dto) {
         DeferredResult<ResponseEntity<RestBean<StickerPackVO>>> result = new DeferredResult<>();
         if (!telegramEnabled) {
@@ -91,6 +93,7 @@ public class StickerController {
     }
 
     @PostMapping("createPack")
+    @Secured("SCOPE_sticker.manage")
     public ResponseEntity<RestBean<StickerPackVO>> createStickerPack(@RequestBody CreateStickerPackDTO dto, @RequestAttribute("user") User user) {
         try {
             StickerPack stickerPack = stickerService.createPack(dto.getTitle(), dto.getName(), user);
@@ -101,6 +104,7 @@ public class StickerController {
     }
 
     @PostMapping("editPack")
+    @Secured("SCOPE_sticker.manage")
     public ResponseEntity<RestBean<StickerPackVO>> editStickerPack(@RequestBody EditStickerPackDTO dto, @RequestAttribute("user") User user) {
         StickerPack pack = stickerService.findPackById(dto.getPack());
         if (!pack.isBelongsTo(user)) {
@@ -111,6 +115,7 @@ public class StickerController {
     }
 
     @PostMapping("addStickers")
+    @Secured("SCOPE_sticker.manage")
     public ResponseEntity<RestBean<List<StickerVO>>> addStickers(@RequestBody AddStickersDTO dto, @RequestAttribute("user") User user) {
         StickerPack pack = stickerService.findPackById(dto.getPack());
         if (!pack.isBelongsTo(user)) {
@@ -121,12 +126,14 @@ public class StickerController {
     }
 
     @GetMapping("favorite")
+    @Secured("SCOPE_sticker.favorite.list")
     public ResponseEntity<RestBean<List<StickerPackVO>>> listFavoritePacks(@RequestAttribute("user") User user) {
         List<StickerPackVO> vos = stickerService.findFavorites(user).stream().map(it -> StickerPackVO.from(it).build()).toList();
         return ResponseEntity.ok(RestBean.success(vos));
     }
 
     @PostMapping("favorite")
+    @Secured("SCOPE_sticker.favorite.manage")
     public ResponseEntity<RestBean<?>> addFavoritePack(@RequestBody AddFavoriteStickerPackDTO dto, @RequestAttribute("user") User user) {
         StickerPack pack = stickerService.findPackById(dto.getPack());
         if (pack == null) {
@@ -137,6 +144,7 @@ public class StickerController {
     }
 
     @DeleteMapping("favorite")
+    @Secured("SCOPE_sticker.favorite.manage")
     public ResponseEntity<RestBean<?>> removeFavoritePack(@RequestBody RemoteFavoriteStickerPackDTO dto, @RequestAttribute("user") User user) {
         StickerPack pack = stickerService.findPackById(dto.getPack());
         if (pack == null) {

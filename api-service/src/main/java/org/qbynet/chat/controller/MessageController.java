@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -48,6 +49,7 @@ public class MessageController {
     Queue messageReadQueue;
 
     @PostMapping("send")
+    @Secured("SCOPE_message.send")
     public DeferredResult<ResponseEntity<RestBean<MessageVO>>> sendMessage(@RequestBody SendMessageDTO message, @RequestAttribute("user") User user) {
         DeferredResult<ResponseEntity<RestBean<MessageVO>>> result = new DeferredResult<>();
         if (message.getConversation() == null) {
@@ -78,6 +80,7 @@ public class MessageController {
     }
 
     @PostMapping("edit")
+    @Secured("SCOPE_message.edit")
     public DeferredResult<ResponseEntity<RestBean<MessageVO>>> editMessage(@RequestBody EditMessageDTO dto, @RequestAttribute("user") User user) {
         DeferredResult<ResponseEntity<RestBean<MessageVO>>> result = new DeferredResult<>();
         executorService.submit(() -> {

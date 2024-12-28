@@ -18,6 +18,10 @@ spring:
   mvc:
     async:
       request-timeout: -1
+  graphql:
+    schema:
+      printer:
+        enabled: true
 
 qbychat:
   user:

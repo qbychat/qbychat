@@ -11,6 +11,7 @@ import org.qbynet.chat.service.ConversationService;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -61,6 +62,7 @@ public class ConversationController {
     }
 
     @PostMapping("create")
+    @Secured("SCOPE_conversation.create")
     public ResponseEntity<RestBean<ConversationVO>> createConversation(@RequestBody CreateConversationDTO dto, @RequestAttribute("user") User user) {
         Conversation conversation = conversationService.create(dto.getName(), dto.getType(), user);
         return ResponseEntity.ok(RestBean.success(ConversationVO.from(conversation)));
@@ -77,6 +79,7 @@ public class ConversationController {
     }
 
     @PostMapping("{link}/join")
+    @Secured("SCOPE_conversation.join")
     public ResponseEntity<RestBean<JoinConversationVO>> joinConversation(@PathVariable String link, @RequestAttribute("user") User user) {
         Conversation conversation = conversationService.findByLink(link);
         if (conversation == null) {
@@ -90,6 +93,7 @@ public class ConversationController {
     }
 
     @PostMapping("invite")
+    @Secured("SCOPE_conversation.invite")
     public ResponseEntity<RestBean<InviteLinkVO>> invite(@RequestBody InviteDTO dto, @RequestAttribute("user") User user) {
         Conversation conversation = conversationService.findConversationById(dto.getConversation());
         if (conversation == null) {
@@ -103,6 +107,7 @@ public class ConversationController {
     }
 
     @GetMapping("join-request")
+    @Secured("SCOPE_conversation.join-request.list")
     public ResponseEntity<RestBean<List<JoinRequestVO>>> listJoinRequests(@RequestParam(name = "conversation") String conversationId, @RequestAttribute("user") User user) {
         Conversation conversation = conversationService.findConversationById(conversationId);
         if (!conversationService.findMember(conversation, user).hasPermissions(MemberPermission.PROCESS_JOIN_REQUESTS)) {
@@ -113,6 +118,7 @@ public class ConversationController {
     }
 
     @PostMapping("join-request")
+    @Secured("SCOPE_conversation.join-request.approve")
     public ResponseEntity<RestBean<String>> approveJoinRequest(@RequestBody ApproveJoinRequestDTO dto, @RequestAttribute("user") User user) {
         JoinRequest joinRequest = conversationService.findJoinRequest(dto.getRequest());
         if (joinRequest == null) {
@@ -129,6 +135,7 @@ public class ConversationController {
     }
 
     @PostMapping("auto-delete-timer")
+    @Secured("SCOPE_conversation.manage")
     public ResponseEntity<RestBean<?>> configAutoDeleteTimer(@RequestBody ConfigAutoDeleteTimerDTO dto, @RequestAttribute("user") User user) {
         Conversation conversation = conversationService.findConversationById(dto.getConversation());
         Member member = conversationService.findMember(conversation, user);

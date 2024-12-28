@@ -14,6 +14,7 @@ import org.qbynet.chat.service.UserService;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -72,6 +73,7 @@ public class AvatarController {
     }
 
     @PostMapping("user")
+    @Secured("SCOPE_avatar.manage")
     public ResponseEntity<RestBean<AvatarVO>> addUserAvatar(@RequestBody AddAvatarDTO dto, @RequestAttribute("user") User user) {
         try {
             Avatar avatar = avatarService.addAvatar(mediaService.findById(dto.getMedia()), user);
@@ -82,6 +84,7 @@ public class AvatarController {
     }
 
     @DeleteMapping("user")
+    @Secured("SCOPE_avatar.manage")
     public ResponseEntity<RestBean<?>> removeUserAvatar(@RequestBody RemoveAvatarDTO dto, @RequestAttribute("user") User user) {
         Avatar avatar = avatarService.getAvatar(dto.getAvatar());
         if (avatarService.isAvatarBelongsTo(avatar, user)) {
@@ -91,6 +94,7 @@ public class AvatarController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.forbidden("Forbidden"));
     }
 
+    @Secured("SCOPE_avatar.manage")
     @PostMapping("conversation")
     public ResponseEntity<RestBean<AvatarVO>> addConversationAvatar(@RequestBody AddAvatarDTO dto, @RequestAttribute("user") User user) {
         Conversation conversation = conversationService.findConversationById(dto.getConversation());
@@ -106,6 +110,7 @@ public class AvatarController {
         }
     }
 
+    @Secured("SCOPE_avatar.manage")
     @DeleteMapping("conversation")
     public ResponseEntity<RestBean<?>> removeConversationAvatar(@RequestBody RemoveAvatarDTO dto, @RequestAttribute("user") User user) {
         Conversation conversation = conversationService.findConversationById(dto.getConversation());
@@ -123,6 +128,7 @@ public class AvatarController {
     }
 
     @PostMapping("bot")
+    @Secured("SCOPE_avatar.manage")
     public ResponseEntity<RestBean<AvatarVO>> addBotAvatar(@RequestBody AddAvatarDTO dto, @RequestAttribute("user") User user) {
         Bot bot = userService.findBot(dto.getBot());
         if (!bot.isBelongTo(user)) {
@@ -137,6 +143,7 @@ public class AvatarController {
     }
 
     @DeleteMapping("bot")
+    @Secured("SCOPE_avatar.manage")
     public ResponseEntity<RestBean<?>> removeBotAvatar(@RequestBody RemoveAvatarDTO dto, @RequestAttribute("user") User user) {
         Bot bot = userService.findBot(dto.getBot());
         Avatar avatar = avatarService.getAvatar(dto.getAvatar());

@@ -12,6 +12,7 @@ import org.qbynet.chat.service.UserService;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class BotController {
     BotConfig botConfig;
 
     @PostMapping("create")
+    @Secured("SCOPE_bot.create")
     public ResponseEntity<RestBean<BotVO>> create(@RequestBody CreateBotDTO dto, @RequestAttribute("user") User user) {
         if (!botConfig.isState()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Bots are disabled on this instance."));
@@ -42,11 +44,13 @@ public class BotController {
     }
 
     @GetMapping("list")
+    @Secured("SCOPE_bot.list")
     public ResponseEntity<RestBean<List<BotVO>>> list(@RequestAttribute("user") User user) {
         return ResponseEntity.ok(RestBean.success(userService.listBots(user).stream().map(BotVO::from).toList()));
     }
 
     @DeleteMapping("delete")
+    @Secured("SCOPE_bot.delete")
     public ResponseEntity<RestBean<String>> delete(@RequestBody DeleteBotDTO dto, @RequestAttribute("user") User user) {
         if (!userService.canDeleteBot(dto.getBot(), user)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(RestBean.failure(400, "You are not allowed to delete this bot."));

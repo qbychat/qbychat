@@ -9,6 +9,7 @@ import org.qbynet.chat.service.NotificationService;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +31,7 @@ public class NotificationController {
     NotificationService notificationService;
 
     @GetMapping("fetch")
+    @Secured("SCOPE_notification.fetch")
     public DeferredResult<ResponseEntity<RestBean<List<NotificationVO>>>> fetch(HttpServletRequest request, @RequestAttribute("user") User user) {
         DeferredResult<ResponseEntity<RestBean<List<NotificationVO>>>> result = new DeferredResult<>();
         executorService.submit(() -> {

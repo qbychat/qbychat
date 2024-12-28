@@ -10,6 +10,7 @@ import org.qbynet.chat.service.UserService;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +25,7 @@ public class UserController {
     }
 
     @PostMapping("profile")
+    @Secured("SCOPE_profile.read")
     public ResponseEntity<RestBean<UserVO>> editProfile(@RequestBody EditProfileDTO dto, @RequestAttribute("user") User user) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(RestBean.failure(401, "Profile not found, please register it first."));
@@ -47,6 +49,7 @@ public class UserController {
     }
 
     @PostMapping("status")
+    @Secured("SCOPE_status.edit")
     public ResponseEntity<RestBean<?>> editStatus(@RequestBody EditStatusDTO dto, @RequestAttribute("user") User user) {
         userService.setUserStatus(user, dto.getText());
         return ResponseEntity.ok(RestBean.success("Ok"));

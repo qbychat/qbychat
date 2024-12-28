@@ -7,7 +7,7 @@ build/
 .qbychat
 .idea/discord.xml
 
-/config/application.yml
+/config/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -45,5 +45,3 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-
-config/

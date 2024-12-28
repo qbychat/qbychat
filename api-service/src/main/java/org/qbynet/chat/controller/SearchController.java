@@ -7,11 +7,13 @@ import org.qbynet.chat.service.SearchService;
 import org.qbynet.shared.entity.RestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@Secured("SCOPE_search")
 @RequestMapping("/api/search")
 public class SearchController {
     @Resource
