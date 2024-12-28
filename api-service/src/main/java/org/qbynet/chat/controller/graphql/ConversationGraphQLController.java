@@ -3,8 +3,10 @@ package org.qbynet.chat.controller.graphql;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Conversation;
+import org.qbynet.chat.entity.InviteLink;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.entity.dto.CreateConversationDTO;
+import org.qbynet.chat.entity.dto.InviteDTO;
 import org.qbynet.chat.entity.vo.ConversationVO;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.UserService;
@@ -35,5 +37,11 @@ public class ConversationGraphQLController {
     @PreAuthorize("isFullyAuthenticated()")
     public ConversationVO conversationByLink(@Argument @NotNull String link) {
         return ConversationVO.from(conversationService.findByLink(link));
+    }
+
+    @MutationMapping
+    @Secured("SCOPE_conversation.invite")
+    public InviteLink invite(@Argument @NotNull InviteDTO input) {
+        return conversationService.invite(input);
     }
 }

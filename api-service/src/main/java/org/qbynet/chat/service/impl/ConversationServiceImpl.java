@@ -5,9 +5,12 @@ import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
+import org.qbynet.chat.entity.dto.InviteDTO;
+import org.qbynet.chat.exception.Forbidden;
 import org.qbynet.chat.repository.*;
 import org.qbynet.chat.service.AuditLogService;
 import org.qbynet.chat.service.ConversationService;
+import org.qbynet.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +38,9 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Resource
     MessageRepository messageRepository;
+
+    @Resource
+    UserService userService;
 
     @Resource
     AuditLogService auditLogService;
@@ -201,7 +207,7 @@ public class ConversationServiceImpl implements ConversationService {
         InviteLink inviteLink = new InviteLink();
         Optional<Member> member = memberRepository.findByUserAndConversation(user, conversation);
         if (member.isEmpty() || !member.get().getPermissions().contains(MemberPermission.CREATE_INVITE_LINKS)) {
-            return null;
+            throw new Forbidden("No permissions to create invite link in this conversation");
         }
         inviteLink.setOwner(member.get());
         inviteLink.setLink("+" + RandomUtil.randomString(16));
@@ -259,5 +265,10 @@ public class ConversationServiceImpl implements ConversationService {
             throw new IllegalArgumentException("Only private chat conversations are allowed");
         }
         return memberRepository.findAllByConversation(conversation).stream().filter(it -> !it.getUser().equals(self)).findFirst().orElseThrow(() -> new IllegalStateException("Private chat member not found"));
+    }
+
+    @Override
+    public InviteLink invite(@NotNull InviteDTO input) {
+        return this.invite(conversationRepository.findById(input.getConversation()).orElseThrow(() -> new IllegalArgumentException("Conversation " + input.getConversation() + " not found")), userService.currentUser());
     }
 }

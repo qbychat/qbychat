@@ -2,7 +2,9 @@ package org.qbynet.chat.service;
 
 import lombok.Builder;
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
+import org.qbynet.chat.entity.dto.InviteDTO;
 
 import java.util.List;
 
@@ -71,6 +73,8 @@ public interface ConversationService {
     int countJoinRequests(Conversation conversation);
 
     Member getPrivateChatMember(Conversation conversation, User self);
+
+    InviteLink invite(@NotNull InviteDTO input);
 
     @Data
     @Builder
