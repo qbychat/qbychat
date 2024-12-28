@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Bot;
 import org.qbynet.chat.entity.CreateBot;
 import org.qbynet.chat.entity.User;
+import org.qbynet.chat.entity.dto.EditProfileDTO;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -20,8 +21,6 @@ public interface UserService {
     User find(String remoteId);
 
     User find(Principal principal);
-
-    User update(User user);
 
     Bot verifyBotToken(String botKey) throws IOException;
 
@@ -48,4 +47,13 @@ public interface UserService {
     boolean canAccessStatus(User target, User operator);
 
     boolean hasContact(User owner, User target);
+
+    /**
+     * Get user from a request
+     */
+    User currentUser();
+
+    User editProfile(@NotNull EditProfileDTO input);
+
+    boolean checkUsernameAvailable(String username);
 }

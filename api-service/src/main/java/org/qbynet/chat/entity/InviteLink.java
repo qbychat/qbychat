@@ -15,7 +15,7 @@ public class InviteLink {
     private String id;
 
     @DBRef
-    private Member createBy;
+    private Member owner;
 
     @Indexed(unique = true)
     private String link;

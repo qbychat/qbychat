@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Message;
+import org.qbynet.chat.entity.MessageType;
 
 import java.util.List;
 
@@ -23,11 +24,14 @@ public class MessageVO {
     private LinkPreviewVO linkPreview;
     private String language;
 
+    private MessageType type;
+
     private List<MediaVO> medias = List.of();
 
     private long sentAt;
     private long editAt = -1L;
 
+    private boolean pinned;
     private boolean bot = false;
     private boolean myself = false;
 
@@ -38,6 +42,8 @@ public class MessageVO {
         vo.setContent(source.getContent());
         vo.setLanguage(source.getLanguage());
         vo.setSentAt(source.getSentAt().getEpochSecond());
+        vo.setPinned(source.isPinned());
+        vo.setType(source.getType());
         vo.setLinkPreview(LinkPreviewVO.from(source.getLinkPreview()));
         if (source.getEditAt() != null) {
             vo.setEditAt(source.getEditAt().getEpochSecond());
@@ -56,11 +62,13 @@ public class MessageVO {
     }
 
     public static @NotNull MessageVOBuilder builder(@NotNull Message source) {
-        MessageVOBuilder builder = new MessageVO.MessageVOBuilder()
+        MessageVOBuilder builder = new MessageVOBuilder()
             .id(source.getId())
             .content(source.getContent())
+            .type(source.getType())
             .language(source.getLanguage())
             .sentAt(source.getSentAt().getEpochSecond())
+            .pinned(source.isPinned())
             .medias(source.getMedias().stream().map(MediaVO::from).toList())
             .linkPreview(LinkPreviewVO.from(source.getLinkPreview()));
         if (!source.isAnonymous()) {

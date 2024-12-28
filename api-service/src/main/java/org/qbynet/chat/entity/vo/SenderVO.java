@@ -12,7 +12,6 @@ import org.qbynet.chat.entity.Member;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SenderVO {
-    private String conversation;
     private String user;
 
     private String nickname;
@@ -20,7 +19,7 @@ public class SenderVO {
 
     public static @NotNull SenderVO from(@NotNull Member member) {
         SenderVO vo = new SenderVO();
-        vo.setConversation(member.getConversation().getId());
+//        vo.setConversation(member.getConversation().getId());
         vo.setUser(member.getUser().getId());
         vo.setNickname(member.getNickname());
         vo.setTitle(member.getTitle());

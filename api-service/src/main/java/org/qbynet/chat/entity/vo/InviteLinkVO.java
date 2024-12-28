@@ -13,8 +13,8 @@ public class InviteLinkVO {
 
     public static @NotNull InviteLinkVO from(@NotNull InviteLink source) {
         InviteLinkVO vo = new InviteLinkVO();
-        vo.setUser(source.getCreateBy().getUser().getId());
-        vo.setConversation(source.getCreateBy().getConversation().getId());
+        vo.setUser(source.getOwner().getUser().getId());
+        vo.setConversation(source.getOwner().getConversation().getId());
         vo.setLink(source.getLink());
         vo.setExpireAt(source.getExpireAt().getEpochSecond());
         return vo;

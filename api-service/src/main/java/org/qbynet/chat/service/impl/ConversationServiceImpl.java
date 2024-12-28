@@ -43,7 +43,7 @@ public class ConversationServiceImpl implements ConversationService {
     int inviteExpire;
 
     @Override
-    public Conversation create(String name, ConversationType type, User user) {
+    public Conversation create(String name, ConversationType type, User owner) {
         Conversation conversation = new Conversation();
         conversation.setName(name);
         conversation.setType(type);
@@ -56,12 +56,12 @@ public class ConversationServiceImpl implements ConversationService {
         Conversation savedConversation = conversationRepository.save(conversation);
 
         Member member = new Member();
-        member.setUser(user);
+        member.setUser(owner);
         member.setConversation(savedConversation);
         member.setOwner(true);
         memberRepository.save(member);
         log.info("Conversation {} was created", conversation.getName());
-        auditLogService.createConversation(savedConversation, user);
+        auditLogService.createConversation(savedConversation, owner);
         return savedConversation;
     }
 
@@ -98,7 +98,7 @@ public class ConversationServiceImpl implements ConversationService {
                 return null;
             }
             // find by invite links
-            return inviteLinkRepository.findByLinkAndExpireAtAfter(link, Instant.now()).map(it -> it.getCreateBy().getConversation()).orElse(null);
+            return inviteLinkRepository.findByLinkAndExpireAtAfter(link, Instant.now()).map(it -> it.getOwner().getConversation()).orElse(null);
         });
     }
 
@@ -123,7 +123,7 @@ public class ConversationServiceImpl implements ConversationService {
                 .conversation(existMember.getConversation())
                 .build();
         }
-        if (!conversation.isMemberVerificationNeeded()) {
+        if (!conversation.isVerifyNeeded()) {
             log.info("User {} has joined the conversation {}", user.getNickname(), conversation.getName());
             this.addMember(conversation, user);
             return JoinConversationDetails.builder()
@@ -203,7 +203,7 @@ public class ConversationServiceImpl implements ConversationService {
         if (member.isEmpty() || !member.get().getPermissions().contains(MemberPermission.CREATE_INVITE_LINKS)) {
             return null;
         }
-        inviteLink.setCreateBy(member.get());
+        inviteLink.setOwner(member.get());
         inviteLink.setLink("+" + RandomUtil.randomString(16));
         inviteLink.setExpireAt(Instant.now().plus(inviteExpire, ChronoUnit.DAYS));
         return inviteLinkRepository.save(inviteLink);

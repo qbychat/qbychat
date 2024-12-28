@@ -52,6 +52,7 @@ public class RegisteredClientServiceImpl implements RegisteredClientService {
             .scope("profile.read")
             .scope("profile.edit")
             .scope("message.send")
+            .scope("message.edit")
             .scope("media.upload")
             .scope("conversation.join")
             .scope("conversation.list")

@@ -36,10 +36,8 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = new Notification();
         if (message.getSender() != null) {
             notification.setSender(SenderVO.from(message.getSender()));
-        } else {
-            // anonymous
-            notification.setSender(SenderVO.builder().conversation(conversation.getId()).nickname(conversation.getName()).build());
         }
+        notification.setConversation(conversation.getId());
         notification.setContent(message.getContent());
         notificationRepository.save(notification);
 

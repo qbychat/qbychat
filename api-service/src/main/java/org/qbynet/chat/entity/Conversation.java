@@ -24,7 +24,7 @@ public class Conversation implements Serializable {
     private Instant createdAt = Instant.now();
 
     private List<MemberPermission> defaultPermissions = List.of(MemberPermission.MEMBER_DEFAULT);
-    private boolean memberVerificationNeeded = false;
+    private boolean verifyNeeded = false;
     private boolean preview = true; // can member view messages without join?
     private boolean noForward = false; // can members forward messages? (include admins)
 

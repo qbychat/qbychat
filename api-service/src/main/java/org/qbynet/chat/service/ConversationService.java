@@ -12,10 +12,10 @@ public interface ConversationService {
      *
      * @param name the name of the conversation
      * @param type conversation type
-     * @param user the owner
+     * @param owner the owner
      * @return the Conversation object
      */
-    Conversation create(String name, ConversationType type, User user);
+    Conversation create(String name, ConversationType type, User owner);
 
     /**
      * Add the user to the conversation

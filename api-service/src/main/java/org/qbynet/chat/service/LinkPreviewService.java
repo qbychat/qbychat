@@ -9,5 +9,7 @@ public interface LinkPreviewService {
 
     LinkPreview generateOrGetLinkPreview(URI link);
 
+    LinkPreview getLinkPreviewOrNull(URI link);
+
     LinkPreview fromText(String content);
 }

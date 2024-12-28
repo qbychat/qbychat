@@ -29,6 +29,9 @@ qbychat:
     temp-relations:
       # How long does a temporary relation expire? (Unit: Hours)
       expire: 1
+    username:
+      min-length: 5
+      max-length: 8
   # Telegram Features
   # Please disable it if your region blocked Telegram
   telegram:

@@ -152,13 +152,18 @@ public class LinkPreviewServiceImpl implements LinkPreviewService {
     }
 
     @Override
+    public LinkPreview getLinkPreviewOrNull(@NotNull URI link) {
+        return linkPreviewRepository.findByLink(link.toString()).orElse(null);
+    }
+
+    @Override
     public LinkPreview fromText(String content) {
         // parse the first link
         List<String> links = extractLinks(content);
         if (links.isEmpty()) {
             return null;
         }
-        return generateOrGetLinkPreview(URI.create(links.getFirst()));
+        return getLinkPreviewOrNull(URI.create(links.getFirst()));
     }
 
     @Data

@@ -25,15 +25,9 @@ public class UserController {
     }
 
     @PostMapping("profile")
-    @Secured("SCOPE_profile.read")
-    public ResponseEntity<RestBean<UserVO>> editProfile(@RequestBody EditProfileDTO dto, @RequestAttribute("user") User user) {
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(RestBean.failure(401, "Profile not found, please register it first."));
-        }
-        user.setNickname(dto.getNickname());
-        user.setUsername(dto.getUsername());
-        user.setBio(dto.getBio());
-        return ResponseEntity.ok(RestBean.success(UserVO.from(userService.update(user))));
+    @Secured("SCOPE_profile.edit")
+    public ResponseEntity<RestBean<UserVO>> editProfile(@RequestBody EditProfileDTO dto) {
+        return ResponseEntity.ok(RestBean.success(UserVO.from(userService.editProfile(dto))));
     }
 
     @GetMapping("status")

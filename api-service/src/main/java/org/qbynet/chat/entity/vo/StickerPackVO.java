@@ -18,7 +18,7 @@ public class StickerPackVO {
 
     private String name;
     private String link;
-    private String thumbnail;
+    private StickerVO thumbnail;
 
     @Builder.Default
     private List<String> stickers = List.of();
@@ -32,7 +32,7 @@ public class StickerPackVO {
             .id(source.getId()).name(source.getTitle())
             .link(source.getName());
         if (source.getThumbnail() != null) {
-            builder.thumbnail(source.getThumbnail().getId());
+            builder.thumbnail(StickerVO.from(source.getThumbnail()));
         }
         return builder.telegramUpstream(source.getTelegramUpstream());
     }

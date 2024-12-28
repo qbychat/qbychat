@@ -1,19 +1,20 @@
 package org.qbynet.chat.controller.graphql;
 
+import jakarta.annotation.Resource;
 import org.qbynet.chat.entity.User;
+import org.qbynet.chat.service.UserService;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 
 @Controller
 public class QueryController {
+    @Resource
+    UserService userService;
+
     @QueryMapping
-    @PreAuthorize("hasRole('USER')")
+    @Secured("ROLE_USER")
     public User myself() {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        assert requestAttributes != null;
-        return (User) requestAttributes.getAttribute("user", RequestAttributes.SCOPE_REQUEST);
+        return userService.currentUser();
     }
 }

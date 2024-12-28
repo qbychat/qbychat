@@ -61,7 +61,7 @@ public class SearchServiceImpl implements SearchService {
             // match invite links
             Optional<SearchResult> linkOptional = inviteLinkRepository.findByLinkAndExpireAtAfter(content, Instant.now()).map(it -> SearchResult.builder()
                 .inviteLink(InviteLinkVO.from(it))
-                .conversation(ConversationVO.from(it.getCreateBy().getConversation()))
+                .conversation(ConversationVO.from(it.getOwner().getConversation()))
                 .type(SearchResultType.INVITE_LINK).build()
             );
             linkOptional.ifPresent(results::add);

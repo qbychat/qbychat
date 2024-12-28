@@ -1,9 +1,192 @@
 schema {
     query: Query
+    mutation: Mutation
 }
 
 type Query {
     myself: User!
+
+    fetchMessage(input: FetchMessageInput): [Message]
+
+    conversationByLink(link: String): Conversation
+}
+
+type Mutation {
+    editProfile(input: EditProfileInput): User
+
+    sendMessage(input: SendMessageInput): Message
+    editMessage(input: EditMessageInput): Message
+
+    createConversation(input: CreateConversationInput): Conversation
+    invite(input: InviteInput): InviteLink
+}
+
+type InviteLink {
+    id: ID!
+
+    owner: Member
+    link: String!
+    expireAt: Instant
+}
+
+type Member {
+    conversation: Conversation!
+    nickname: String!
+    title: String
+
+    permissions: [MemberPermission]
+
+    joinedAt: Instant
+    muteUntil: Instant
+    banUntil: Instant
+
+    owner: Boolean
+}
+
+scalar MemberPermission
+
+input InviteInput {
+    conversation: ID
+}
+
+input CreateConversationInput {
+    name: String!
+    type: ConversationType!
+}
+
+input FetchMessageInput {
+    conversation: String!
+    since: String
+    page: Int
+    size: Int
+}
+
+input EditProfileInput {
+    username: String
+    nickname: String
+    bio: String
+}
+
+input SendMessageInput {
+    conversation: ID
+    content: String
+    sticker: ID
+
+    replyTo: ID
+    redirectFrom: ID
+
+    linkPreview: Boolean
+    anonymous: Boolean
+
+    medias: [ID]
+}
+
+input EditMessageInput {
+    message: ID!
+
+    content: String
+    sticker: ID
+    linkPreview: Boolean
+    medias: [ID]
+}
+
+type Message {
+    id: ID!
+
+    sender: Sender
+    conversation: Conversation!
+    content: String
+    sticker: Sticker
+
+    reply: Message
+    redirect: Message
+
+    linkPreview: LinkPreview
+    language: String
+
+    medias: [Media!]
+
+    sentAt: Instant!
+    editAt: Instant
+    pinned: Boolean
+
+    myself: Boolean
+    bot: Boolean
+
+    type: MessageType!
+}
+
+type Sender {
+    user: String
+
+    nickname: String
+    title: String
+}
+
+type Conversation {
+    id: ID
+
+    name: String!
+    description: String
+    link: String
+
+    type: ConversationType!
+    createdAt: Instant
+
+    verifyNeeded: Boolean
+    preview: Boolean
+    noForward: Boolean
+}
+
+enum ConversationType {
+    GROUP,
+    CHANNEL,
+    PRIVATE_CHAT
+}
+
+type Sticker {
+    id: ID!
+
+    emoji: String
+    media: Media!
+    pack: StickerPack
+}
+
+type StickerPack {
+    id: ID!
+
+    name: String!
+    link: String
+    thumbnail: Sticker
+}
+
+type LinkPreview {
+    id: ID
+
+    link: String!
+    title: String
+    description: String
+
+    status: Int! # Http status
+    image: Media
+
+    timestamp: Instant!
+}
+
+type Media {
+    id: ID
+
+    name: String!
+    hash: String!
+
+    contentType: String!
+
+    compressed: Media
+}
+
+enum MessageType {
+    NORMAL_MESSAGE,
+    SERVICE_MESSAGE
 }
 
 type User {

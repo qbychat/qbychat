@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Conversation;
 import org.qbynet.chat.entity.ConversationType;
 
+import java.time.Instant;
+
 @Data
 public class ConversationVO {
     private String id;
@@ -14,8 +16,8 @@ public class ConversationVO {
     private ConversationType type;
     private String link;
 
-    private long createdAt;
-    private boolean memberVerificationNeeded;
+    private Instant createdAt;
+    private boolean verifyNeeded;
     private boolean preview;
     private boolean noForward;
 
@@ -26,8 +28,8 @@ public class ConversationVO {
         vo.setDescription(source.getDescription());
         vo.setType(source.getType());
         vo.setLink(source.getLink());
-        vo.setCreatedAt(source.getCreatedAt().getEpochSecond());
-        vo.setMemberVerificationNeeded(source.isMemberVerificationNeeded());
+        vo.setCreatedAt(source.getCreatedAt());
+        vo.setVerifyNeeded(source.isVerifyNeeded());
         vo.setPreview(source.isPreview());
         vo.setNoForward(source.isNoForward());
         return vo;

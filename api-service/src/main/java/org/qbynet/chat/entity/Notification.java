@@ -15,6 +15,7 @@ public class Notification {
     private String id;
 
     private String content;
+    private String conversation;
     private SenderVO sender;
     private JoinRequestVO joinRequest;
 

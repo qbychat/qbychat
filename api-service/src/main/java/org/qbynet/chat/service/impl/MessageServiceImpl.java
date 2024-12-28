@@ -7,10 +7,13 @@ import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
+import org.qbynet.chat.entity.dto.EditMessageDTO;
 import org.qbynet.chat.entity.dto.SendMessageDTO;
+import org.qbynet.chat.exception.Forbidden;
 import org.qbynet.chat.repository.*;
 import org.qbynet.chat.service.LinkPreviewService;
 import org.qbynet.chat.service.MessageService;
+import org.qbynet.chat.service.UserService;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
@@ -48,6 +51,9 @@ public class MessageServiceImpl implements MessageService {
     LinkPreviewService linkPreviewService;
 
     @Resource
+    UserService userService;
+
+    @Resource
     RabbitTemplate rabbitTemplate;
 
     @Resource(name = "messagesQueue")
@@ -64,7 +70,8 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message send(@NotNull SendMessageDTO dto, User user) {
+    public Message send(@NotNull SendMessageDTO dto) {
+        User user = userService.currentUser();
         Conversation conversation = conversationRepository.findById(dto.getConversation()).orElseThrow();
         Member member = memberRepository.findByUserAndConversation(user, conversation).orElseThrow();
 
@@ -152,11 +159,15 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void editMessage(@NotNull Message message, String content, String sticker, List<String> medias, boolean linkPreview) {
+    public Message editMessage(@NotNull Message message, String content, String sticker, List<String> medias, boolean linkPreview) {
         message.setEditAt(Instant.now());
         message.setContent(content);
-        message.setMedias(mediaRepository.findAllById(medias));
-        message.setSticker(stickerRepository.findById(sticker).orElse(null));
+        if (medias != null && !medias.isEmpty()) {
+            message.setMedias(mediaRepository.findAllById(medias));
+        }
+        if (sticker != null) {
+            message.setSticker(stickerRepository.findById(sticker).orElse(null));
+        }
         if (linkPreview) {
             message.setLinkPreview(linkPreviewService.fromText(message.getContent()));
         } else {
@@ -166,7 +177,9 @@ public class MessageServiceImpl implements MessageService {
         if (lang.isPresent()) {
             message.setLanguage(lang.get().getLanguage());
         }
-        rabbitTemplate.convertAndSend(messagesQueue.getName(), messageRepository.save(message));
+        Message saved = messageRepository.save(message);
+        rabbitTemplate.convertAndSend(messagesQueue.getName(), saved);
+        return saved;
     }
 
 
@@ -182,5 +195,15 @@ public class MessageServiceImpl implements MessageService {
         Member member = memberRepository.findByUserAndConversation(user, conversation).orElse(null);
         if (member == null || !member.hasViewPermission()) return null;
         return messageRepository.findAllByIdGreaterThanAndConversationOrderBySentAtDesc(since.getId(), conversation, pageable);
+    }
+
+    @Override
+    public Message editMessage(@NotNull EditMessageDTO dto) {
+        User user = userService.currentUser();
+        Message message = messageRepository.findById(dto.getMessage()).orElseThrow(() -> new IllegalArgumentException("Message not found"));
+        if (!message.isBelongsTo(user)) {
+            throw new Forbidden("No Permission");
+        }
+        return this.editMessage(message, dto.getContent(), dto.getSticker(), dto.getMedias(), dto.isLinkPreview());
     }
 }

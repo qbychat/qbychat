@@ -6,6 +6,7 @@ import org.qbynet.chat.entity.Message;
 import org.qbynet.chat.entity.ReadMessage;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.entity.dto.EditMessageDTO;
+import org.qbynet.chat.entity.dto.FetchMessageDTO;
 import org.qbynet.chat.entity.dto.ReadMessageDTO;
 import org.qbynet.chat.entity.dto.SendMessageDTO;
 import org.qbynet.chat.entity.vo.MessageVO;
@@ -70,7 +71,7 @@ public class MessageController {
 
         executorService.submit(() -> {
             try {
-                Message msg = messageService.send(message, user);
+                Message msg = messageService.send(message);
                 result.setResult(ResponseEntity.ok(RestBean.success(MessageVO.from(msg))));
             } catch (Exception e) {
                 result.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, e.getMessage())));
@@ -102,12 +103,12 @@ public class MessageController {
     }
 
     @GetMapping("fetch")
-    public ResponseEntity<RestBean<List<MessageVO>>> fetchMessages(@RequestParam(name = "conversation") String conversationId, @RequestParam(required = false) String since, @RequestParam int page, @RequestParam(required = false, defaultValue = "100") int size, @RequestAttribute("user") User user) {
-        Conversation conversation = conversationService.findConversationById(conversationId);
-        Pageable pageable = PageRequest.of(page, size);
+    public ResponseEntity<RestBean<List<MessageVO>>> fetchMessages(@RequestParam FetchMessageDTO dto, @RequestAttribute("user") User user) {
+        Conversation conversation = conversationService.findConversationById(dto.getConversation());
+        Pageable pageable = PageRequest.of(dto.getPage(), dto.getSize());
         Page<Message> messages;
-        if (since != null) {
-            Message sinceMessage = messageService.findMessageById(since);
+        if (dto.getSince() != null) {
+            Message sinceMessage = messageService.findMessageById(dto.getSince());
             messages = messageService.fetchMessages(conversation, sinceMessage, user, pageable);
         } else {
             messages = messageService.fetchMessages(conversation, user, pageable);

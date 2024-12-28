@@ -7,6 +7,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
+import org.qbynet.chat.entity.dto.EditProfileDTO;
 import org.qbynet.chat.repository.BotRepository;
 import org.qbynet.chat.repository.ContactRepository;
 import org.qbynet.chat.repository.TemporaryRelationRepository;
@@ -17,6 +18,8 @@ import org.qbynet.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -29,6 +32,12 @@ import java.util.*;
 public class UserServiceImpl implements UserService {
     @Value("${qbychat.user.temp-relations.expire}")
     int relationExpire;
+
+    @Value("${qbychat.user.username.min-length}")
+    int minUsernameLength;
+
+    @Value("${qbychat.user.username.max-length}")
+    int maxUsernameLength;
 
     @Resource
     UserRepository userRepository;
@@ -103,11 +112,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User find(@NotNull Principal principal) {
         return find(principal.getName());
-    }
-
-    @Override
-    public User update(User user) {
-        return userRepository.save(user);
     }
 
     @Override
@@ -232,5 +236,39 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean hasContact(User owner, User target) {
         return contactRepository.existsByOwnerAndTarget(owner, target);
+    }
+
+    @Override
+    public User currentUser() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        assert requestAttributes != null;
+        return (User) requestAttributes.getAttribute("user", RequestAttributes.SCOPE_REQUEST);
+    }
+
+    @Override
+    public User editProfile(@NotNull EditProfileDTO input) {
+        User user = currentUser();
+        user.setBio(input.getBio());
+        // check username available
+        String username = input.getUsername();
+        if (checkUsernameAvailable(username)) {
+            if (username == null) {
+                user.setUsername(null);
+            } else {
+                user.setUsername(username.toLowerCase());
+            }
+        } else {
+            throw new IllegalArgumentException("Bad username: " + username);
+        }
+        user.setNickname(input.getNickname());
+        return userRepository.save(user);
+    }
+
+    @Override
+    public boolean checkUsernameAvailable(String username) {
+        if (username == null) return true;
+        if (username.length() < minUsernameLength) return false;
+        if (username.length() > maxUsernameLength) return false;
+        return userRepository.existsByUsername(username);
     }
 }
