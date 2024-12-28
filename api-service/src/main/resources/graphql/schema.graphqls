@@ -8,12 +8,15 @@ schema {
 type Query {
     settings: ServerSettings
     myself: GraphQlUser
+
+    conversationById(id: ID): GraphQlConversation
 }
 
 type Mutation {
     updateProfile(input: UpdateProfileInput): GraphQlUser
 
     createConversation(name: String, type: GraphQlConversationType!): GraphQlConversation
+    updateConversation(id: ID, input: UpdateConversationInput): GraphQlConversation
 }
 
 enum GraphQlConversationType {
@@ -29,13 +32,32 @@ type GraphQlConversation {
     type: GraphQlConversationType!
     link: String
     createAt: Date!
+
     preview: Boolean
+    noForward: Boolean
+    verifyNeeded: Boolean
+
+    autoDeleteTimer: Int
+
+    owner: Boolean
 }
 
 input UpdateProfileInput {
     username: String
     nickname: String!
     bio: String
+}
+
+input UpdateConversationInput {
+    name: String
+    description: String
+    link: String
+
+    preview: Boolean
+    noForward: Boolean
+    verifyNeeded: Boolean
+
+    autoDeleteTimer: Int
 }
 
 type ServerSettings {

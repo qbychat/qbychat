@@ -47,4 +47,14 @@ public class ConversationServiceImpl implements ConversationService {
                     .thenReturn(savedConversation);
             });
     }
+
+    @Override
+    public Mono<Member> findMember(Conversation conversation, User user) {
+        return memberRepository.findByConversationAndUser(conversation, user);
+    }
+
+    @Override
+    public Mono<Conversation> findConversation(String id) {
+        return conversationRepository.findById(id);
+    }
 }

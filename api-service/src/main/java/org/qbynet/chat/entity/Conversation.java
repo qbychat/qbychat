@@ -28,7 +28,7 @@ public class Conversation implements Serializable {
     private Instant createdAt = Instant.now();
 
     private List<MemberPermission> defaultPermissions = List.of(MemberPermission.MEMBER_DEFAULT);
-    private boolean memberVerificationNeeded = false;
+    private boolean verifyNeeded = false;
     private boolean preview = true; // can member view messages without join?
     private boolean noForward = false; // can members forward messages? (include admins)
 
@@ -41,8 +41,14 @@ public class Conversation implements Serializable {
         return MemberPermission.calculate(defaultPermissions);
     }
 
-    public GraphQlConversation toGraphQL() {
-        return GraphQlConversation.newBuilder()
+    public GraphQlConversation toGraphQL(Member member) {
+        GraphQlConversation.Builder builder = GraphQlConversation.newBuilder();
+        if (member != null) {
+            builder.owner(member.isOwner());
+        } else {
+            builder.owner(false);
+        }
+        return builder
             .id(this.id)
             .name(this.name)
             .description(this.description)
@@ -50,6 +56,24 @@ public class Conversation implements Serializable {
             .preview(this.preview)
             .type(GraphQlConversationType.valueOf(type.name()))
             .createAt(ZonedDateTime.ofInstant(this.getCreatedAt(), ZoneId.systemDefault()).toLocalDate())
+            .preview(this.preview)
+            .noForward(this.noForward)
+            .verifyNeeded(this.verifyNeeded)
+            .autoDeleteTimer(this.autoDeleteTimer)
+            .build();
+    }
+
+    public GraphQlConversation toLimitedGraphQl() {
+        return GraphQlConversation.newBuilder()
+            .id(this.id)
+            .name(this.name)
+            .description(this.description)
+            .link(this.link)
+            .preview(this.preview)
+            .type(GraphQlConversationType.valueOf(type.name()))
+            .preview(this.preview)
+            .createAt(ZonedDateTime.ofInstant(this.getCreatedAt(), ZoneId.systemDefault()).toLocalDate())
+            .verifyNeeded(this.verifyNeeded)
             .build();
     }
 }

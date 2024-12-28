@@ -2,6 +2,7 @@ package org.qbynet.chat.entity;
 
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
+import org.qbychat.graphql.types.GraphQlConversation;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -85,5 +86,9 @@ public class Member implements Serializable {
 
     public boolean hasViewPermission() {
         return !(quit && !conversation.isPreview()) || !isBanned();
+    }
+
+    public GraphQlConversation conversationToGraphQL() {
+        return conversation.toGraphQL(this);
     }
 }

@@ -7,8 +7,8 @@ import org.qbychat.graphql.types.GraphQlConversation;
 import org.qbychat.graphql.types.GraphQlConversationType;
 import org.qbychat.graphql.types.GraphQlUser;
 import org.qbychat.graphql.types.UpdateProfileInput;
-import org.qbynet.chat.entity.Conversation;
 import org.qbynet.chat.entity.ConversationType;
+import org.qbynet.chat.entity.Member;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.UserService;
@@ -41,6 +41,9 @@ public class MutationController {
     public Mono<GraphQlConversation> createConversation(DataFetchingEnvironment dfe, @Argument String name, @Argument @NotNull GraphQlConversationType type) {
         User user = userService.find(dfe);
         return conversationService.create(name, ConversationType.valueOf(type.name()), user)
-            .map(Conversation::toGraphQL);
+            .flatMap(conversation ->
+                conversationService.findMember(conversation, user)
+                    .map(Member::conversationToGraphQL)
+            );
     }
 }
