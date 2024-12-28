@@ -13,13 +13,13 @@ type ServerSettings {
 }
 
 type GraphQlUser {
-    id: ID
+    id: ID!
 
     username: String
-    nickname: String
+    nickname: String!
     bio: String
 
-    registerTime: Date
+    registerTime: Date!
     lastLoginTime: Date
 
     status: GraphQlStatus

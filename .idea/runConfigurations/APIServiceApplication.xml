@@ -3,6 +3,7 @@
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
     <module name="qbychat.api-service.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="org.qbynet.chat.APIServiceApplication" />
+    <option name="VM_PARAMETERS" value="-Ddebug" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
