@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "qbychat.bot")
-public class BotConfig {
+@ConfigurationProperties(prefix = "qbychat.telegram")
+public class TelegramConfig {
     private boolean enabled;
-    private String[] scopes;
+    private String token;
 }

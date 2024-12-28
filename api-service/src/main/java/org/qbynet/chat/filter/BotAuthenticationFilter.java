@@ -32,7 +32,7 @@ public class BotAuthenticationFilter implements WebFilter {
 
     public BotAuthenticationFilter(@NotNull BotConfig botConfig, UserService userService) {
         this.scopes = botConfig.getScopes();
-        state = botConfig.isState();
+        state = botConfig.isEnabled();
         this.userService = userService;
     }
 

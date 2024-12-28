@@ -59,7 +59,7 @@ qbychat:
   # Bot Feature
   bot:
     # Should this qbychat instance allow bots?
-    state: true
+    enabled: true
     # What permission will be granted to bots?
     # Warning: DO NOT grant ADMIN permissions, otherwise bots will break your servlet
     scopes:

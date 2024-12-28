@@ -12,7 +12,6 @@ import org.qbynet.chat.util.ReactiveUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -44,7 +43,7 @@ public class SecurityConfig {
 
         return http
             .authorizeExchange(conf -> conf
-                .pathMatchers("/actuator", "/actuator/**").permitAll()
+                .pathMatchers("/actuator", "/actuator/**", "/graphql").permitAll()
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(conf -> conf
