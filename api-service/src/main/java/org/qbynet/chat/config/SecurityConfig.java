@@ -41,7 +41,7 @@ public class SecurityConfig {
 
         return http
             .authorizeHttpRequests(conf -> conf
-                .requestMatchers("/actuator", "/actuator/**").permitAll()
+                .requestMatchers("/actuator", "/actuator/**", "/graphql").permitAll()
                 .requestMatchers("/api/media/*/raw", "/api/media/*/info", "/api/avatar/image", "/api/avatar/list").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
