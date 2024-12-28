@@ -12,6 +12,24 @@ type Query {
 
 type Mutation {
     updateProfile(input: UpdateProfileInput): GraphQlUser
+
+    createConversation(name: String, type: GraphQlConversationType!): GraphQlConversation
+}
+
+enum GraphQlConversationType {
+    GROUP,
+    CHANNEL,
+    PRIVATE_CHAT
+}
+
+type GraphQlConversation {
+    id: ID!
+    name: String!
+    description: String
+    type: GraphQlConversationType!
+    link: String
+    createAt: Date!
+    preview: Boolean
 }
 
 input UpdateProfileInput {

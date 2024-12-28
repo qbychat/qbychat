@@ -1,6 +1,8 @@
 package org.qbynet.chat.entity;
 
 import lombok.Data;
+import org.qbychat.graphql.types.GraphQlConversation;
+import org.qbychat.graphql.types.GraphQlConversationType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -8,6 +10,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Data
@@ -35,5 +39,17 @@ public class Conversation implements Serializable {
 
     public List<MemberPermission> getDefaultPermissions() {
         return MemberPermission.calculate(defaultPermissions);
+    }
+
+    public GraphQlConversation toGraphQL() {
+        return GraphQlConversation.newBuilder()
+            .id(this.id)
+            .name(this.name)
+            .description(this.description)
+            .link(this.link)
+            .preview(this.preview)
+            .type(GraphQlConversationType.valueOf(type.name()))
+            .createAt(ZonedDateTime.ofInstant(this.getCreatedAt(), ZoneId.systemDefault()).toLocalDate())
+            .build();
     }
 }

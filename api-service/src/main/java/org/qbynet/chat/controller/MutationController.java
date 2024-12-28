@@ -2,9 +2,15 @@ package org.qbynet.chat.controller;
 
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.annotation.Resource;
+import org.jetbrains.annotations.NotNull;
+import org.qbychat.graphql.types.GraphQlConversation;
+import org.qbychat.graphql.types.GraphQlConversationType;
 import org.qbychat.graphql.types.GraphQlUser;
 import org.qbychat.graphql.types.UpdateProfileInput;
+import org.qbynet.chat.entity.Conversation;
+import org.qbynet.chat.entity.ConversationType;
 import org.qbynet.chat.entity.User;
+import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.UserService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -17,13 +23,24 @@ public class MutationController {
     @Resource
     UserService userService;
 
+    @Resource
+    ConversationService conversationService;
+
     @MutationMapping
     @PreAuthorize("hasAuthority('SCOPE_profile.edit')")
-    public Mono<GraphQlUser> updateProfile(@Argument UpdateProfileInput input, DataFetchingEnvironment dfe) {
+    public Mono<GraphQlUser> updateProfile(DataFetchingEnvironment dfe, @Argument UpdateProfileInput input) {
         User user = userService.find(dfe);
         Mono<User> userMono = userService.updateProfile(user, input);
         // todo handle errors
         return userMono
-            .map(u -> user.toGraphQL());
+            .map(User::toGraphQL);
+    }
+
+    @MutationMapping
+    @PreAuthorize("hasAuthority('SCOPE_conversation.create')")
+    public Mono<GraphQlConversation> createConversation(DataFetchingEnvironment dfe, @Argument String name, @Argument @NotNull GraphQlConversationType type) {
+        User user = userService.find(dfe);
+        return conversationService.create(name, ConversationType.valueOf(type.name()), user)
+            .map(Conversation::toGraphQL);
     }
 }
