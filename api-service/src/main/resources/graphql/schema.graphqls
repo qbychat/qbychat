@@ -1,3 +1,5 @@
+scalar Date
+
 schema {
     query: Query
 }
@@ -25,10 +27,6 @@ type GraphQlUser {
     status: GraphQlStatus
 }
 
-scalar Date
-@specifiedBy(url:
-"https://tools.ietf.org/html/rfc3339"
-)
 
 type GraphQlStatus {
     text: String

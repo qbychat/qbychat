@@ -19,10 +19,10 @@ spring:
     server:
       mapping-path: "/rsocket"
       transport: "websocket"
-dgs:
   graphql:
-    graphiql:
-      enabled: false
+    schema:
+      printer:
+        enabled: true
 
 qbychat:
   user:

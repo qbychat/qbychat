@@ -29,21 +29,18 @@ dependencies {
     implementation("org.jetbrains:annotations:24.0.0")
     implementation("org.springframework.security:spring-security-data")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-//    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
-//    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
 
-    implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars:10.0.1")
-    implementation("com.netflix.graphql.dgs.codegen:graphql-dgs-codegen-gradle:6.2.1")
-    implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
-
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+
+    implementation("org.springframework.boot:spring-boot-starter-graphql")
+    implementation("com.graphql-java:graphql-java-extended-scalars:22.0")
 
     testImplementation("org.springframework.amqp:spring-rabbit-test")
     testImplementation("io.projectreactor:reactor-test")
@@ -59,7 +56,6 @@ dependencies {
 dependencyManagement {
     imports {
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
-        mavenBom("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$netflixDgsVersion")
     }
 }
 
