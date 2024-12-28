@@ -19,6 +19,7 @@ spring:
     async:
       request-timeout: -1
   graphql:
+    path: /graphql
     schema:
       printer:
         enabled: true
