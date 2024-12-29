@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface ReadRepository extends MongoRepository<Read, String> {
-    boolean existsByMessageAndMember(Message message, Member member);
-
     Optional<Read> findTopByMemberOrderByTimestampDesc(Member member);
+
+    int countByMessage(Message message);
 }

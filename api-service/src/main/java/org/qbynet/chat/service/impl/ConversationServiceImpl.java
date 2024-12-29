@@ -12,6 +12,7 @@ import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.UserService;
 import org.qbynet.shared.exception.Forbidden;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -165,15 +166,37 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public void approveJoinRequest(@NotNull JoinRequest request, User operator) {
-        addMember(request.getConversation(), request.getUser());
+    @Secured("SCOPE_conversation.join-request.manage")
+    public Member approveJoinRequest(@NotNull JoinRequest request) {
+        User operator = userService.currentUser();
+
+        Member member = addMember(request.getConversation(), request.getUser());
         auditLogService.approveJoinRequest(request, operator);
         joinRequestRepository.delete(request);
+        log.info("Join request {} was approved", request.getId());
+        return member;
+    }
+
+    @Override
+    @Secured("SCOPE_conversation.join-request.manage")
+    public void denyJoinRequest(JoinRequest joinRequest) {
+        User operator = userService.currentUser();
+        auditLogService.denyJoinRequest(joinRequest, operator);
+        joinRequestRepository.delete(joinRequest);
+        log.info("Join request {} was denied", joinRequest.getId());
+    }
+
+    @Override
+    public boolean hasViewPermission(Conversation conversation, User user) {
+        if (hasJoined(conversation, user)) return true;
+        return conversation.isPreview();
     }
 
     @Override
     public boolean isBanned(Conversation conversation, User user) {
-        return Boolean.TRUE.equals(memberRepository.findByUserAndConversation(user, conversation).map(it -> it.getBanUntil() != null && it.getBanUntil().isAfter(Instant.now())).orElse(null));
+        Optional<Member> member = memberRepository.findByUserAndConversation(user, conversation);
+        if (member.isEmpty()) return false; // not banned
+        return Boolean.TRUE.equals(member.map(it -> it.getBanUntil() != null && it.getBanUntil().isAfter(Instant.now())).orElse(null));
     }
 
     @Override
@@ -193,8 +216,8 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public List<Conversation> list(User user) {
-        return memberRepository.findAllByUser(user).stream().map(Member::getConversation).toList();
+    public List<Member> list(User user) {
+        return memberRepository.findAllByUser(user);
     }
 
     @Override
@@ -217,11 +240,14 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public boolean hasJoined(Conversation conversation, User user) {
-        return memberRepository.existsByUserAndConversation(user, conversation);
+        Optional<Member> optional = memberRepository.findByUserAndConversation(user, conversation);
+        if (optional.isEmpty()) return false;
+        Member member = optional.get();
+        return !member.isQuit() || !member.isBanned();
     }
 
     @Override
-    public void switchAutoDeleteTimer(@NotNull Conversation conversation, int duration, User operator) {
+    public @NotNull Conversation switchAutoDeleteTimer(@NotNull Conversation conversation, int duration, User operator) {
         conversation.setAutoDeleteTimer(duration);
         // apply for exist messages
         if (duration == -1) {
@@ -237,6 +263,7 @@ public class ConversationServiceImpl implements ConversationService {
             }
         }).toList());
         auditLogService.configAutoDeleteTimer(conversation, operator);
+        return conversationRepository.save(conversation);
     }
 
     @Override

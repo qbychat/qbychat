@@ -3,7 +3,6 @@ package org.qbynet.chat.entity;
 import lombok.Builder;
 import lombok.Data;
 import org.qbynet.chat.entity.vo.ConversationVO;
-import org.qbynet.chat.entity.vo.JoinRequestVO;
 import org.qbynet.chat.entity.vo.MemberVO;
 
 @Data
@@ -14,5 +13,5 @@ public class ConversationSession {
 
     private int joinRequests; // count of join requests (need permission)
     private boolean joined; // is joined conversation
-    private JoinRequestVO joinRequest; // current join request
+    private boolean joinRequestPending; // current join request
 }

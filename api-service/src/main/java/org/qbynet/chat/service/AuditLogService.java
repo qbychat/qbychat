@@ -18,4 +18,6 @@ public interface AuditLogService {
     void createConversation(Conversation conversation, User operator);
 
     void configAutoDeleteTimer(@NotNull Conversation conversation, User operator);
+
+    void denyJoinRequest(JoinRequest joinRequest, User operator);
 }

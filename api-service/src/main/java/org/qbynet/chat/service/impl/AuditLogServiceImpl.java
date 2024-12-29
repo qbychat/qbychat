@@ -74,4 +74,14 @@ public class AuditLogServiceImpl implements AuditLogService {
             .type(AuditType.CHANGE_AUTO_DELETE_TIMER)
             .build());
     }
+
+    @Override
+    public void denyJoinRequest(JoinRequest joinRequest, User operator) {
+        auditLogRepository.save(AuditLog.builder()
+            .operator(operator)
+            .targetConversation(joinRequest.getConversation())
+            .targetUser(joinRequest.getUser())
+            .description("Denied join request")
+            .type(AuditType.DENY_JOIN_REQUEST).build());
+    }
 }

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.dto.EditMessageDTO;
 import org.qbynet.chat.entity.dto.SendMessageDTO;
+import org.qbynet.chat.entity.vo.MessageVO;
 import org.qbynet.chat.repository.*;
 import org.qbynet.chat.service.LinkPreviewService;
 import org.qbynet.chat.service.MessageService;
@@ -57,6 +58,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Resource(name = "messagesQueue")
     Queue messagesQueue;
+
+    @Resource(name = "messageReadQueue")
+    Queue messageReadQueue;
 
     @Resource
     LanguageDetector languageDetector;
@@ -136,19 +140,25 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void markAsRead(@NotNull List<String> messageIds, User user) {
-        List<Message> messages = messageIds.stream().map(messageId -> messageRepository.findById(messageId).orElse(null)).filter(Objects::nonNull).toList();
+        List<Message> messages = messageIds.stream().map(messageId -> messageRepository.findById(messageId).orElse(null)).filter(Objects::nonNull).filter(message -> !message.getSender().getUser().equals(user)).toList();
         readRepository.saveAll(messages.stream().map(it -> {
             Member member = memberRepository.findByUserAndConversation(user, it.getConversation()).orElse(null);
             if (member == null) {
                 return null;
             }
+            // todo push to each user
             return Read.builder().message(it).member(member).build();
         }).filter(Objects::nonNull).toList());
     }
 
-    @Scheduled(cron = "0 0 */6 * * *")
+    @Override
+    public void markAsRead(List<String> messages) {
+        User user = userService.currentUser();
+        rabbitTemplate.convertAndSend(messageReadQueue.getName(), ReadMessage.builder().messages(messages).user(user).build());
+    }
+
+    @Scheduled(cron = "0 0 * * * *")
     private void autoDeleteExpiredMessages() {
-        log.debug("Delete expired messages");
         messageRepository.deleteAllByExpiresAtLessThan(Instant.now());
     }
 
@@ -194,6 +204,16 @@ public class MessageServiceImpl implements MessageService {
         Member member = memberRepository.findByUserAndConversation(user, conversation).orElse(null);
         if (member == null || !member.hasViewPermission()) return null;
         return messageRepository.findAllByIdGreaterThanAndConversationOrderBySentAtDesc(since.getId(), conversation, pageable);
+    }
+
+    @Override
+    public MessageVO toMessageVO(@NotNull Message message, User user) {
+        User senderUser = message.getSender().getUser();
+        return MessageVO.builder(message)
+            .myself(senderUser.equals(user))
+            .bot(userService.isBot(senderUser))
+            .readCount(readRepository.countByMessage(message))
+            .build();
     }
 
     @Override

@@ -35,6 +35,8 @@ public class MessageVO {
     private boolean bot = false;
     private boolean myself = false;
 
+    private int readCount = 0;
+
 
     public static @NotNull MessageVO from(@NotNull Message source) {
         MessageVO vo = new MessageVO();

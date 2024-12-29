@@ -19,5 +19,4 @@ public class MessageReadListener {
     public void receive(@NotNull ReadMessage dto) {
         messageService.markAsRead(dto.getMessages(), dto.getUser());
     }
-
 }

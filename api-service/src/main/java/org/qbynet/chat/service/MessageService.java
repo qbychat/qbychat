@@ -6,6 +6,7 @@ import org.qbynet.chat.entity.Message;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.entity.dto.EditMessageDTO;
 import org.qbynet.chat.entity.dto.SendMessageDTO;
+import org.qbynet.chat.entity.vo.MessageVO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -20,6 +21,8 @@ public interface MessageService {
     boolean canSendMessage(Conversation conversation, User user);
 
     void markAsRead(List<String> messages, User user);
+
+    void markAsRead(List<String> messages);
 
     Message findMessageById(String id);
 
@@ -46,4 +49,12 @@ public interface MessageService {
      */
     Page<Message> fetchMessages(Conversation conversation, Message since, User user, Pageable pageable);
 
+    /**
+     * Generate a MessageVO with full information
+     *
+     * @param message the message
+     * @param user    the user
+     * @return the VO
+     */
+    MessageVO toMessageVO(Message message, User user);
 }

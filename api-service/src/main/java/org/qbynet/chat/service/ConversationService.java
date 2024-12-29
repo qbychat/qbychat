@@ -36,9 +36,10 @@ public interface ConversationService {
 
     JoinConversationDetails join(Conversation conversation, User user);
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean canApproveJoinRequest(Member member);
 
-    void approveJoinRequest(JoinRequest request, User operator);
+    Member approveJoinRequest(JoinRequest request);
 
     boolean isBanned(Conversation conversation, User user);
 
@@ -48,7 +49,7 @@ public interface ConversationService {
 
     JoinRequest findJoinRequest(String id);
 
-    List<Conversation> list(User user);
+    List<Member> list(User user);
 
     List<Member> listMembers(Conversation conversation);
 
@@ -61,8 +62,9 @@ public interface ConversationService {
      *
      * @param conversation the conversation
      * @param duration     the timer. set to -1 to disable the timer (Unit: days)
+     * @return modified conversation
      */
-    void switchAutoDeleteTimer(Conversation conversation, int duration, User operator);
+    @NotNull Conversation switchAutoDeleteTimer(Conversation conversation, int duration, User operator);
 
     List<Member> listMembersWithPermissions(Conversation conversation, MemberPermission... permissions);
 
@@ -75,6 +77,10 @@ public interface ConversationService {
     Member getPrivateChatMember(Conversation conversation, User self);
 
     InviteLink invite(@NotNull InviteDTO input);
+
+    void denyJoinRequest(JoinRequest joinRequest);
+
+    boolean hasViewPermission(Conversation conversation, User user);
 
     @Data
     @Builder

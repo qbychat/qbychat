@@ -190,7 +190,7 @@ public class UserServiceImpl implements UserService {
     public List<User> collectRelations(@NotNull User user) {
         // collect group members
         List<User> users = new ArrayList<>();
-        List<Conversation> joinedConversations = conversationService.list(user);
+        List<Conversation> joinedConversations = conversationService.list(user).stream().map(Member::getConversation).toList();
         // group admins
         joinedConversations.stream().filter(c -> c.getType().equals(ConversationType.GROUP)).forEach(conversation -> users.addAll(conversationService.listMembers(conversation).stream().filter(member -> !member.getUser().equals(user) && member.hasPermissions(MemberPermission.LIST_USERS)).map(Member::getUser).toList()));
         // private chats

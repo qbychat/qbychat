@@ -15,15 +15,19 @@ import org.qbynet.chat.service.UserService;
 import org.qbynet.shared.exception.BadRequest;
 import org.qbynet.shared.exception.Forbidden;
 import org.qbynet.shared.exception.NotFound;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.context.request.async.DeferredResult;
+
+import java.util.List;
 
 @Controller
-public class MessageGraphQLController {
+public class MessageController {
     @Resource
     MessageService messageService;
     @Resource
@@ -47,7 +51,7 @@ public class MessageGraphQLController {
         }
         try {
             Message msg = messageService.send(input);
-            return MessageVO.from(msg);
+            return messageService.toMessageVO(msg, user);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -56,14 +60,41 @@ public class MessageGraphQLController {
     @MutationMapping
     @Secured("SCOPE_message.edit")
     public MessageVO editMessage(@Argument @NotNull EditMessageDTO input) {
+        User user = userService.currentUser();
         Message message = messageService.editMessage(input);
-        return MessageVO.from(message);
+        return messageService.toMessageVO(message, user);
+    }
+
+    @MutationMapping
+    @Secured("SCOPE_message.read")
+    public String markAsRead(@Argument @NotNull List<String> messages) {
+        messageService.markAsRead(messages);
+        return "Success";
     }
 
     @QueryMapping
     @Secured("SCOPE_message.fetch")
-    public DeferredResult<MessageVO> fetchMessage(@Argument FetchMessageDTO input) {
-        // todo
-        throw new RuntimeException("TODO!");
+    public List<MessageVO> fetchMessage(@Argument @NotNull FetchMessageDTO input) {
+        User user = userService.currentUser();
+        Conversation conversation = conversationService.findConversationById(input.getConversation());
+        Pageable pageable = PageRequest.of(input.getPage(), input.getSize());
+        Page<Message> messages;
+        if (input.getSince() != null) {
+            Message sinceMessage = messageService.findMessageById(input.getSince());
+            messages = messageService.fetchMessages(conversation, sinceMessage, user, pageable);
+        } else {
+            messages = messageService.fetchMessages(conversation, user, pageable);
+        }
+        if (conversation == null) {
+            throw new NotFound("Conversation not found!");
+        }
+        // check permission
+        if (conversationService.hasViewPermission(conversation, user)) {
+            throw new Forbidden("No permission to view messages!");
+        }
+        if (messages == null) {
+            throw new BadRequest("Cannot fetch messages");
+        }
+        return messages.stream().map(message -> messageService.toMessageVO(message, user)).toList();
     }
 }

@@ -55,7 +55,7 @@ qbychat:
       - profile.edit
       - avatar.manage
       - notification.fetch
-      - conversation.join-request.approve
+      - conversation.join-request.process
       - conversation.join-request.list
       - sticker.favorite.manage
       - link.preview
@@ -70,7 +70,9 @@ qbychat:
       - sticker.favorite.manage
       - sticker.favorite.list
       - status.edit
+      - status.read
       - message.send
       - message.edit
+      - message.read
       - message.fetch
       - message.delete

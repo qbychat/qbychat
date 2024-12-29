@@ -6,13 +6,17 @@ schema {
 type Query {
     myself: User!
 
-    fetchMessage(input: FetchMessageInput): [Message]
+    fetchMessage(input: FetchMessageInput): [Message!]!
 
-    conversationByLink(link: String): Conversation
+    conversationByLink(link: String): Conversation!
+    conversationSession(id: ID): ConversationSession
+    joinedConversations: [ConversationMember!]!
+    joinRequests(conversation: String): [JoinRequest]
 
-    conversationList: [Conversation]!
+    avatarByUser(user: ID): [Avatar!]!
+    avatarByConversation(conversation: ID): [Avatar!]!
 
-    avatarByUser(input: FetchAvatarInput): [Avatar!]!
+    status(user: ID): Status
 }
 
 type Mutation {
@@ -20,10 +24,60 @@ type Mutation {
 
     sendMessage(input: SendMessageInput): Message
     editMessage(input: EditMessageInput): Message
+    markAsRead(messages: [ID]): String
 
     createConversation(input: CreateConversationInput): Conversation
+    joinConversation(link: String): JoinConversation
+    approveJoinRequest(id: ID): Member
+    denyJoinRequest(id: ID): String
+    configAutoDeleteTimer(input: ConfigAutoDeleteTimerInput): Conversation
+
     invite(input: InviteInput): InviteLink
     updateStatus(text: String): Status
+}
+
+input ConfigAutoDeleteTimerInput {
+    conversation: ID!
+    duration: Int!
+}
+
+type ConversationSession {
+    conversation: Conversation!
+    member: Member
+
+    joinRequests: Int # Join request count (for admin)
+    joined: Boolean
+    joinRequestPending: Boolean # current join request
+}
+
+type JoinRequest {
+    id: ID!
+
+    user: User!
+    conversation: Conversation!
+
+    timestamp: Instant!
+}
+
+type ConversationMember {
+    conversation: Conversation!
+    name: String!
+    type: ConversationType!
+
+    pinned: Boolean!
+    archived: Boolean!
+    notificationPreferment: NotificationPreferment!
+}
+
+enum NotificationPreferment {
+    EVERYTHING,
+    MENTION_AND_REPLY,
+    NOTHING
+}
+
+type JoinConversation {
+    joined: Boolean
+    banned: Boolean
 }
 
 type Avatar {
@@ -222,8 +276,6 @@ type User {
 
     registerTime: Instant!
     lastLoginTime: Instant
-
-    status: Status
 }
 
 type Status {
