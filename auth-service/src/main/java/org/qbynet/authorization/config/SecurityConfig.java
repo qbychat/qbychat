@@ -100,7 +100,7 @@ public class SecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
             .authorizeHttpRequests(conf -> conf
-                .requestMatchers("/actuator", "/actuator/**").permitAll()
+                .requestMatchers("/actuator", "/actuator/**", graphqlPath).permitAll()
                 .requestMatchers("/assets/**", "/favicon.ico", "/user/login").permitAll()
                 .requestMatchers("/user/register", "/user/register/admin", "/user/confirm").anonymous()
                 .anyRequest().authenticated()
@@ -108,20 +108,11 @@ public class SecurityConfig {
             .formLogin(conf -> conf
                 .loginPage("/user/login")
             )
+            .csrf(conf -> conf.ignoringRequestMatchers("/api/**", graphqlPath))
             .logout(conf -> conf
                 .logoutUrl("/user/logout")
                 .logoutSuccessUrl("/user/login?logout")
             )
-            .build();
-    }
-
-    @Bean
-    @Order(3)
-    SecurityFilterChain graphqlSecurityFilterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests(conf -> conf
-                .requestMatchers(graphqlPath).permitAll()
-            )
-            .csrf(conf -> conf.ignoringRequestMatchers(graphqlPath))
             .build();
     }
 

@@ -1,4 +1,4 @@
-package org.qbynet.chat.exception;
+package org.qbynet.shared.exception;
 
 public class BadRequest extends RuntimeException {
     public BadRequest(String message) {

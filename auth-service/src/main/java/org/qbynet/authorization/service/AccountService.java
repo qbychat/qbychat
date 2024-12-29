@@ -15,4 +15,6 @@ public interface AccountService extends UserDetailsService {
     boolean hasAdmin();
 
     Account findById(String id);
+
+    Account currentAccount();
 }

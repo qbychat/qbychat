@@ -2,6 +2,7 @@ package org.qbynet.authorization.service.impl;
 
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.qbynet.authorization.entity.Account;
 import org.qbynet.authorization.entity.Role;
 import org.qbynet.authorization.entity.Verify;
@@ -10,6 +11,7 @@ import org.qbynet.authorization.repository.VerifyRepository;
 import org.qbynet.authorization.service.AccountService;
 import org.qbynet.authorization.service.MailService;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -95,7 +97,12 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.findById(id).orElse(null);
     }
 
-    private String generateVerificationCode() {
+    @Override
+    public Account currentAccount() {
+        return accountRepository.findById(((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername()).orElseThrow(() -> new UsernameNotFoundException("Current account not found"));
+    }
+
+    private @NotNull String generateVerificationCode() {
         Random random = new Random();
         StringBuilder code = new StringBuilder();
 

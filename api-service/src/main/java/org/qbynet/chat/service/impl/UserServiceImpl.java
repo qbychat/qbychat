@@ -16,6 +16,7 @@ import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.EventService;
 import org.qbynet.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
@@ -57,6 +58,7 @@ public class UserServiceImpl implements UserService {
     @Resource
     EventService eventService;
 
+    @Lazy
     @Resource
     ConversationService conversationService;
 

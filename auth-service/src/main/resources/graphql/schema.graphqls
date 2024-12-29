@@ -4,6 +4,8 @@ schema {
 }
 
 type Query {
+    availableScopes: [String]
+
     myApps: [App]
 }
 
@@ -27,6 +29,7 @@ input UpdateAppInput {
 input RegisterAppInput {
     clientId: String
     clientName: String
+    clientSecret: String
 
     clientAuthenticationMethods: [String]
     authorizationGrantTypes: [String]

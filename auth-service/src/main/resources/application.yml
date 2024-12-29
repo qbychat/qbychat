@@ -47,3 +47,30 @@ qbychat:
     register:
       # Is confirm email required
       confirm: true
+  auth:
+    scopes:
+      # Allowed scopes
+      - openid
+      - profile
+      - profile.edit
+      - avatar.manage
+      - notification.fetch
+      - conversation.join-request.approve
+      - conversation.join-request.list
+      - sticker.favorite.manage
+      - link.preview
+      - conversation.join
+      - conversation.create
+      - conversation.manage
+      - search
+      - bot.create
+      - bot.list
+      - media.upload
+      - sticker.manage
+      - sticker.favorite.manage
+      - sticker.favorite.list
+      - status.edit
+      - message.send
+      - message.edit
+      - message.fetch
+      - message.delete

@@ -1,12 +1,12 @@
-package org.qbynet.chat.util;
+package org.qbynet.chat.graphql;
 
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
 import org.jetbrains.annotations.NotNull;
-import org.qbynet.chat.exception.BadRequest;
-import org.qbynet.chat.exception.Forbidden;
-import org.qbynet.chat.exception.NotFound;
+import org.qbynet.shared.exception.BadRequest;
+import org.qbynet.shared.exception.Forbidden;
+import org.qbynet.shared.exception.NotFound;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.graphql.execution.ErrorType;
 import org.springframework.stereotype.Component;

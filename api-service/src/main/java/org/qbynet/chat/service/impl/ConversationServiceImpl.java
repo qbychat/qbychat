@@ -6,11 +6,11 @@ import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.dto.InviteDTO;
-import org.qbynet.chat.exception.Forbidden;
 import org.qbynet.chat.repository.*;
 import org.qbynet.chat.service.AuditLogService;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.UserService;
+import org.qbynet.shared.exception.Forbidden;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
