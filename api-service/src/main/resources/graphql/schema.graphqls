@@ -34,6 +34,19 @@ type Mutation {
 
     invite(input: InviteInput): InviteLink
     updateStatus(text: String): Status
+
+    createBot(input: CreateBotInput): Bot
+}
+
+input CreateBotInput {
+    nickname: String
+    username: String
+}
+
+type Bot {
+    id: ID!
+    user: User!
+    token: String
 }
 
 input ConfigAutoDeleteTimerInput {
