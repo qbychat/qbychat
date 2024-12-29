@@ -1,5 +1,6 @@
 package org.qbynet.chat.controller.graphql;
 
+import org.qbynet.chat.entity.Avatar;
 import jakarta.annotation.Resource;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.service.UserService;

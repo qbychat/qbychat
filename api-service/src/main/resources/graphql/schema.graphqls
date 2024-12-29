@@ -19,6 +19,7 @@ type Mutation {
 
     createConversation(input: CreateConversationInput): Conversation
     invite(input: InviteInput): InviteLink
+    updateStatus(text: String): Status
 }
 
 type InviteLink {

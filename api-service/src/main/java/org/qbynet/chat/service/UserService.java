@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Bot;
 import org.qbynet.chat.entity.CreateBot;
+import org.qbynet.chat.entity.Status;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.entity.dto.EditProfileDTO;
 
@@ -47,6 +48,8 @@ public interface UserService {
     boolean canAccessStatus(User target, User operator);
 
     boolean hasContact(User owner, User target);
+
+    Status getUserStatus(@NotNull User user);
 
     /**
      * Get user from a request

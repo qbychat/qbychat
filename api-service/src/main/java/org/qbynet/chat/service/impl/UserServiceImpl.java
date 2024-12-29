@@ -185,6 +185,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Status getUserStatus(@NotNull User user) {
+        return user.getStatus();
+    }
+
+    @Override
     public List<User> collectRelations(@NotNull User user) {
         // collect group members
         List<User> users = new ArrayList<>();
