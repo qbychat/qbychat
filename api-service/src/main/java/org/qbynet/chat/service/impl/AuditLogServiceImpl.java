@@ -7,6 +7,9 @@ import org.qbynet.chat.repository.AuditLogRepository;
 import org.qbynet.chat.service.AuditLogService;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 @Service
 public class AuditLogServiceImpl implements AuditLogService {
     @Resource
@@ -63,11 +66,11 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Override
     public void configAutoDeleteTimer(@NotNull Conversation conversation, User operator) {
-        int timer = conversation.getAutoDeleteTimer();
+        Duration timer = conversation.getAutoDeleteTimer();
         auditLogRepository.save(AuditLog.builder()
             .operator(operator)
             .targetConversation(conversation)
-            .description((timer != -1) ? "Change auto delete timer to " + timer + "d" : "Cleared auto delete timer")
+            .description((timer != null) ? "Change auto delete timer to " + timer.get(ChronoUnit.DAYS) + "d" : "Cleared auto delete timer")
             .type(AuditType.CHANGE_AUTO_DELETE_TIMER)
             .build());
     }

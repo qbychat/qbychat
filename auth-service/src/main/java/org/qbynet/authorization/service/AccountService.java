@@ -11,6 +11,7 @@ public interface AccountService extends UserDetailsService {
 
     Account doVerify(String email, String token);
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean hasAdmin();
 
     Account findById(String id);

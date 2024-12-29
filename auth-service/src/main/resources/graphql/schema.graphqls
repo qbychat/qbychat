@@ -1,0 +1,53 @@
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    myApps: [App]
+}
+
+type Mutation {
+    registerApp(input: RegisterAppInput): App
+    deleteApp(id: ID): Boolean
+    updateApp(id: ID, input: UpdateAppInput): App
+}
+
+input UpdateAppInput {
+    clientId: String
+    clientName: String
+
+    clientAuthenticationMethods: [String]
+    authorizationGrantTypes: [String]
+    redirectUris: [String]
+    postLogoutRedirectUris: [String]
+    scopes: [String]
+}
+
+input RegisterAppInput {
+    clientId: String
+    clientName: String
+
+    clientAuthenticationMethods: [String]
+    authorizationGrantTypes: [String]
+    redirectUris: [String]
+    postLogoutRedirectUris: [String]
+    scopes: [String]
+}
+
+type App {
+    id: ID!
+
+    clientId: String!
+    clientName: String
+    clientIdIssuedAt: Instant
+
+    clientSecretExpiresAt: Instant
+    clientAuthenticationMethods: [String]
+    authorizationGrantTypes: [String]
+    redirectUris: [String]
+    postLogoutRedirectUris: [String]
+    scopes: [String]
+}
+
+scalar Instant

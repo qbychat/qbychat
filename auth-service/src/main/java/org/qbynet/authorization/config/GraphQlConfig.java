@@ -1,6 +1,5 @@
-package org.qbynet.chat.config;
+package org.qbynet.authorization.config;
 
-import org.qbynet.chat.graphql.MemberPermissionScalar;
 import org.qbynet.shared.graphql.InstantScalar;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +10,6 @@ public class GraphQlConfig {
     @Bean
     public RuntimeWiringConfigurer runtimeWiringConfigurer() {
         return wiringBuilder -> wiringBuilder
-            .scalar(InstantScalar.INSTANCE)
-            .scalar(MemberPermissionScalar.INSTANCE);
+            .scalar(InstantScalar.INSTANCE);
     }
 }

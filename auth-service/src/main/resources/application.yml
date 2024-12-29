@@ -37,6 +37,11 @@ spring:
               KEY CONTENT
               -----END PRIVATE KEY-----
 
+  graphql:
+    schema:
+      printer:
+        enabled: true
+    path: /graphql
 qbychat:
   user:
     register:

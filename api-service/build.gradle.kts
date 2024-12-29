@@ -2,7 +2,6 @@ plugins {
     java
     id("org.springframework.boot")
     id("io.spring.dependency-management")
-//    id("com.netflix.dgs.codegen")
 }
 
 extra["springCloudVersion"] = "2024.0.0"
@@ -39,7 +38,6 @@ dependencies {
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-graphql")
-//    implementation("com.netflix.graphql.dgs.codegen:graphql-dgs-codegen-gradle:6.2.1")
     implementation("com.graphql-java:graphql-java-extended-scalars:22.0")
     testImplementation("org.springframework.amqp:spring-rabbit-test")
     testImplementation("org.springframework.graphql:spring-graphql-test")

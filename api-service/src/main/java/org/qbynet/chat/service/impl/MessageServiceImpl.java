@@ -22,7 +22,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -96,8 +95,8 @@ public class MessageServiceImpl implements MessageService {
         }
 
         // enable auto delete timer
-        if (conversation.getAutoDeleteTimer() != -1) {
-            message.setExpiresAt(Instant.now().plus(conversation.getAutoDeleteTimer(), ChronoUnit.DAYS));
+        if (conversation.getAutoDeleteTimer() != null) {
+            message.setExpiresAt(Instant.now().plus(conversation.getAutoDeleteTimer()));
         }
         // sender info
         message.setSender(member);

@@ -3,7 +3,6 @@ plugins {
     id("java-library")
     id("org.springframework.boot") version "3.4.0" apply false
     id("io.spring.dependency-management") version "1.1.6" apply false
-    id("com.netflix.dgs.codegen") version "7.0.3" apply false
 }
 
 group = "org.qbynet"
@@ -27,7 +26,9 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
+    implementation("com.graphql-java:graphql-java:22.3")
     api("org.jetbrains:annotations:24.0.0")
     implementation("com.alibaba.fastjson2:fastjson2:2.0.53")
     api("com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.53")

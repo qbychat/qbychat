@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
@@ -28,12 +29,20 @@ public class Conversation implements Serializable {
     private boolean preview = true; // can member view messages without join?
     private boolean noForward = false; // can members forward messages? (include admins)
 
-    private int autoDeleteTimer = -1; // How long do we delete all messages? (Unit: days)
+    private Duration autoDeleteTimer = null; // How long do we delete all messages? (Unit: days)
 
     @DBRef
     private StickerPack stickerPack = null; // bound sticker pack
 
     public List<MemberPermission> getDefaultPermissions() {
         return MemberPermission.calculate(defaultPermissions);
+    }
+
+    public void setAutoDeleteTimer(int duration) {
+        if (duration > 0) {
+            this.autoDeleteTimer = Duration.ofDays(duration);
+        } else {
+            this.autoDeleteTimer = null;
+        }
     }
 }

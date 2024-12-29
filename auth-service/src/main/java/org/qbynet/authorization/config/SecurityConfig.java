@@ -7,11 +7,13 @@ import jakarta.annotation.Resource;
 import org.qbynet.authorization.authentication.DeviceClientAuthenticationConverter;
 import org.qbynet.authorization.authentication.DeviceClientAuthenticationProvider;
 import org.qbynet.authorization.jose.Jwks;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
@@ -34,12 +36,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @EnableWebSecurity
+@EnableMethodSecurity(securedEnabled = true)
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
     private static final String CUSTOM_CONSENT_PAGE_URI = "/oauth2/consent";
-
     @Resource
     Jwks jwks;
+    @Value("${spring.graphql.path}")
+    private String graphqlPath;
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -108,6 +112,16 @@ public class SecurityConfig {
                 .logoutUrl("/user/logout")
                 .logoutSuccessUrl("/user/login?logout")
             )
+            .build();
+    }
+
+    @Bean
+    @Order(3)
+    SecurityFilterChain graphqlSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http.authorizeHttpRequests(conf -> conf
+                .requestMatchers(graphqlPath).permitAll()
+            )
+            .csrf(conf -> conf.ignoringRequestMatchers(graphqlPath))
             .build();
     }
 

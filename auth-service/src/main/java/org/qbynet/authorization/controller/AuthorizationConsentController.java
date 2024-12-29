@@ -16,6 +16,7 @@
 package org.qbynet.authorization.controller;
 
 import jakarta.annotation.Resource;
+import org.jetbrains.annotations.NotNull;
 import org.qbynet.authorization.service.AccountService;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -44,7 +45,7 @@ public class AuthorizationConsentController {
     @Resource
     OAuth2AuthorizationConsentService authorizationConsentService;
 
-    private static Set<ScopeWithDescription> withDescription(Set<String> scopes) {
+    private static @NotNull Set<ScopeWithDescription> withDescription(@NotNull Set<String> scopes) {
         Set<ScopeWithDescription> scopeWithDescriptions = new HashSet<>();
         for (String scope : scopes) {
             scopeWithDescriptions.add(new ScopeWithDescription(scope));
@@ -103,6 +104,7 @@ public class AuthorizationConsentController {
         String username = email.split("@")[0];
         String maskedUsername = username;
         if (username.length() > 2) {
+            //noinspection SuspiciousRegexArgument
             maskedUsername = username.charAt(0) +
                 username.substring(1, username.length() - 1).replaceAll(".", "*") +
                 username.charAt(username.length() - 1);
@@ -111,6 +113,7 @@ public class AuthorizationConsentController {
         String[] domainParts = domain.split("\\.");
         String maskedDomain = domainParts[0];
         if (maskedDomain.length() > 2) {
+            //noinspection SuspiciousRegexArgument
             maskedDomain = domainParts[0].substring(0, 2) +
                 domainParts[0].substring(2).replaceAll(".", "*");
         }

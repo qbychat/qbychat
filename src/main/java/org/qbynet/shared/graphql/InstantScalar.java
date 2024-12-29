@@ -1,4 +1,4 @@
-package org.qbynet.chat.graphql;
+package org.qbynet.shared.graphql;
 
 import graphql.GraphQLContext;
 import graphql.schema.Coercing;
