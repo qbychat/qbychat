@@ -172,7 +172,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void setUserStatus(@NotNull User user, String text) {
+    public Status setUserStatus(@NotNull User user, String text) {
         if (text == null || text.isEmpty()) {
             log.info("Cleared status for user {}", user.getNickname());
             user.setStatus(null);
@@ -181,12 +181,7 @@ public class UserServiceImpl implements UserService {
             user.setStatus(new Status(text));
         }
         eventService.createEventForRelations(user, EventType.CONTACT_STATUS_CHANGED, user.getStatus());
-        userRepository.save(user);
-    }
-
-    @Override
-    public Status getUserStatus(@NotNull User user) {
-        return user.getStatus();
+        return userRepository.save(user).getStatus();
     }
 
     @Override

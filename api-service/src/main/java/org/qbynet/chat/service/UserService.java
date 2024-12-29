@@ -39,7 +39,7 @@ public interface UserService {
 
     boolean isBot(User user);
 
-    void setUserStatus(User user, String text);
+    Status setUserStatus(User user, String text);
 
     List<User> collectRelations(@NotNull User user);
 
@@ -48,8 +48,6 @@ public interface UserService {
     boolean canAccessStatus(User target, User operator);
 
     boolean hasContact(User owner, User target);
-
-    Status getUserStatus(@NotNull User user);
 
     /**
      * Get user from a request
