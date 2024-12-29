@@ -9,6 +9,10 @@ type Query {
     fetchMessage(input: FetchMessageInput): [Message]
 
     conversationByLink(link: String): Conversation
+
+    conversationList: [Conversation]!
+
+    avatarByUser(input: FetchAvatarInput): [Avatar!]!
 }
 
 type Mutation {
@@ -20,6 +24,20 @@ type Mutation {
     createConversation(input: CreateConversationInput): Conversation
     invite(input: InviteInput): InviteLink
     updateStatus(text: String): Status
+}
+
+type Avatar {
+    id: ID!
+    user: User
+    conversation: Conversation
+    avatarType: AvatarType!
+    media: Media
+    timestamp: Instant!
+}
+
+enum AvatarType {
+    USER,
+    CONVERSATION
 }
 
 type InviteLink {
@@ -48,6 +66,11 @@ scalar MemberPermission
 
 input InviteInput {
     conversation: ID
+}
+
+input FetchAvatarInput{
+    userId: ID
+    conversationId: ID
 }
 
 input CreateConversationInput {
