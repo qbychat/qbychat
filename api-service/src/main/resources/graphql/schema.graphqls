@@ -17,6 +17,8 @@ type Query {
     avatarByConversation(conversation: ID): [Avatar!]!
 
     status(user: ID): Status
+
+    botList: [Bot!]!
 }
 
 type Mutation {
@@ -35,7 +37,8 @@ type Mutation {
     invite(input: InviteInput): InviteLink
     updateStatus(text: String): Status
 
-    createBot(input: CreateBotInput): Bot
+    createBot(input: CreateBotInput): Bot!
+    deleteBot(input: DeleteBotInput): String!
 }
 
 input CreateBotInput {
@@ -47,6 +50,10 @@ type Bot {
     id: ID!
     user: User!
     token: String
+}
+
+input DeleteBotInput {
+    bot: ID!
 }
 
 input ConfigAutoDeleteTimerInput {
