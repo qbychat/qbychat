@@ -1,27 +1,24 @@
 package org.qbynet.chat.controller.graphql;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
-import org.qbynet.chat.annotation.Authorized;
-import org.qbynet.chat.entity.Bot;
+import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.CreateBot;
 import org.qbynet.chat.entity.config.BotConfig;
 import org.qbynet.chat.entity.dto.CreateBotDTO;
 import org.qbynet.chat.entity.dto.DeleteBotDTO;
 import org.qbynet.chat.entity.vo.BotVO;
 import org.qbynet.chat.service.UserService;
+import org.qbynet.shared.exception.Forbidden;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.List;
 
 @Controller
-public class BotGraphQLController {
+public class BotController {
 
     @Resource
     UserService userService;
@@ -31,36 +28,32 @@ public class BotGraphQLController {
 
     @MutationMapping
     @Secured("SCOPE_bot.create")
-    public DeferredResult<BotVO> createBot(@Argument CreateBotDTO input) {
-        DeferredResult<BotVO> result = new DeferredResult<>();
+    public BotVO createBot(@Argument CreateBotDTO input) {
         if(!botConfig.isState()) {
-            result.setErrorResult(new IllegalStateException("Bots are disabled on this instance."));
+            throw new IllegalStateException("Bots are disabled on this instance.");
         }
         CreateBot cb;
         try {
             cb = userService.createBot(userService.currentUser(), input.getUsername(), input.getNickname());
-            result.setResult(BotVO.from(cb.getBot()));
+            return BotVO.from(cb);
         } catch (Exception e) {
-            result.setErrorResult(e);
+            throw new RuntimeException(e);
         }
-        return result;
     }
 
     @QueryMapping
     @Secured("SCOPE_bot.list")
-    public List<BotVO> botList() {
-        return userService.listBots(userService.currentUser()).stream().map(BotVO::from).toList();
+    public List<BotVO> bots() {
+        return userService.listBots(userService.currentUser()).stream().map(BotVO::ignoreToken).toList();
     }
 
     @MutationMapping
     @Secured("SCOPE_bot.delete")
-    public DeferredResult<String> deleteBot(@Argument DeleteBotDTO input) {
-        DeferredResult<String> result = new DeferredResult<>();
+    public String deleteBot(@Argument @NotNull DeleteBotDTO input) {
         if (!userService.canDeleteBot(input.getBot(), userService.currentUser())) {
-            result.setErrorResult("You are not allowed to delete this bot!");
+            throw new Forbidden("You are not allowed to delete this bot!");
         }
         userService.deleteBot(input.getBot());
-        result.setResult("Deleted");
-        return result;
+        return "Deleted";
     }
 }

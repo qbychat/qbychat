@@ -13,14 +13,16 @@ public class BotVO {
     private String token = null;
 
     public static @NotNull BotVO from(@NotNull CreateBot cb) {
-        BotVO vo = new BotVO();
-        vo.setId(cb.getBot().getId());
-        vo.setUser(UserVO.from(cb.getBot().getBot()));
+        BotVO vo = ignoreToken(cb);
         vo.setToken(cb.getToken());
         return vo;
     }
 
-    public static @NotNull BotVO from(@NotNull Bot source) {
+    public static @NotNull BotVO ignoreToken(@NotNull CreateBot cb) {
+        return ignoreToken(cb.getBot());
+    }
+
+    public static @NotNull BotVO ignoreToken(@NotNull Bot source) {
         BotVO vo = new BotVO();
         vo.setId(source.getId());
         vo.setUser(UserVO.from(source.getBot()));

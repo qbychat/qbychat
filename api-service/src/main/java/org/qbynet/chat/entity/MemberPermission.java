@@ -43,10 +43,10 @@ public enum MemberPermission {
     public static List<MemberPermission> calculate(List<MemberPermission> permissions) {
         List<MemberPermission> result = new ArrayList<>();
         for (MemberPermission permission : permissions) {
-            result.add(permission);
             if (permission.subPermissions.length > 0 && !result.contains(permission)) {
                 result.addAll(calculate(List.of(permission.subPermissions)));
             }
+            result.add(permission);
         }
         return result;
     }

@@ -2,6 +2,7 @@ package org.qbynet.authorization.service.impl;
 
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import org.qbynet.authorization.entity.JsonAuthorization;
 import org.qbynet.authorization.repository.JsonClientRepository;
 import org.qbynet.authorization.repository.OAuth2AuthorizationRepository;
@@ -10,6 +11,9 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
+
+@Log4j2
 @Service
 public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationService {
     @Resource
@@ -36,16 +40,21 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
     @Override
     public OAuth2Authorization findByToken(String token, OAuth2TokenType tokenType) {
-        return authorizationRepository.findAll().stream()
-            .map(it -> it.convent(jsonClientRepository.findById(it.getRegisteredClientId())
-                .orElseThrow().asRegisteredClient()))
-            .filter(authorization -> {
-                if (tokenType.getValue().equals("state")) {
-                    return token.equals(authorization.getAttribute("state"));
-                }
-                return authorization.getToken(token) != null;
-            })
-            .findFirst()
-            .orElse(null);
+        try {
+            return authorizationRepository.findAll().stream()
+                .map(it -> it.convent(jsonClientRepository.findById(it.getRegisteredClientId())
+                    .orElseThrow().asRegisteredClient()))
+                .filter(authorization -> {
+                    if (tokenType.getValue().equals("state")) {
+                        return token.equals(authorization.getAttribute("state"));
+                    }
+                    return authorization.getToken(token) != null;
+                })
+                .findFirst()
+                .orElse(null);
+        } catch (NoSuchElementException e) {
+            log.error("Please notice that there is no authorization token, did somebody droped the database?", e);
+            return null;
+        }
     }
 }

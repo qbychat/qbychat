@@ -18,7 +18,7 @@ type Query {
 
     status(user: ID): Status
 
-    botList: [Bot!]!
+    bots: [Bot!]!
 }
 
 type Mutation {

@@ -132,7 +132,7 @@ public class MessageServiceImpl implements MessageService {
             return true;
         }
         // muted or banned
-        if (member.getMuteUntil().isAfter(Instant.now()) || member.getBanUntil().isAfter(Instant.now())) {
+        if (member.getMuteUntil() != null && member.getMuteUntil().isAfter(Instant.now()) || (member.getBanUntil() != null && member.getBanUntil().isAfter(Instant.now()))) {
             return false;
         }
         return member.getPermissions() != null && member.getPermissions().contains(MemberPermission.SEND_TEXT_MESSAGE);

@@ -39,6 +39,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-graphql")
     implementation("com.graphql-java:graphql-java-extended-scalars:22.0")
+    implementation("io.projectreactor.netty:reactor-netty")
+    implementation("io.netty:netty-all")
     testImplementation("org.springframework.amqp:spring-rabbit-test")
     testImplementation("org.springframework.graphql:spring-graphql-test")
     testImplementation("org.springframework:spring-webflux")
