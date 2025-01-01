@@ -8,15 +8,14 @@ public enum EventType {
 
     CONTACT_ONLINE,
     CONTACT_OFFLINE,
-    CONTACT_INSTANT_STATUS_CHANGED, // etc. user is inputting
     USER_STATUS_CHANGED,
 
-    GROUP_ONLINE_COUNTER_CHANGED,
-    GROUP_MEMBER_COUNTER_CHANGED,
-    GROUP_INSTANT_STATUS_CHANGED, // etc. member is inputting
+    MEMBER_INFO_CHANGED, // todo send this event on a conversation pinned, archived or member nickname changed
+    DISBAND_CONVERSATION,
 
     UPDATE_CONVERSATION_STATUS,
 
     CLEAR_HISTORY,
-    MESSAGE_READ, DISBAND_CONVERSATION, MESSAGE_DELETED
+    MESSAGE_READ,
+    MESSAGE_DELETED
 }

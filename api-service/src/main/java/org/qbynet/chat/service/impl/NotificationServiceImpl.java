@@ -4,12 +4,13 @@ import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.vo.JoinRequestVO;
-import org.qbynet.chat.entity.vo.MessageVO;
 import org.qbynet.chat.entity.vo.SenderVO;
 import org.qbynet.chat.repository.NotificationDestinationRepository;
 import org.qbynet.chat.repository.NotificationRepository;
 import org.qbynet.chat.service.ConversationService;
+import org.qbynet.chat.service.MessageService;
 import org.qbynet.chat.service.NotificationService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Resource
     NotificationDestinationRepository notificationDestinationRepository;
 
+    @Lazy
+    @Resource
+    MessageService messageService;
+
     @Override
     public void createNotification(@NotNull Message message) {
         Conversation conversation = message.getConversation();
@@ -45,17 +50,18 @@ public class NotificationServiceImpl implements NotificationService {
         if (conversation.isPreview()) {
             // push to all users
             // todo push to relations only
-            messagingTemplate.convertAndSend("/topic/messages." + conversation.getId(), MessageVO.from(message));
+            messagingTemplate.convertAndSend("/topic/messages." + conversation.getId(), messageService.toMessageVO(message, null));
         }
         notificationDestinationRepository.saveAll(conversationService.listMembers(conversation).stream().map(member -> {
-            String userId = member.getUser().getRemoteId();
+            User user = member.getUser();
+            String userId = user.getRemoteId();
             if (message.getSender() == null || !userId.equals(message.getSender().getId())) {
                 // the content of message is already responded in /api/message/send for sender
-                messagingTemplate.convertAndSendToUser(userId, "/topic/messages", MessageVO.from(message));
+                messagingTemplate.convertAndSendToUser(userId, "/topic/messages", messageService.toMessageVO(message, user));
             }
             // create notification destination
             if (member.shouldPush(message)) {
-                return createNotificationDestination(notification, member.getUser());
+                return createNotificationDestination(notification, user);
             }
             return null;
         }).filter(Objects::nonNull).toList());

@@ -40,12 +40,39 @@ type Mutation {
     configAutoDeleteTimer(input: ConfigAutoDeleteTimerInput!): Conversation
     configAnonymous(input: ConfigAnonymousInput!): Member
 
+    editMember(input: EditMemberInput!): Member
+    editCurrentMember(input: EditCurrentMemberInput!): Member
+    updateNotificationPreferences(input:UpdateNotificationPreferencesInput!): Member
+    # todo implement api
+
     invite(input: InviteInput!): InviteLink
     updateStatus(text: String): Status
 
     createBot(input: CreateBotInput!): Bot!
     resetBotToken(id: ID!): Bot!
     deleteBot(input: DeleteBotInput!): String!
+}
+
+input UpdateNotificationPreferencesInput {
+    conversation: ID!
+    notificationPreferment: NotificationPreferment!
+}
+
+input EditCurrentMemberInput {
+    conversation: ID!
+
+    nickname: String
+    pinned: Boolean!
+    archived: Boolean!
+}
+
+input EditMemberInput {
+    conversation: ID!
+    user: ID!
+
+    nickname: String
+    title: String
+    permissions: [MemberPermission!]
 }
 
 input ConfigAnonymousInput {
@@ -223,19 +250,24 @@ type Message {
 
     sentAt: Instant!
     editAt: Instant
-    pinned: Boolean
+    pinned: Boolean!
 
-    myself: Boolean
-    bot: Boolean
+    myself: Boolean!
+    bot: Boolean!
+
+    readCount: Int
 
     type: MessageType!
 }
 
 type Sender {
     user: String
+    conversation: String
 
-    nickname: String
+    nickname: String!
     title: String
+
+    anonymous: Boolean!
 }
 
 type Conversation {

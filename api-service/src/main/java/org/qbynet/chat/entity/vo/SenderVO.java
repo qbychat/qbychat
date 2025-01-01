@@ -13,15 +13,22 @@ import org.qbynet.chat.entity.Member;
 @AllArgsConstructor
 public class SenderVO {
     private String user;
+    private String conversation;
 
     private String nickname;
     private String title;
+    private boolean anonymous = false;
 
     public static @NotNull SenderVO from(@NotNull Member member) {
         SenderVO vo = new SenderVO();
-//        vo.setConversation(member.getConversation().getId());
-        vo.setUser(member.getUser().getId());
-        vo.setNickname(member.getNickname());
+        if (member.isAnonymous()) {
+            vo.setAnonymous(true);
+            vo.setConversation(member.getConversation().getId());
+            vo.setNickname(member.getConversation().getName());
+        } else {
+            vo.setUser(member.getUser().getId());
+            vo.setNickname(member.getNickname());
+        }
         vo.setTitle(member.getTitle());
         return vo;
     }
