@@ -26,15 +26,6 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
-    public void joinConversation(@NotNull Member member) {
-        auditLogRepository.save(AuditLog.builder()
-            .operator(member.getUser())
-            .targetConversation(member.getConversation())
-            .description("Joined conversation")
-            .type(AuditType.JOIN_CONVERSATION).build());
-    }
-
-    @Override
     public void memberQuit(@NotNull Member member) {
         auditLogRepository.save(AuditLog.builder()
             .operator(member.getUser())
@@ -76,12 +67,22 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
-    public void denyJoinRequest(JoinRequest joinRequest, User operator) {
+    public void denyJoinRequest(@NotNull JoinRequest joinRequest, User operator) {
         auditLogRepository.save(AuditLog.builder()
             .operator(operator)
             .targetConversation(joinRequest.getConversation())
             .targetUser(joinRequest.getUser())
             .description("Denied join request")
             .type(AuditType.DENY_JOIN_REQUEST).build());
+    }
+
+    @Override
+    public void anonymous(@NotNull Member member, User operator) {
+        auditLogRepository.save(AuditLog.builder()
+            .operator(operator)
+            .targetConversation(member.getConversation())
+            .targetUser(member.getUser())
+            .description((member.isAnonymous()) ? "Enabled" : "Disabled" + " anonymous")
+            .type(AuditType.SWITCH_ANONYMOUS).build());
     }
 }

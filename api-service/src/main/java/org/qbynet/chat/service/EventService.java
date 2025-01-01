@@ -17,4 +17,6 @@ public interface EventService {
     void deleteMessages(List<Message> messages);
 
     void markAsRead(List<Message> message);
+
+    void disbandConversation(@NotNull Conversation conversation);
 }

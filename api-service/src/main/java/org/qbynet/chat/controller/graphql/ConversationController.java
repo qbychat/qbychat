@@ -48,6 +48,38 @@ public class ConversationController {
         return ConversationVO.from(conversation);
     }
 
+    @MutationMapping
+    @Secured("SCOPE_conversation.leave")
+    public String leaveConversation(@Argument @NotNull String conversation) {
+        User user = userService.currentUser();
+        Conversation conv = conversationService.findConversationById(conversation);
+        if (conv == null) {
+            throw new NotFound("Conversation not found");
+        }
+        Member member = conversationService.findMember(conv, user);
+        if (member == null) {
+            throw new BadRequest("You haven't joined this conversation");
+        }
+        conversationService.leave(member);
+        return "Success";
+    }
+
+    @MutationMapping
+    @Secured("SCOPE_conversation.disband")
+    public String disbandConversation(@Argument @NotNull String conversation) {
+        User user = userService.currentUser();
+        Conversation conv = conversationService.findConversationById(conversation);
+        if (conv == null) {
+            throw new NotFound("Conversation not found");
+        }
+        Member member = conversationService.findMember(conv, user);
+        if (member == null || !member.isOwner()) {
+            throw new Forbidden("You don't have permission to disband this conversation");
+        }
+        conversationService.disbandConversation(conv);
+        return "Success";
+    }
+
     @Authorized
     @QueryMapping
     public ConversationVO conversationByLink(@Argument @NotNull String link) {

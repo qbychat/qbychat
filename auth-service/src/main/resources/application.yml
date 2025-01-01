@@ -60,9 +60,11 @@ qbychat:
       - sticker.favorite.manage
       - link.preview
       - conversation.join
+      - conversation.leave
       - conversation.create
-      - conversation.start-pm
       - conversation.manage
+      - conversation.disband
+      - conversation.start-pm
       - search
       - bot.create
       - bot.delete

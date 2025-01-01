@@ -104,7 +104,9 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public void setAnonymous(boolean state, @NotNull Member member) {
+        User operator = userService.currentUser();
         member.setAnonymous(state);
+        auditLogService.anonymous(member, operator);
         memberRepository.save(member);
     }
 
@@ -250,6 +252,29 @@ public class ConversationServiceImpl implements ConversationService {
         memberActivity.setConversation(conversation.getId());
         memberActivity.setActivity(activity);
         memberActivityRepository.save(memberActivity);
+    }
+
+    @Override
+    public void leave(@NotNull Member member) {
+        log.info("User {} left the conversation {}", member.getUser().getId(), member.getConversation().getId());
+        Conversation conversation = member.getConversation();
+        if (conversation.getType().equals(ConversationType.PRIVATE_CHAT)) {
+            // disband conversation
+            this.disbandConversation(conversation);
+            return;
+        }
+        removeMember(member);
+    }
+
+    @Override
+    public void disbandConversation(@NotNull Conversation conversation) {
+        log.info("Disbanding conversation {}", conversation.getId());
+        // push event
+        eventService.disbandConversation(conversation);
+        // remove all members
+        memberRepository.deleteAllByConversation(conversation);
+        // delete conversation
+        conversationRepository.delete(conversation);
     }
 
     @Override

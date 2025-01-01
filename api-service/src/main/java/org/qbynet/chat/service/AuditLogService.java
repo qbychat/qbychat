@@ -9,8 +9,6 @@ import org.qbynet.chat.entity.User;
 public interface AuditLogService {
     void approveJoinRequest(@NotNull JoinRequest joinRequest, User operator);
 
-    void joinConversation(Member member);
-
     void memberQuit(Member member);
 
     void memberJoined(Member member);
@@ -20,4 +18,6 @@ public interface AuditLogService {
     void configAutoDeleteTimer(@NotNull Conversation conversation, User operator);
 
     void denyJoinRequest(JoinRequest joinRequest, User operator);
+
+    void anonymous(@NotNull Member member, User operator);
 }

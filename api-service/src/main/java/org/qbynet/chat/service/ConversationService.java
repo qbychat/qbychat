@@ -41,6 +41,8 @@ public interface ConversationService {
 
     Member approveJoinRequest(JoinRequest request);
 
+    void disbandConversation(@NotNull Conversation conversation);
+
     boolean isBanned(Conversation conversation, User user);
 
     Conversation findConversationById(String conversation);
@@ -87,6 +89,8 @@ public interface ConversationService {
     List<MemberActivity> listActivities(@NotNull Conversation conversation);
 
     void updateActivity(Conversation conversation, User user, MemberActivity.MemberActivityEnum activity);
+
+    void leave(Member member);
 
     @Data
     @Builder

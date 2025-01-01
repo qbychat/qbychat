@@ -19,5 +19,6 @@ public enum AuditType {
     INVITE_MEMBER,
     REMOVE_MEMBER,
 
+    SWITCH_ANONYMOUS,
     CHANGE_AUTO_DELETE_TIMER
 }

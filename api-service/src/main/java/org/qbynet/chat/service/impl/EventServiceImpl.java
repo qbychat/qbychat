@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.event.ClearHistoryEvent;
 import org.qbynet.chat.entity.event.DeleteMessageEvent;
+import org.qbynet.chat.entity.event.DisbandConversationEvent;
 import org.qbynet.chat.entity.event.ReadMessageEvent;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.EventService;
@@ -148,6 +149,11 @@ public class EventServiceImpl implements EventService {
         classifyMessagesBySender(messages).forEach((user, sortedMessages) ->
             Event.create(user, EventType.MESSAGE_READ, ReadMessageEvent.create(sortedMessages))
         );
+    }
+
+    @Override
+    public void disbandConversation(@NotNull Conversation conversation) {
+        pushEventToMembers(conversation, Event.create(EventType.DISBAND_CONVERSATION, DisbandConversationEvent.create(conversation)));
     }
 
     /**

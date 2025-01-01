@@ -30,6 +30,8 @@ type Mutation {
     markAsRead(messages: [ID!]): String
 
     createConversation(input: CreateConversationInput!): Conversation
+    leaveConversation(conversation: ID!): String
+    disbandConversation(conversation: ID!): String
     startPrivateChat(partner: ID!): Conversation
     clearHistory(conversation: ID!): String
     joinConversation(link: String!): JoinConversation

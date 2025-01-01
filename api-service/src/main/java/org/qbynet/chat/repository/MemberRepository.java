@@ -14,8 +14,6 @@ import java.util.Optional;
 public interface MemberRepository extends MongoRepository<Member, String> {
     Optional<Member> findByUserAndConversation(User user, Conversation conversation);
 
-    boolean existsByUserAndConversation(User user, Conversation conversation);
-
     List<Member> findAllByUser(User user);
 
     List<Member> findAllByConversation(Conversation conversation);
@@ -23,4 +21,6 @@ public interface MemberRepository extends MongoRepository<Member, String> {
     List<Member> findAllByConversationAndBanUntilNullOrBanUntilGreaterThan(Conversation conversation, Instant banUntilAfter);
 
     List<Member> findAllByConversationAndPermissionsNotNullOrConversationAndOwnerIsTrue(Conversation conversation, Conversation same);
+
+    void deleteAllByConversation(Conversation conversation);
 }
