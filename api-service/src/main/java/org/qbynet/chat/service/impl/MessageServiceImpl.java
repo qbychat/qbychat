@@ -7,10 +7,12 @@ import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
+import org.qbynet.chat.entity.dto.DeleteMessageDTO;
 import org.qbynet.chat.entity.dto.EditMessageDTO;
 import org.qbynet.chat.entity.dto.SendMessageDTO;
 import org.qbynet.chat.entity.vo.MessageVO;
 import org.qbynet.chat.repository.*;
+import org.qbynet.chat.service.EventService;
 import org.qbynet.chat.service.LinkPreviewService;
 import org.qbynet.chat.service.MessageService;
 import org.qbynet.chat.service.UserService;
@@ -37,6 +39,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Resource
     ReadRepository readRepository;
+
+    @Resource
+    EventService eventService;
 
     @Resource
     MemberRepository memberRepository;
@@ -123,6 +128,11 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    public void delete(@NotNull Message message) {
+        messageRepository.delete(message);
+    }
+
+    @Override
     public boolean canSendMessage(Conversation conversation, User user) {
         Member member = memberRepository.findByUserAndConversation(user, conversation).orElse(null);
         if (member == null) {
@@ -131,8 +141,8 @@ public class MessageServiceImpl implements MessageService {
         if (member.isOwner()) {
             return true;
         }
-        // muted or banned
-        if (member.getMuteUntil() != null && member.getMuteUntil().isAfter(Instant.now()) || (member.getBanUntil() != null && member.getBanUntil().isAfter(Instant.now()))) {
+        // quited, muted or banned
+        if (member.isMuted() || member.isQuitOrBanned()) {
             return false;
         }
         return member.getPermissions() != null && member.getPermissions().contains(MemberPermission.SEND_TEXT_MESSAGE);
@@ -214,6 +224,20 @@ public class MessageServiceImpl implements MessageService {
             .bot(userService.isBot(senderUser))
             .readCount(readRepository.countByMessage(message))
             .build();
+    }
+
+    @Override
+    public void clearHistory(@NotNull Conversation conversation) {
+        log.info("Clear history for {}", conversation.getId());
+        messageRepository.deleteAllByConversation(conversation);
+        eventService.clearHistory(conversation);
+    }
+
+    @Override
+    public void delete(@NotNull DeleteMessageDTO input) {
+        List<Message> deleted = messageRepository.findAllById(input.getMessages());
+        messageRepository.deleteAll(deleted);
+        eventService.deleteMessages(deleted);
     }
 
     @Override

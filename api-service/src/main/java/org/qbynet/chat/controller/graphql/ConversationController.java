@@ -10,6 +10,7 @@ import org.qbynet.chat.entity.dto.InviteDTO;
 import org.qbynet.chat.entity.vo.*;
 import org.qbynet.chat.service.ContactService;
 import org.qbynet.chat.service.ConversationService;
+import org.qbynet.chat.service.MessageService;
 import org.qbynet.chat.service.UserService;
 import org.qbynet.shared.exception.BadRequest;
 import org.qbynet.shared.exception.Forbidden;
@@ -29,6 +30,9 @@ public class ConversationController {
 
     @Resource
     ConversationService conversationService;
+
+    @Resource
+    MessageService messageService;
 
     @Resource
     ContactService contactService;
@@ -188,5 +192,22 @@ public class ConversationController {
         Member member = conversationService.createPrivateChat(user, partnerUser);
         Contact contact = contactService.findContact(user, partnerUser);
         return ConversationVO.privateChat(member, contact);
+    }
+
+    @MutationMapping
+    @Secured("SCOPE_conversation.clear-history")
+    public String clearHistory(@Argument String conversation) {
+        User user = userService.currentUser();
+        Conversation conv = conversationService.findConversationById(conversation);
+        if (conv == null) {
+            throw new NotFound("Conversation not found");
+        }
+        // check permission
+        Member member = conversationService.findMember(conv, user);
+        if (member == null || !member.hasPermissions(MemberPermission.CLEAR_HISTORY)) {
+            throw new Forbidden("You have no permission to clear history");
+        }
+        messageService.clearHistory(conv);
+        return "Success";
     }
 }

@@ -2,6 +2,7 @@ package org.qbynet.chat.entity;
 
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 
@@ -12,12 +13,16 @@ public class Event implements Serializable, Cloneable {
 
     private Object payload; // the addition data for the event object
 
-    public static @NotNull Event create(@NotNull User user, EventType type, Object data) {
+    public static @NotNull Event create(@Nullable User user, EventType type, Object payload) {
         Event event = new Event();
         event.user = user;
         event.type = type;
-        event.payload = data;
+        event.payload = payload;
         return event;
+    }
+
+    public static @NotNull Event create(EventType eventType, Object payload) {
+        return create(null, eventType, payload);
     }
 
     public Event applyUser(@NotNull User user) {

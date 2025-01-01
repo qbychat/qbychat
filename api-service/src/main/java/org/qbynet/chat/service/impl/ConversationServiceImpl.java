@@ -240,7 +240,9 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public Member findMember(Conversation conversation, User user) {
         if (conversation == null || user == null) return null;
-        return memberRepository.findByUserAndConversation(user, conversation).orElse(null);
+        Member member = memberRepository.findByUserAndConversation(user, conversation).orElse(null);
+        if (member == null || member.isQuitOrBanned()) return null;
+        return member;
     }
 
     @Override

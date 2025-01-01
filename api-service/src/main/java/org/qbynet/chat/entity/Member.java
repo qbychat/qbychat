@@ -83,7 +83,12 @@ public class Member implements Serializable {
         return muteUntil.isAfter(Instant.now());
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean hasViewPermission() {
         return !(quit && !conversation.isPreview()) || !isBanned();
+    }
+
+    public boolean isQuitOrBanned() {
+        return isQuit() || isBanned();
     }
 }

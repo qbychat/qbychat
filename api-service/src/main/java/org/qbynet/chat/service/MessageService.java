@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Conversation;
 import org.qbynet.chat.entity.Message;
 import org.qbynet.chat.entity.User;
+import org.qbynet.chat.entity.dto.DeleteMessageDTO;
 import org.qbynet.chat.entity.dto.EditMessageDTO;
 import org.qbynet.chat.entity.dto.SendMessageDTO;
 import org.qbynet.chat.entity.vo.MessageVO;
@@ -16,6 +17,17 @@ public interface MessageService {
     Message send(Message source);
 
     Message send(SendMessageDTO dto);
+
+    /**
+     * Delete all messages
+     *
+     * @param conversation conversation
+     */
+    void clearHistory(Conversation conversation);
+
+    void delete(@NotNull DeleteMessageDTO input);
+
+    void delete(Message message);
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean canSendMessage(Conversation conversation, User user);

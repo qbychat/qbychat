@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Conversation;
 import org.qbynet.chat.entity.Message;
 import org.qbynet.chat.entity.User;
+import org.qbynet.chat.entity.dto.DeleteMessageDTO;
 import org.qbynet.chat.entity.dto.EditMessageDTO;
 import org.qbynet.chat.entity.dto.FetchMessageDTO;
 import org.qbynet.chat.entity.dto.SendMessageDTO;
@@ -63,6 +64,13 @@ public class MessageController {
         User user = userService.currentUser();
         Message message = messageService.editMessage(input);
         return messageService.toMessageVO(message, user);
+    }
+
+    @MutationMapping
+    @Secured("SCOPE_message.delete")
+    public String deleteMessage(@Argument @NotNull DeleteMessageDTO input) {
+        messageService.delete(input);
+        return "Success";
     }
 
     @MutationMapping

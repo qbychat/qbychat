@@ -4,6 +4,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
+import org.qbynet.chat.entity.event.ClearHistoryEvent;
+import org.qbynet.chat.entity.event.DeleteMessageEvent;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.EventService;
 import org.qbynet.chat.service.UserService;
@@ -14,8 +16,7 @@ import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Log4j2
 @Service
@@ -36,6 +37,18 @@ public class EventServiceImpl implements EventService {
 
     @Resource(name = "eventsQueue")
     Queue queue;
+
+    private @NotNull Map<Conversation, List<Message>> classifyMessagesByConversation(@NotNull List<Message> messages) {
+        Map<Conversation, List<Message>> conversationMap = new HashMap<>();
+
+        for (Message message : messages) {
+            Conversation conversation = message.getConversation();
+            conversationMap.computeIfAbsent(conversation, k -> new ArrayList<>());
+            conversationMap.get(conversation).add(message);
+        }
+
+        return conversationMap;
+    }
 
     @Override
     public void createEvent(User dest, EventType eventType, Object data) {
@@ -101,5 +114,29 @@ public class EventServiceImpl implements EventService {
                 }
             }
         });
+    }
+
+    @Override
+    public void clearHistory(@NotNull Conversation conversation) {
+        Event event = Event.create(EventType.CLEAR_HISTORY, ClearHistoryEvent.create(conversation));
+        pushEventToMembers(conversation, event);
+    }
+
+    @Override
+    public void deleteMessages(List<Message> messages) {
+        classifyMessagesByConversation(messages).forEach((conversation, sortedMessages) -> {
+            Event event = Event.create(EventType.MESSAGE_DELETED, DeleteMessageEvent.create(conversation, sortedMessages));
+            pushEventToMembers(conversation, event);
+        });
+    }
+
+    /**
+     * Push event message to every member
+     *
+     * @param conversation the conversation
+     * @param event        the event
+     */
+    private void pushEventToMembers(@NotNull Conversation conversation, Event event) {
+        conversationService.listMembers(conversation).forEach(member -> pushEvent(event.applyUser(member.getUser())));
     }
 }

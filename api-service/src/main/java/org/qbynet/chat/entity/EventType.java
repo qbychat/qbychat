@@ -16,5 +16,7 @@ public enum EventType {
     GROUP_INSTANT_STATUS_CHANGED, // etc. member is inputting
 
     UPDATE_CONVERSATION_STATUS,
+
+    CLEAR_HISTORY,
     MESSAGE_DELETED
 }

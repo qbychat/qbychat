@@ -26,10 +26,12 @@ type Mutation {
 
     sendMessage(input: SendMessageInput!): Message
     editMessage(input: EditMessageInput!): Message
+    deleteMessage(input: DeleteMessageInput!): String
     markAsRead(messages: [ID!]): String
 
     createConversation(input: CreateConversationInput!): Conversation
-    startPrivateChat(partner: ID): Conversation
+    startPrivateChat(partner: ID!): Conversation
+    clearHistory(conversation: ID!): String
     joinConversation(link: String!): JoinConversation
     approveJoinRequest(id: ID!): Member
     denyJoinRequest(id: ID!): String
@@ -41,7 +43,10 @@ type Mutation {
     createBot(input: CreateBotInput!): Bot!
     resetBotToken(id: ID!): Bot!
     deleteBot(input: DeleteBotInput!): String!
+}
 
+input DeleteMessageInput {
+    messages: [ID!]
 }
 
 input CreateBotInput {
