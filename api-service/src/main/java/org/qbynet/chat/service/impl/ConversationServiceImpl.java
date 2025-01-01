@@ -9,6 +9,7 @@ import org.qbynet.chat.entity.dto.InviteDTO;
 import org.qbynet.chat.repository.*;
 import org.qbynet.chat.service.AuditLogService;
 import org.qbynet.chat.service.ConversationService;
+import org.qbynet.chat.service.EventService;
 import org.qbynet.chat.service.UserService;
 import org.qbynet.shared.exception.Forbidden;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +47,9 @@ public class ConversationServiceImpl implements ConversationService {
     @Resource
     AuditLogService auditLogService;
 
+    @Resource
+    EventService eventService;
+
     @Value("${qbychat.conversation.invite.expire}")
     int inviteExpire;
 
@@ -80,6 +84,8 @@ public class ConversationServiceImpl implements ConversationService {
         log.info("Add user {} to conversation {}", user.getNickname(), conversation.getName());
         Member saved = memberRepository.save(member);
         auditLogService.memberJoined(saved);
+        // push event
+        eventService.createEvent(member.getUser(), EventType.JOIN_CONVERSATION, member.getConversation().getId());
         return saved;
     }
 
@@ -89,6 +95,8 @@ public class ConversationServiceImpl implements ConversationService {
         member.setNickname(null); // restore nickname
         member.setQuit(true);
         auditLogService.memberQuit(memberRepository.save(member));
+        // push event
+        eventService.createEvent(member.getUser(), EventType.QUIT_CONVERSATION, member.getConversation().getId());
     }
 
     @Override
@@ -216,7 +224,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public List<Member> list(User user) {
+    public List<Member> listJoinedConversations(User user) {
         return memberRepository.findAllByUser(user);
     }
 
@@ -287,7 +295,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public Member getPrivateChatMember(@NotNull Conversation conversation, User self) {
+    public Member getPrivateChatPartner(@NotNull Conversation conversation, User self) {
         if (!conversation.getType().equals(ConversationType.PRIVATE_CHAT)) {
             throw new IllegalArgumentException("Only private chat conversations are allowed");
         }

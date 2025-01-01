@@ -2,6 +2,7 @@ package org.qbynet.chat.util.listener;
 
 import jakarta.annotation.Resource;
 import org.qbynet.chat.entity.Event;
+import org.qbynet.chat.entity.vo.EventVO;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -15,6 +16,6 @@ public class EventListener {
 
     @RabbitHandler
     public void process(Event message) {
-        messagingTemplate.convertAndSendToUser(message.getUser(), "/topic/events", message);
+        messagingTemplate.convertAndSendToUser(message.getUser().getRemoteId(), "/topic/events", EventVO.from(message));
     }
 }

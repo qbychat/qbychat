@@ -78,7 +78,7 @@ public class SearchServiceImpl implements SearchService {
         results.addAll(conversationSearchResults);
 
         // search messages
-        conversationService.list(user).stream().map(Member::getConversation).forEach(conversation -> {
+        conversationService.listJoinedConversations(user).stream().map(Member::getConversation).forEach(conversation -> {
             List<Message> messages = messageRepository.findAllByConversationAndContentContainingIgnoreCaseAndExpiresAtNullOrExpiresAtGreaterThan(conversation, content, PageRequest.of(page, searchPageLimit), Instant.now()).toList();
             List<SearchResult> messageSearchResults = messages.stream().map(it -> SearchResult.builder().message(MessageVO.from(it)).type(SearchResultType.MESSAGE).build()).toList();
             results.addAll(messageSearchResults);

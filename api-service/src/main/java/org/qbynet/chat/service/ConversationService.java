@@ -49,7 +49,7 @@ public interface ConversationService {
 
     JoinRequest findJoinRequest(String id);
 
-    List<Member> list(User user);
+    List<Member> listJoinedConversations(User user);
 
     List<Member> listMembers(Conversation conversation);
 
@@ -74,7 +74,7 @@ public interface ConversationService {
 
     int countJoinRequests(Conversation conversation);
 
-    Member getPrivateChatMember(Conversation conversation, User self);
+    Member getPrivateChatPartner(Conversation conversation, User self);
 
     InviteLink invite(@NotNull InviteDTO input);
 

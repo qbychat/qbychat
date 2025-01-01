@@ -64,7 +64,9 @@ qbychat:
       - conversation.manage
       - search
       - bot.create
+      - bot.delete
       - bot.list
+      - bot.manage
       - media.upload
       - sticker.manage
       - sticker.favorite.manage

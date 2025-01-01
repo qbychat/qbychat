@@ -2,10 +2,7 @@ package org.qbynet.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jetbrains.annotations.NotNull;
-import org.qbynet.chat.entity.Bot;
-import org.qbynet.chat.entity.CreateBot;
-import org.qbynet.chat.entity.Status;
-import org.qbynet.chat.entity.User;
+import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.dto.EditProfileDTO;
 import org.springframework.web.socket.messaging.AbstractSubProtocolEvent;
 
@@ -50,7 +47,19 @@ public interface UserService {
 
     void createTemporaryRelation(User owner, User relation);
 
-    boolean canAccessStatus(User target, User operator);
+    boolean canAccess(PrivacyPreferment field, @NotNull User target, User operator);
+
+    default boolean canAccessStatus(User target, User operator) {
+        return canAccess(target.getPrivacy().getStatus(), target, operator);
+    }
+
+    default boolean canAccessOnlineStatus(User target, User operator) {
+        return canAccess(target.getPrivacy().getOnlineStatus(), target, operator);
+    }
+
+    default boolean canSendCalls(User target, User operator) {
+        return canAccess(target.getPrivacy().getCalls(), target, operator);
+    }
 
     boolean hasContact(User owner, User target);
 
@@ -62,4 +71,6 @@ public interface UserService {
     User editProfile(@NotNull EditProfileDTO input);
 
     boolean checkUsernameAvailable(String username);
+
+    void goneOffline(@NotNull User user);
 }

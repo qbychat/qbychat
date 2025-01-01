@@ -70,7 +70,7 @@ public class ConversationController {
     @Secured("SCOPE_conversation.list")
     public List<ConversationMemberVO> joinedConversations() {
         User user = userService.currentUser();
-        return conversationService.list(user).stream().map((ConversationMemberVO::from)).toList();
+        return conversationService.listJoinedConversations(user).stream().map((ConversationMemberVO::from)).toList();
     }
 
     @MutationMapping

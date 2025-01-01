@@ -13,7 +13,6 @@ import org.qbynet.chat.repository.ContactRepository;
 import org.qbynet.chat.repository.TemporaryRelationRepository;
 import org.qbynet.chat.repository.UserRepository;
 import org.qbynet.chat.service.ConversationService;
-import org.qbynet.chat.service.EventService;
 import org.qbynet.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -54,9 +53,6 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     PasswordEncoder passwordEncoder;
-
-    @Resource
-    EventService eventService;
 
     @Lazy
     @Resource
@@ -182,7 +178,6 @@ public class UserServiceImpl implements UserService {
             log.info("Set status for user {} (status: {})", user.getNickname(), text);
             user.setStatus(new Status(text));
         }
-        eventService.createEventForRelations(user, EventType.CONTACT_STATUS_CHANGED, user.getStatus());
         return userRepository.save(user).getStatus();
     }
 
@@ -190,11 +185,11 @@ public class UserServiceImpl implements UserService {
     public List<User> collectRelations(@NotNull User user) {
         // collect group members
         List<User> users = new ArrayList<>();
-        List<Conversation> joinedConversations = conversationService.list(user).stream().map(Member::getConversation).toList();
+        List<Conversation> joinedConversations = conversationService.listJoinedConversations(user).stream().map(Member::getConversation).toList();
         // group admins
         joinedConversations.stream().filter(c -> c.getType().equals(ConversationType.GROUP)).forEach(conversation -> users.addAll(conversationService.listMembers(conversation).stream().filter(member -> !member.getUser().equals(user) && member.hasPermissions(MemberPermission.LIST_USERS)).map(Member::getUser).toList()));
         // private chats
-        joinedConversations.stream().filter(c -> c.getType().equals(ConversationType.PRIVATE_CHAT)).forEach(conversation -> users.add(conversationService.getPrivateChatMember(conversation, user).getUser()));
+        joinedConversations.stream().filter(c -> c.getType().equals(ConversationType.PRIVATE_CHAT)).forEach(conversation -> users.add(conversationService.getPrivateChatPartner(conversation, user).getUser()));
         // temp relations
         users.addAll(temporaryRelationRepository.findAllByOwner(user.getId()).stream().map(relation -> userRepository.findById(relation.getTarget()).orElse(null)).filter(Objects::nonNull).toList());
         return users;
@@ -203,25 +198,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public void createTemporaryRelation(@NotNull User owner, @NotNull User relation) {
         Optional<TemporaryRelation> current = temporaryRelationRepository.findByOwnerAndTarget(owner.getId(), relation.getId());
-        if (current.isPresent()) {
-            // renew expire
-            log.info("Renew the temporary relation between {} and {}", owner.getNickname(), relation.getNickname());
-            TemporaryRelation temporaryRelation = current.get();
-            temporaryRelation.setExpire(Instant.now().plus(relationExpire, ChronoUnit.DAYS).getEpochSecond());
-            temporaryRelationRepository.save(temporaryRelation);
-            return;
+        if (current.isEmpty()) {
+            // create the relation
+            log.info("Create the temporary relation between {} and {}", owner.getNickname(), relation.getNickname());
+            temporaryRelationRepository.save(TemporaryRelation.builder()
+                .owner(owner.getId())
+                .target(relation.getId())
+                .expire(Instant.now().plus(relationExpire, ChronoUnit.HOURS).getEpochSecond())
+                .build());
         }
-        log.info("Create the temporary relation between {} and {}", owner.getNickname(), relation.getNickname());
-        temporaryRelationRepository.save(TemporaryRelation.builder()
-            .owner(owner.getId())
-            .target(relation.getId())
-            .expire(Instant.now().plus(relationExpire, ChronoUnit.DAYS).getEpochSecond())
-            .build());
     }
 
     @Override
-    public boolean canAccessStatus(@NotNull User target, User operator) {
-        switch (target.getPrivacy().getStatus()) {
+    public boolean canAccess(@NotNull PrivacyPreferment field, @NotNull User target, User operator) {
+        switch (field) {
             case EVERYONE -> {
                 return true;
             }
@@ -272,5 +262,12 @@ public class UserServiceImpl implements UserService {
         if (username.length() < minUsernameLength) return false;
         if (username.length() > maxUsernameLength) return false;
         return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public void goneOffline(@NotNull User user) {
+        log.info("User {} has gone offline", user.getId());
+        user.setLastLoginTime(Instant.now());
+        userRepository.save(user);
     }
 }
