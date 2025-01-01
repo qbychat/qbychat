@@ -84,6 +84,10 @@ public interface ConversationService {
 
     Member createPrivateChat(User user, User partner);
 
+    List<MemberActivity> listActivities(@NotNull Conversation conversation);
+
+    void updateActivity(Conversation conversation, User user, MemberActivity.MemberActivityEnum activity);
+
     @Data
     @Builder
     class JoinConversationDetails {

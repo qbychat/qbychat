@@ -15,4 +15,6 @@ public interface EventService {
     void clearHistory(@NotNull Conversation conversation);
 
     void deleteMessages(List<Message> messages);
+
+    void markAsRead(List<Message> message);
 }

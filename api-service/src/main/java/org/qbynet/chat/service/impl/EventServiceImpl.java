@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.event.ClearHistoryEvent;
 import org.qbynet.chat.entity.event.DeleteMessageEvent;
+import org.qbynet.chat.entity.event.ReadMessageEvent;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.EventService;
 import org.qbynet.chat.service.UserService;
@@ -50,6 +51,18 @@ public class EventServiceImpl implements EventService {
         return conversationMap;
     }
 
+    private @NotNull Map<User, List<Message>> classifyMessagesBySender(@NotNull List<Message> messages) {
+        Map<User, List<Message>> userMap = new HashMap<>();
+
+        for (Message message : messages) {
+            User user = message.getSender().getUser();
+            userMap.computeIfAbsent(user, k -> new ArrayList<>());
+            userMap.get(user).add(message);
+        }
+
+        return userMap;
+    }
+
     @Override
     public void createEvent(User dest, EventType eventType, Object data) {
         Event event = Event.create(dest, eventType, data);
@@ -80,7 +93,7 @@ public class EventServiceImpl implements EventService {
                     List<Member> members = conversationService.listMembers(conversation);
                     Event event = new Event();
                     event.setType(EventType.UPDATE_CONVERSATION_STATUS);
-                    List<MemberActivity> activities = List.of(); // todo activities
+                    List<MemberActivity> activities = conversationService.listActivities(conversation);
                     event.setPayload(ConversationStatus.create(conversation, members.size(), (int) members.stream().map(it ->
                                 simpUserRegistry.getUser(it.getUser().getRemoteId()))
                             .filter(Objects::nonNull)
@@ -95,7 +108,7 @@ public class EventServiceImpl implements EventService {
                 case PRIVATE_CHAT -> {
                     Member partner = conversationService.getPrivateChatPartner(conversation, user);
                     Status status = null;
-                    List<MemberActivity> activities = List.of(); // todo activities
+                    List<MemberActivity> activities = conversationService.listActivities(conversation);
                     if (userService.canAccessStatus(partner.getUser(), user)) {
                         status = partner.getUser().getStatus();
                     }
@@ -128,6 +141,13 @@ public class EventServiceImpl implements EventService {
             Event event = Event.create(EventType.MESSAGE_DELETED, DeleteMessageEvent.create(conversation, sortedMessages));
             pushEventToMembers(conversation, event);
         });
+    }
+
+    @Override
+    public void markAsRead(List<Message> messages) {
+        classifyMessagesBySender(messages).forEach((user, sortedMessages) ->
+            Event.create(user, EventType.MESSAGE_READ, ReadMessageEvent.create(sortedMessages))
+        );
     }
 
     /**

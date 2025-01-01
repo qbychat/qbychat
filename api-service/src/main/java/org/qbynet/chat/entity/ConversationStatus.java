@@ -14,6 +14,7 @@ public class ConversationStatus {
     private int onlineMemberCount;
     private Duration autoDeleteTimer;
     private List<MemberActivity> activities;
+    private Instant activityExpiry;
 
     // === pm ===
     private boolean isPrivateChat;
@@ -53,6 +54,7 @@ public class ConversationStatus {
             status.setPartnerStatus(pmPartnerStatus);
             status.setPartnerLastOnline(pmPartnerLastOnline);
         }
+        status.setActivityExpiry(Instant.now().plus(Duration.ofSeconds(5)));
         return status;
     }
 }

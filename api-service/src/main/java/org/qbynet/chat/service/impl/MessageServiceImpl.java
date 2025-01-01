@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -151,14 +152,16 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void markAsRead(@NotNull List<String> messageIds, User user) {
         List<Message> messages = messageIds.stream().map(messageId -> messageRepository.findById(messageId).orElse(null)).filter(Objects::nonNull).filter(message -> !message.getSender().getUser().equals(user)).toList();
-        readRepository.saveAll(messages.stream().map(it -> {
+        List<Read> reads = messages.stream().map(it -> {
             Member member = memberRepository.findByUserAndConversation(user, it.getConversation()).orElse(null);
             if (member == null) {
                 return null;
             }
-            // todo push to each user
             return Read.builder().message(it).member(member).build();
-        }).filter(Objects::nonNull).toList());
+        }).filter(Objects::nonNull).toList();
+        readRepository.saveAll(reads);
+        // push events to sender
+        eventService.markAsRead(reads.stream().map(Read::getMessage).collect(Collectors.toList()));
     }
 
     @Override

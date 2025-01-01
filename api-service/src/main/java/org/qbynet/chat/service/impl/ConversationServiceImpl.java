@@ -50,6 +50,9 @@ public class ConversationServiceImpl implements ConversationService {
     @Resource
     EventService eventService;
 
+    @Resource
+    MemberActivityRepository memberActivityRepository;
+
     @Value("${qbychat.conversation.invite.expire}")
     int inviteExpire;
 
@@ -223,6 +226,30 @@ public class ConversationServiceImpl implements ConversationService {
         Member member = addMember(savedConversation, user);
         addMember(savedConversation, partner);
         return member;
+    }
+
+    @Override
+    public List<MemberActivity> listActivities(@NotNull Conversation conversation) {
+        return memberActivityRepository.findAllByConversation(conversation.getId());
+    }
+
+    @Override
+    public void updateActivity(@NotNull Conversation conversation, @NotNull User user, MemberActivity.MemberActivityEnum activity) {
+        // find exist
+        Optional<MemberActivity> exists = memberActivityRepository.findByUserAndConversation(user.getId(), conversation.getId());
+        if (exists.isPresent()) {
+            MemberActivity memberActivity = exists.get();
+            if (!memberActivity.getActivity().equals(activity)) {
+                memberActivity.setActivity(activity);
+                memberActivityRepository.save(memberActivity);
+            }
+            return;
+        }
+        MemberActivity memberActivity = new MemberActivity();
+        memberActivity.setUser(user.getId());
+        memberActivity.setConversation(conversation.getId());
+        memberActivity.setActivity(activity);
+        memberActivityRepository.save(memberActivity);
     }
 
     @Override

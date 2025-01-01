@@ -5,10 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.Conversation;
 import org.qbynet.chat.entity.Message;
 import org.qbynet.chat.entity.User;
-import org.qbynet.chat.entity.dto.DeleteMessageDTO;
-import org.qbynet.chat.entity.dto.EditMessageDTO;
-import org.qbynet.chat.entity.dto.FetchMessageDTO;
-import org.qbynet.chat.entity.dto.SendMessageDTO;
+import org.qbynet.chat.entity.dto.*;
 import org.qbynet.chat.entity.vo.MessageVO;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.MessageService;
@@ -22,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 
@@ -31,10 +29,22 @@ import java.util.List;
 public class MessageController {
     @Resource
     MessageService messageService;
+
     @Resource
     UserService userService;
+
     @Resource
     ConversationService conversationService;
+
+    @MessageMapping("/activity")
+    public void updateTypingStatus(@NotNull UpdateMemberActivityDTO dto) {
+        User user = userService.currentUser();
+        Conversation conversation = conversationService.findConversationById(dto.getConversation());
+        if (conversation == null) {
+            return;
+        }
+        conversationService.updateActivity(conversation, user, dto.getActivity());
+    }
 
     @MutationMapping
     @Secured("SCOPE_message.send") // client->server
