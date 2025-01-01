@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.vo.JoinRequestVO;
+import org.qbynet.chat.entity.vo.MessageVO;
 import org.qbynet.chat.entity.vo.SenderVO;
 import org.qbynet.chat.repository.NotificationDestinationRepository;
 import org.qbynet.chat.repository.NotificationRepository;
@@ -43,13 +44,14 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (conversation.isPreview()) {
             // push to all users
-            messagingTemplate.convertAndSend("/topic/conversation/messages/" + conversation.getId(), message);
+            // todo push to relations only
+            messagingTemplate.convertAndSend("/topic/messages." + conversation.getId(), MessageVO.from(message));
         }
         notificationDestinationRepository.saveAll(conversationService.listMembers(conversation).stream().map(member -> {
-            String userId = member.getUser().getId();
+            String userId = member.getUser().getRemoteId();
             if (message.getSender() == null || !userId.equals(message.getSender().getId())) {
                 // the content of message is already responded in /api/message/send for sender
-                messagingTemplate.convertAndSendToUser(userId, "/topic/conversation/messages", message);
+                messagingTemplate.convertAndSendToUser(userId, "/topic/messages", MessageVO.from(message));
             }
             // create notification destination
             if (member.shouldPush(message)) {
