@@ -53,6 +53,7 @@ public class SecurityConfig {
                 .accessDeniedHandler(new CustomAccessDeniedHandler())
                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
             )
+            .cors(AbstractHttpConfigurer::disable)
             .csrf(AbstractHttpConfigurer::disable)
             .addFilterAfter(new BotAuthenticationFilter(botConfig, userService), BasicAuthenticationFilter.class)
             .addFilterAfter(new UserFilter(userService), AuthorizationFilter.class)
@@ -68,4 +69,9 @@ public class SecurityConfig {
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+//    @Bean
+//    SessionRegistry sessionRegistry() {
+//        return new SessionRegistryImpl();
+//    }
 }

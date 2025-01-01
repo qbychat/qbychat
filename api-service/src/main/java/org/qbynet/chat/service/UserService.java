@@ -7,6 +7,7 @@ import org.qbynet.chat.entity.CreateBot;
 import org.qbynet.chat.entity.Status;
 import org.qbynet.chat.entity.User;
 import org.qbynet.chat.entity.dto.EditProfileDTO;
+import org.springframework.web.socket.messaging.AbstractSubProtocolEvent;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -22,6 +23,10 @@ public interface UserService {
     User find(String remoteId);
 
     User find(Principal principal);
+
+    default User find(@NotNull AbstractSubProtocolEvent event) {
+        return find(event.getUser());
+    }
 
     Bot verifyBotToken(String botKey) throws IOException;
 
