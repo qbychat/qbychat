@@ -3,12 +3,10 @@ package org.qbynet.chat.service.impl;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
-import org.qbynet.chat.entity.Avatar;
-import org.qbynet.chat.entity.Conversation;
-import org.qbynet.chat.entity.Media;
-import org.qbynet.chat.entity.User;
+import org.qbynet.chat.entity.*;
 import org.qbynet.chat.repository.AvatarRepository;
 import org.qbynet.chat.service.AvatarService;
+import org.qbynet.chat.service.ConversationService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeType;
 
@@ -19,6 +17,9 @@ import java.util.List;
 public class AvatarServiceImpl implements AvatarService {
     @Resource
     AvatarRepository avatarRepository;
+
+    @Resource
+    ConversationService conversationService;
 
     @Override
     public Avatar getAvatar(String id) {
@@ -82,7 +83,16 @@ public class AvatarServiceImpl implements AvatarService {
     }
 
     @Override
-    public List<Avatar> getAllAvatars(Conversation conversation) {
+    public List<Avatar> getAllAvatars(@NotNull Conversation conversation, User self) {
+        if (self != null && conversation.getType() == ConversationType.PRIVATE_CHAT) {
+            if (!conversationService.hasJoined(conversation, self)) {
+                // no permission
+                throw new IllegalArgumentException("You have no permission to view avatars of this conversation.");
+            }
+            // find for pm
+            return getAllAvatars(conversationService.getPrivateChatPartner(conversation, self).getUser());
+        }
+        // find for normal conversation
         return avatarRepository.findAllByConversation(conversation);
     }
 }

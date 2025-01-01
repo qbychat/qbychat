@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.entity.*;
 import org.qbynet.chat.entity.dto.EditProfileDTO;
 import org.qbynet.chat.repository.BotRepository;
-import org.qbynet.chat.repository.ContactRepository;
 import org.qbynet.chat.repository.TemporaryRelationRepository;
 import org.qbynet.chat.repository.UserRepository;
+import org.qbynet.chat.service.ContactService;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,10 +43,11 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Resource
-    ContactRepository contactRepository;
-
-    @Resource
     ObjectMapper objectMapper;
+
+    @Lazy
+    @Resource
+    ContactService contactService;
 
     @Resource
     BotRepository botRepository;
@@ -219,15 +220,10 @@ public class UserServiceImpl implements UserService {
                 return false;
             }
             case CONTACTS -> {
-                return hasContact(operator, target);
+                return contactService.hasContact(operator, target);
             }
         }
         return false; // unreachable
-    }
-
-    @Override
-    public boolean hasContact(User owner, User target) {
-        return contactRepository.existsByOwnerAndTarget(owner, target);
     }
 
     @Override

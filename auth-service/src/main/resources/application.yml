@@ -61,6 +61,7 @@ qbychat:
       - link.preview
       - conversation.join
       - conversation.create
+      - conversation.start-pm
       - conversation.manage
       - search
       - bot.create

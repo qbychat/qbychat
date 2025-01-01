@@ -35,12 +35,12 @@ public class AvatarController {
     AvatarService avatarService;
 
     @GetMapping("list")
-    public ResponseEntity<RestBean<List<AvatarVO>>> list(@RequestParam(name = "user", required = false) String userId, @RequestParam(name = "conversation", required = false) String conversationId) {
+    public ResponseEntity<RestBean<List<AvatarVO>>> list(@RequestParam(name = "user", required = false) String userId, @RequestParam(name = "conversation", required = false) String conversationId, @RequestAttribute("user") User user) {
         List<Avatar> avatars;
         if (userId != null) {
             avatars = avatarService.getAllAvatars(userService.findById(userId));
         } else if (conversationId != null) {
-            avatars = avatarService.getAllAvatars(conversationService.findConversationById(conversationId));
+            avatars = avatarService.getAllAvatars(conversationService.findConversationById(conversationId), user);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RestBean.failure(400, "Bad request"));
         }

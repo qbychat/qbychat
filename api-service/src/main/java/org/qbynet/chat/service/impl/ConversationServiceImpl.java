@@ -201,6 +201,31 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
+    public Member createPrivateChat(@NotNull User user, @NotNull User partner) {
+        // find exist
+        Optional<Member> exist = this.listJoinedConversations(partner)
+            .stream()
+            .filter(it -> it.getConversation().getType().equals(ConversationType.PRIVATE_CHAT))
+            .map(member -> this.getPrivateChatPartner(member.getConversation(), member.getUser()))
+            .filter(member -> member.getUser().equals(user))
+            .findFirst();
+        if (exist.isPresent()) {
+            return exist.get();
+        }
+        Conversation conversation = new Conversation();
+        conversation.setPreview(false);
+        conversation.setNoForward(false);
+        conversation.setDefaultPermissions(Collections.singletonList(MemberPermission.PRIVATE_CHAT_DEFAULT));
+        conversation.setType(ConversationType.PRIVATE_CHAT);
+        Conversation savedConversation = conversationRepository.save(conversation);
+        log.info("Created private chat between {} and {}", user.getId(), partner.getId());
+        // add members
+        Member member = addMember(savedConversation, user);
+        addMember(savedConversation, partner);
+        return member;
+    }
+
+    @Override
     public boolean isBanned(Conversation conversation, User user) {
         Optional<Member> member = memberRepository.findByUserAndConversation(user, conversation);
         if (member.isEmpty()) return false; // not banned

@@ -82,6 +82,8 @@ public interface ConversationService {
 
     boolean hasViewPermission(Conversation conversation, User user);
 
+    Member createPrivateChat(User user, User partner);
+
     @Data
     @Builder
     class JoinConversationDetails {

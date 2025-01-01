@@ -61,8 +61,6 @@ public interface UserService {
         return canAccess(target.getPrivacy().getCalls(), target, operator);
     }
 
-    boolean hasContact(User owner, User target);
-
     /**
      * Get user from a request
      */

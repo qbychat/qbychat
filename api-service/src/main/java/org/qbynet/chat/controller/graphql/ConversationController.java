@@ -8,6 +8,7 @@ import org.qbynet.chat.entity.dto.ConfigAutoDeleteTimerDTO;
 import org.qbynet.chat.entity.dto.CreateConversationDTO;
 import org.qbynet.chat.entity.dto.InviteDTO;
 import org.qbynet.chat.entity.vo.*;
+import org.qbynet.chat.service.ContactService;
 import org.qbynet.chat.service.ConversationService;
 import org.qbynet.chat.service.UserService;
 import org.qbynet.shared.exception.BadRequest;
@@ -28,6 +29,9 @@ public class ConversationController {
 
     @Resource
     ConversationService conversationService;
+
+    @Resource
+    ContactService contactService;
 
     @MutationMapping
     @Secured("SCOPE_conversation.create")
@@ -168,5 +172,21 @@ public class ConversationController {
             .joined(true)
             .joinRequests(joinRequests)
             .build();
+    }
+
+    @MutationMapping
+    @Secured("SCOPE_conversation.start-pm")
+    public ConversationVO startPrivateChat(@Argument @NotNull String partner) {
+        User user = userService.currentUser();
+        if (user.getId().equals(partner)) {
+            throw new BadRequest("You cannot start a private chat with yourself!");
+        }
+        User partnerUser = userService.findById(partner);
+        if (partnerUser == null) {
+            throw new NotFound("Partner not found");
+        }
+        Member member = conversationService.createPrivateChat(user, partnerUser);
+        Contact contact = contactService.findContact(user, partnerUser);
+        return ConversationVO.privateChat(member, contact);
     }
 }
