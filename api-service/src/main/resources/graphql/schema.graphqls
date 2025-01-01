@@ -22,23 +22,24 @@ type Query {
 }
 
 type Mutation {
-    editProfile(input: EditProfileInput): User
+    editProfile(input: EditProfileInput!): User
 
-    sendMessage(input: SendMessageInput): Message
-    editMessage(input: EditMessageInput): Message
-    markAsRead(messages: [ID]): String
+    sendMessage(input: SendMessageInput!): Message
+    editMessage(input: EditMessageInput!): Message
+    markAsRead(messages: [ID!]): String
 
-    createConversation(input: CreateConversationInput): Conversation
-    joinConversation(link: String): JoinConversation
-    approveJoinRequest(id: ID): Member
-    denyJoinRequest(id: ID): String
-    configAutoDeleteTimer(input: ConfigAutoDeleteTimerInput): Conversation
+    createConversation(input: CreateConversationInput!): Conversation
+    joinConversation(link: String!): JoinConversation
+    approveJoinRequest(id: ID!): Member
+    denyJoinRequest(id: ID!): String
+    configAutoDeleteTimer(input: ConfigAutoDeleteTimerInput!): Conversation
 
-    invite(input: InviteInput): InviteLink
+    invite(input: InviteInput!): InviteLink
     updateStatus(text: String): Status
 
-    createBot(input: CreateBotInput): Bot!
-    deleteBot(input: DeleteBotInput): String!
+    createBot(input: CreateBotInput!): Bot!
+    resetBotToken(id: ID!): Bot!
+    deleteBot(input: DeleteBotInput!): String!
 }
 
 input CreateBotInput {
