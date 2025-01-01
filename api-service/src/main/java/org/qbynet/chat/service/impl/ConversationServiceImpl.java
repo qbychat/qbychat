@@ -115,7 +115,7 @@ public class ConversationServiceImpl implements ConversationService {
         Optional<Member> existMemberOptional = memberRepository.findByUserAndConversation(user, conversation);
         if (existMemberOptional.isPresent()) {
             Member existMember = existMemberOptional.get();
-            if (existMember.getBanUntil().isAfter(Instant.now())) {
+            if (existMember.getBanUntil() != null && existMember.getBanUntil().isAfter(Instant.now())) {
                 // banned
                 return JoinConversationDetails.builder()
                     .joined(false)
@@ -196,7 +196,7 @@ public class ConversationServiceImpl implements ConversationService {
     public boolean isBanned(Conversation conversation, User user) {
         Optional<Member> member = memberRepository.findByUserAndConversation(user, conversation);
         if (member.isEmpty()) return false; // not banned
-        return Boolean.TRUE.equals(member.map(it -> it.getBanUntil() != null && it.getBanUntil().isAfter(Instant.now())).orElse(null));
+        return Boolean.TRUE.equals(member.map(it -> it.getBanUntil() != null && it.getBanUntil().isAfter(Instant.now())).orElse(false));
     }
 
     @Override
