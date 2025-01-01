@@ -103,11 +103,11 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public void setAnonymous(boolean state, @NotNull Member member) {
+    public Member setAnonymous(boolean state, @NotNull Member member) {
         User operator = userService.currentUser();
         member.setAnonymous(state);
         auditLogService.anonymous(member, operator);
-        memberRepository.save(member);
+        return memberRepository.save(member);
     }
 
     @Override

@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.qbynet.chat.annotation.Authorized;
 import org.qbynet.chat.entity.*;
+import org.qbynet.chat.entity.dto.ConfigAnonymousDTO;
 import org.qbynet.chat.entity.dto.ConfigAutoDeleteTimerDTO;
 import org.qbynet.chat.entity.dto.CreateConversationDTO;
 import org.qbynet.chat.entity.dto.InviteDTO;
@@ -241,5 +242,21 @@ public class ConversationController {
         }
         messageService.clearHistory(conv);
         return "Success";
+    }
+
+    @MutationMapping
+    @Secured("SCOPE_conversation.manage")
+    public MemberVO configAnonymous(@Argument @NotNull ConfigAnonymousDTO input) {
+        User user = userService.currentUser();
+        Conversation conversation = conversationService.findConversationById(input.getConversation());
+        Member member = conversationService.findMember(conversation, user);
+        if (member == null || !member.hasPermissions(MemberPermission.CHANGE_MEMBER_INFO)) {
+            throw new Forbidden("You have no permission to change anonymous");
+        }
+        Member target = conversationService.findMember(conversation, userService.findById(input.getUser()));
+        if (target == null) {
+            throw new BadRequest("Unknown member");
+        }
+        return MemberVO.from(conversationService.setAnonymous(input.isState(), target));
     }
 }

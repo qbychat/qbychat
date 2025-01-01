@@ -30,7 +30,7 @@ public interface ConversationService {
 
     void removeMember(Member member);
 
-    void setAnonymous(boolean state, Member member);
+    Member setAnonymous(boolean state, Member member);
 
     Conversation findByLink(String link);
 

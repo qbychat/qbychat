@@ -38,6 +38,7 @@ type Mutation {
     approveJoinRequest(id: ID!): Member
     denyJoinRequest(id: ID!): String
     configAutoDeleteTimer(input: ConfigAutoDeleteTimerInput!): Conversation
+    configAnonymous(input: ConfigAnonymousInput!): Member
 
     invite(input: InviteInput!): InviteLink
     updateStatus(text: String): Status
@@ -45,6 +46,12 @@ type Mutation {
     createBot(input: CreateBotInput!): Bot!
     resetBotToken(id: ID!): Bot!
     deleteBot(input: DeleteBotInput!): String!
+}
+
+input ConfigAnonymousInput {
+    conversation: ID!
+    user: ID!
+    state: Boolean
 }
 
 input DeleteMessageInput {
