@@ -1,0 +1,52 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: qbychat-mongo
+    ports:
+      - '27017:27017'
+    environment:
+      - 'MONGO_INITDB_ROOT_USERNAME=root'
+      - 'MONGO_INITDB_ROOT_PASSWORD=password'
+      - 'MONGO_INITDB_DATABASE=qbychat'
+    volumes:
+      - mongo:/data/db
+    restart: always
+  redis:
+    image: redis:latest
+    container_name: qbychat-redis
+    ports:
+      - '6379:6379'
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:4.1.0-beta.4-management-alpine
+    container_name: qbychat-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "5552:5552"
+      - "15672:15672" # webui
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_VHOST: qbychat
+    configs:
+      - source: plugins
+        target: /etc/rabbitmq/enabled_plugins
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+configs:
+  plugins:
+    content: "[rabbitmq_management, rabbitmq_stream]."
+
+volumes:
+  mongo:
+    driver: local
+  rabbitmq_data:
+    driver: local
