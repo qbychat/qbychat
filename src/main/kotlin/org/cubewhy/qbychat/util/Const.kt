@@ -1,6 +1,6 @@
 package org.cubewhy.qbychat.util
 
 object Const {
-    const val USER_WEBSOCKET_SESSION = "qbychat:s:"
-    const val EXPIRED_TOKEN = "qbychat:j:e:"
+    const val USER_WEBSOCKET_SESSION_STORE = "qc:ss:"
+    const val EXPIRED_TOKEN = "qc:j:e:"
 }

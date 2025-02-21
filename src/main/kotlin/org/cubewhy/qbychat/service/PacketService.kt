@@ -1,6 +1,6 @@
 package org.cubewhy.qbychat.service
 
-import org.cubewhy.celestial.entity.WebsocketResponse
+import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.websocket.protocol.Protocol
 import org.springframework.web.reactive.socket.WebSocketSession
@@ -12,5 +12,5 @@ interface PacketService {
         session: WebSocketSession
     ): WebsocketResponse
 
-    suspend fun processDisconnect(signalType: SignalType, session: WebSocketSession, user: User)
+    suspend fun processDisconnect(signalType: SignalType, session: WebSocketSession, user: User?)
 }
