@@ -38,10 +38,9 @@ class SecurityConfig(
     @Bean
     fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         return http {
-
             authorizeExchange {
                 authorize(
-                    pathMatchers("/ws"), permitAll
+                    pathMatchers("/ws", "/.well-known/*"), permitAll
                 )
                 authorize(anyExchange, authenticated)
             }
