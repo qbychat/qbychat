@@ -4,9 +4,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.service.PacketService
+import org.cubewhy.qbychat.util.aesKey
 import org.cubewhy.qbychat.util.decryptInputStream
+import org.cubewhy.qbychat.util.readIvFromInputStream
 import org.cubewhy.qbychat.util.sendWithEncryption
-import org.cubewhy.qbychat.util.serverPrivateKey
 import org.cubewhy.qbychat.websocket.protocol.Protocol
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
@@ -27,17 +28,21 @@ class WebsocketHandler(
         return session.receive()
             .flatMap { message ->
                 // resolve pbMessage
-                val pbMessage = if (session.serverPrivateKey != null) {
+                val inputStream = message.payload.asInputStream()
+                val pbMessage = if (session.aesKey != null) {
                     // decrypt message
+                    // [iv(12 bytes)][encrypted data]
+                    val iv = readIvFromInputStream(inputStream) // parse iv
                     Protocol.ServerboundMessage.parseFrom(
                         decryptInputStream(
-                            message.payload.asInputStream(),
-                            session.serverPrivateKey!!
+                            inputStream,
+                            session.aesKey!!,
+                            iv
                         )
                     )
                 } else {
                     // non-encrypted
-                    Protocol.ServerboundMessage.parseFrom(message.payload.asInputStream())
+                    Protocol.ServerboundMessage.parseFrom(inputStream)
                 }
                 // process packet
                 mono { packetService.process(pbMessage, session) }

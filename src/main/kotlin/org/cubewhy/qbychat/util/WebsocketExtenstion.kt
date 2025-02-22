@@ -8,22 +8,14 @@ import org.cubewhy.qbychat.websocket.protocol.Protocol
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
-import java.security.PrivateKey
-import java.security.PublicKey
+import javax.crypto.SecretKey
 import com.google.protobuf.Any as ProtobufAny
 
-var WebSocketSession.clientPublicKey: PublicKey?
+var WebSocketSession.aesKey: SecretKey?
     get() =
-        this.attributes["cpk"] as PublicKey?
+        this.attributes["aesk"] as SecretKey?
     set(value) {
-        this.attributes["cpk"] = value
-    }
-
-var WebSocketSession.serverPrivateKey: PrivateKey?
-    get() =
-        this.attributes["spk"] as PrivateKey?
-    set(value) {
-        this.attributes["spk"] = value
+        this.attributes["aesk"] = value
     }
 
 var WebSocketSession.handshakeStatus: Boolean
@@ -64,10 +56,12 @@ fun WebSocketSession.sendWithEncryption(response: WebsocketResponse): Mono<Void>
     })
     return this.send(messages.map { message ->
         this.binaryMessage { factory ->
-            if (this.clientPublicKey == null) {
+            if (this.aesKey == null || response.type == HANDSHAKE) {
+                // handshake packet should be unencrypted
                 factory.wrap(message)
             } else {
-                factory.wrap(encryptWithPublicKey(message, this.clientPublicKey!!))
+                // encrypt
+                factory.wrap(encryptAESGCM(message, this.aesKey!!))
             }
         }
     }.toFlux())

@@ -23,12 +23,14 @@ class PacketServiceImpl : PacketService {
                 // encryption is disabled on clientside
                 return handshakeResponse(Protocol.ServerHandshake.getDefaultInstance())
             }
-            // resolve client public key
-            session.clientPublicKey = getPublicKeyFromBytes(clientHandshake.publicKey.toByteArray())
+            // key exchange
             // generate server keypair
-            val keyPair = generateRSAKeyPair()
-            // save server private key to session
-            session.serverPrivateKey = keyPair.private
+            val keyPair = generateECDHKeyPair()
+            // calc shared secret
+            val secret = computeSharedSecret(keyPair, getECDHPublicKeyFromBytes(clientHandshake.publicKey.toByteArray()))
+            val aesKey = hkdfSha256(secret, clientHandshake.aesKeySalt.toByteArray(), "AES".toByteArray(), clientHandshake.aesKeyLength)
+            // save AES key to session
+            session.aesKey = bytesToAESKey(aesKey)
             session.handshakeStatus = true
             val response = Protocol.ServerHandshake.newBuilder().apply {
                 this.publicKey = keyPair.public.encoded.toByteString()
