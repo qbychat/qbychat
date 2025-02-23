@@ -70,10 +70,13 @@ class PacketServiceImpl(
         }
         if (message.hasRequest()) {
             val request = message.request
-            return when (request.service) {
+            val response =  when (request.service) {
                 "org.cubewhy.qbychat.service.UserService" -> userService.process(request.method, request.payload, session, user)
                 else -> emptyWebsocketResponse()
             }
+            // add ticket to response
+            response.ticket = request.ticket
+            return response
         }
         return emptyWebsocketResponse()
     }
