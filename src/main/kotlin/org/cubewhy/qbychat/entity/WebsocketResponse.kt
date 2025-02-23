@@ -18,8 +18,13 @@ enum class WebsocketResponseType {
     HANDSHAKE
 }
 
-fun websocketResponse(userId: String, response: GeneratedMessage?): WebsocketResponse? {
-    if (response == null) return null
+fun websocketResponse(response: GeneratedMessage?): WebsocketResponse {
+    if (response == null) return emptyWebsocketResponse()
+    return WebsocketResponse(null, response)
+}
+
+fun websocketResponse(userId: String, response: GeneratedMessage?): WebsocketResponse {
+    if (response == null) return emptyWebsocketResponse()
     return WebsocketResponse(userId, response)
 }
 

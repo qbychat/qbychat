@@ -2,11 +2,14 @@ package org.cubewhy.qbychat.service.impl
 
 import com.google.protobuf.kotlin.toByteString
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.emptyWebsocketResponse
 import org.cubewhy.qbychat.entity.handshakeResponse
 import org.cubewhy.qbychat.service.PacketService
+import org.cubewhy.qbychat.service.SessionService
+import org.cubewhy.qbychat.service.UserService
 import org.cubewhy.qbychat.util.*
 import org.cubewhy.qbychat.websocket.protocol.Protocol
 import org.springframework.stereotype.Service
@@ -14,12 +17,17 @@ import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.SignalType
 
 @Service
-class PacketServiceImpl : PacketService {
+class PacketServiceImpl(
+    private val sessionService: SessionService,
+    private val userService: UserService
+) : PacketService {
     companion object {
         private val logger = KotlinLogging.logger {}
     }
 
     override suspend fun process(message: Protocol.ServerboundMessage, session: WebSocketSession): WebsocketResponse {
+        // load user
+        val user = userService.loadUser(message)
         if (message.hasClientHandshake() && !session.handshakeStatus) {
             // handle handshake
             // save client public key to session
@@ -52,6 +60,20 @@ class PacketServiceImpl : PacketService {
                 this.publicKey = keyPair.public.encoded.toByteString()
             }.build()
             return handshakeResponse(response)
+        }
+        if (user != null) {
+            if (!sessionService.isOnSession(session, user)) {
+                logger.warn { "Session ${session.id} send invalid packet (account ${message.account} not exist on this session)" }
+                session.close().awaitFirstOrNull()
+                return emptyWebsocketResponse()
+            }
+        }
+        if (message.hasRequest()) {
+            val request = message.request
+            return when (request.service) {
+                "org.cubewhy.qbychat.service.UserService" -> userService.process(request.method, request.payload, session, user)
+                else -> emptyWebsocketResponse()
+            }
         }
         return emptyWebsocketResponse()
     }

@@ -29,6 +29,10 @@ class SessionServiceImpl(
             .awaitFirst()
     }
 
+    override suspend fun isOnSession(session: WebSocketSession, user: User): Boolean {
+        return findSessions(user).any { it.websocketId == session.id }
+    }
+
     override suspend fun findSessions(user: User): List<UserWebsocketSession> =
         userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
             .filter { it.userId == user.id }

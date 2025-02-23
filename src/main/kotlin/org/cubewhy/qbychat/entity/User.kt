@@ -12,7 +12,7 @@ data class User(
     var role: Role = Role.USER,
 
     var nickname: String,
-    var bio: String,
+    var bio: String = "",
 
     val createdAt: Instant = Instant.now(),
 )
