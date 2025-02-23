@@ -40,7 +40,7 @@ class SecurityConfig(
         return http {
             authorizeExchange {
                 authorize(
-                    pathMatchers("/ws", "/.well-known/*"), permitAll
+                    pathMatchers("/ws", "/.well-known/**"), permitAll
                 )
                 authorize(anyExchange, authenticated)
             }

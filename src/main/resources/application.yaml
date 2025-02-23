@@ -14,3 +14,9 @@ spring:
 qbychat:
   websocket:
     path: /ws
+  user:
+    username:
+      rule:
+        regex: "^[a-zA-Z0-9_]+$"
+        # General description of the rule
+        description: "Username should only contain letters (a-z, A-Z), numbers (0-9), and underscores (_)."

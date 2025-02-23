@@ -1,5 +1,5 @@
 package org.cubewhy.qbychat.entity.vo
 
-data class QbyChatConfigVO(
+data class QbyChatConnectionConfigVO(
     val websocketPath: String,
 )
