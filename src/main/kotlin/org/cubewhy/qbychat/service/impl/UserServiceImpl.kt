@@ -78,7 +78,7 @@ class UserServiceImpl(
     override suspend fun processRegister(request: WebsocketUser.RegisterRequest, session: WebSocketSession): WebsocketResponse {
         // check username available
         // todo exists chat name
-        if (userRepository.existsByUsername(request.username).awaitFirst()) {
+        if (userRepository.existsByUsernameIgnoreCase(request.username).awaitFirst()) {
             return websocketResponse(WebsocketUser.RegisterResponse.newBuilder().apply {
                 this.status = WebsocketUser.RegisterStatus.USERNAME_EXISTS
             }.build())
