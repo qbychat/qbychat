@@ -42,7 +42,7 @@ class UserServiceImpl(
     private lateinit var usernameRuleDescription: String
 
     override fun findByUsername(username: String): Mono<UserDetails> {
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsernameIgnoreCase(username)
             .flatMap { user ->
                 // build User details
                 org.springframework.security.core.userdetails.User.builder()
@@ -54,7 +54,7 @@ class UserServiceImpl(
     }
 
     override fun loadUserByUsername(username: String): Mono<User> {
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsernameIgnoreCase(username)
     }
 
     override suspend fun loadUser(message: Protocol.ServerboundMessage): User? {
@@ -112,7 +112,7 @@ class UserServiceImpl(
 
     override suspend fun processUsernamePasswordLogin(request: WebsocketAuth.UsernamePasswordLoginRequest, session: WebSocketSession): WebsocketResponse {
         // find user by username
-        val user = userRepository.findByUsername(request.username).awaitFirstOrNull()
+        val user = userRepository.findByUsernameIgnoreCase(request.username).awaitFirstOrNull()
             ?: return websocketResponse(WebsocketAuth.UsernamePasswordLoginResponse.newBuilder().apply {
                 status = WebsocketAuth.LoginStatus.USER_NOT_FOUND
             }.build())

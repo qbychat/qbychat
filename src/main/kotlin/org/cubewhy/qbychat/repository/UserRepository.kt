@@ -7,6 +7,6 @@ import reactor.core.publisher.Mono
 
 @Repository
 interface UserRepository : ReactiveMongoRepository<User, String> {
-    fun findByUsername(username: String): Mono<User>
+    fun findByUsernameIgnoreCase(username: String): Mono<User>
     fun existsByUsernameIgnoreCase(username: String): Mono<Boolean>
 }
