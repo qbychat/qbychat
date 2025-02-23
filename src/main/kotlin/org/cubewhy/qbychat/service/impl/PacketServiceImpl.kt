@@ -19,6 +19,7 @@ class PacketServiceImpl : PacketService {
             // handle handshake
             // save client public key to session
             val clientHandshake = message.clientHandshake
+            // todo save client info
             if (!clientHandshake.hasPublicKey()) {
                 // encryption is disabled on clientside
                 return handshakeResponse(Protocol.ServerHandshake.getDefaultInstance())

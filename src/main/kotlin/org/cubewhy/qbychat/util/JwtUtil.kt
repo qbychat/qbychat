@@ -44,13 +44,13 @@ class JwtUtil(
         }
     }
 
-    fun createJwt(webUser: User): String {
+    fun createJwt(user: User): String {
         val algorithm: Algorithm = Algorithm.HMAC256(key)
         return JWT.create()
             .withJWTId(UUID.randomUUID().toString())
-            .withClaim("id", webUser.id) // internal id
-            .withClaim("username", webUser.username) // minecraft username
-            .withClaim("role", webUser.role.name) // minecraft uuid
+            .withClaim("id", user.id) // internal id
+            .withClaim("username", user.username)
+            .withClaim("role", user.role.name)
             .withExpiresAt(expireDate) // now + {date}
             .withIssuedAt(Date()) // time now
             .sign(algorithm)
