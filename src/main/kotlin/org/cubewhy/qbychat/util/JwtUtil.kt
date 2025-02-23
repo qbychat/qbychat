@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.JWTVerifier
+import org.cubewhy.qbychat.entity.Session
 import org.cubewhy.qbychat.entity.User
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -49,6 +50,19 @@ class JwtUtil(
         return JWT.create()
             .withJWTId(UUID.randomUUID().toString())
             .withClaim("id", user.id) // internal id
+            .withClaim("username", user.username)
+            .withClaim("role", user.role.name)
+            .withExpiresAt(expireDate) // now + {date}
+            .withIssuedAt(Date()) // time now
+            .sign(algorithm)
+    }
+
+    fun createJwt(user: User, session: Session): String {
+        val algorithm: Algorithm = Algorithm.HMAC256(key)
+        return JWT.create()
+            .withJWTId(UUID.randomUUID().toString())
+            .withClaim("id", user.id) // user id
+            .withClaim("session", session.id) // session id
             .withClaim("username", user.username)
             .withClaim("role", user.role.name)
             .withExpiresAt(expireDate) // now + {date}

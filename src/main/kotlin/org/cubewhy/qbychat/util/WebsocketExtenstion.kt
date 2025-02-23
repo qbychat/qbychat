@@ -1,6 +1,7 @@
 package org.cubewhy.qbychat.util
 
 import com.google.protobuf.GeneratedMessage
+import org.cubewhy.qbychat.entity.ClientInfo
 import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.WebsocketResponseType.COMMON
 import org.cubewhy.qbychat.entity.WebsocketResponseType.HANDSHAKE
@@ -23,6 +24,13 @@ var WebSocketSession.handshakeStatus: Boolean
         this.attributes["handshake"] as Boolean? ?: false
     set(value) {
         this.attributes["handshake"] = value
+    }
+
+var WebSocketSession.clientInfo: ClientInfo?
+    get() =
+        this.attributes["clientInfo"] as ClientInfo?
+    set(value) {
+        this.attributes["clientInfo"] = value
     }
 
 fun GeneratedMessage.toProtobufResponse(ticket: String): Protocol.Response = Protocol.Response.newBuilder().apply {

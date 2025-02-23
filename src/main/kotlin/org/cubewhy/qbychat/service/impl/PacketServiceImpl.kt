@@ -3,10 +3,7 @@ package org.cubewhy.qbychat.service.impl
 import com.google.protobuf.kotlin.toByteString
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.cubewhy.qbychat.entity.User
-import org.cubewhy.qbychat.entity.WebsocketResponse
-import org.cubewhy.qbychat.entity.emptyWebsocketResponse
-import org.cubewhy.qbychat.entity.handshakeResponse
+import org.cubewhy.qbychat.entity.*
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.service.UserService
@@ -33,10 +30,16 @@ class PacketServiceImpl(
             // save client public key to session
             logger.info { "Session ${session.id} handshake" }
             val clientHandshake = message.clientHandshake
-            // todo save client info
+            // save client info
+            session.clientInfo = ClientInfo(
+                name = clientHandshake.clientInfo.name,
+                version = clientHandshake.clientInfo.version,
+                platform = clientHandshake.clientInfo.platform
+            )
             if (!clientHandshake.hasPublicKey()) {
                 // encryption is disabled on clientside
                 logger.info { "Encryption of session ${session.id} is disabled (no ECDH public key provided)" }
+                session.handshakeStatus = true
                 return handshakeResponse(Protocol.ServerHandshake.getDefaultInstance())
             }
             logger.info { "Session ${session.id} key exchange" }
@@ -82,5 +85,7 @@ class PacketServiceImpl(
     }
 
     override suspend fun processDisconnect(signalType: SignalType, session: WebSocketSession, user: User?) {
+        // remove sessions from session store
+        sessionService.removeWebsocketSessions(session)
     }
 }
