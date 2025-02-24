@@ -1,6 +1,9 @@
 package org.cubewhy.qbychat.handler
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.service.PacketService
@@ -13,12 +16,12 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
-import reactor.core.scheduler.Schedulers
 import reactor.netty.channel.AbortedException
 
 @Component
 class WebsocketHandler(
-    private val packetService: PacketService
+    private val packetService: PacketService,
+    private val scope: CoroutineScope,
 ) : WebSocketHandler {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -59,9 +62,9 @@ class WebsocketHandler(
                 // remove session id and close session
                 val user = session.attributes["user"] as User?
                 // remove session
-                mono {
+                scope.launch {
                     packetService.processDisconnect(signalType, session, user)
-                }.publishOn(Schedulers.boundedElastic()).subscribe()
+                }
             }.then()
     }
 }

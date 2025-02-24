@@ -116,6 +116,7 @@ class PacketServiceImpl(
 
     override suspend fun processDisconnect(signalType: SignalType, session: WebSocketSession, user: User?) {
         // remove sessions from session store
+        logger.info { "Session ${session.id} disconnected" }
         sessionService.removeWebsocketSessions(session)
     }
 }
