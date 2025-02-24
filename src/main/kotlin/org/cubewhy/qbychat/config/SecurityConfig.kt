@@ -4,6 +4,7 @@ import org.cubewhy.qbychat.entity.RestBean
 import org.cubewhy.qbychat.entity.vo.AuthorizeVO
 import org.cubewhy.qbychat.service.UserService
 import org.cubewhy.qbychat.util.JwtUtil
+import org.cubewhy.qbychat.util.security.WebsocketSecurityRules
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -65,6 +66,14 @@ class SecurityConfig(
             }
             httpBasic { }
         }
+    }
+
+    @Bean
+    fun websocketSecurityRules(): WebsocketSecurityRules {
+        return WebsocketSecurityRules.builder()
+            .permitAll(UserService::class.java, "UsernamePasswordLogin")
+            .permitAll(UserService::class.java, "Register")
+            .build()
     }
 
     class AuthSuccessHandler(private val jwtUtil: JwtUtil, private val userService: UserService) :

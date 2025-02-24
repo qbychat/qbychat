@@ -4,10 +4,13 @@ import com.google.protobuf.kotlin.toByteString
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.cubewhy.qbychat.entity.*
+import org.cubewhy.qbychat.exception.WebsocketUnauthorized
+import org.cubewhy.qbychat.service.PacketProcessor
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.service.UserService
 import org.cubewhy.qbychat.util.*
+import org.cubewhy.qbychat.util.security.WebsocketSecurityFilter
 import org.cubewhy.qbychat.websocket.protocol.Protocol
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.socket.WebSocketSession
@@ -16,10 +19,22 @@ import reactor.core.publisher.SignalType
 @Service
 class PacketServiceImpl(
     private val sessionService: SessionService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val handlers: MutableList<out PacketProcessor>,
+    private val websocketSecurityFilter: WebsocketSecurityFilter
 ) : PacketService {
+    private val handlerMap = mutableMapOf<String, PacketProcessor>()
+
     companion object {
         private val logger = KotlinLogging.logger {}
+    }
+
+    init {
+        handlers.forEach { handler ->
+            logger.info { "Register packet processor ${handler.javaClass.interfaces[0].name}" }
+            handlerMap[handler.javaClass.interfaces[0].name] = handler
+        }
+        logger.info { "${handlers.size} packet processors registered" }
     }
 
     override suspend fun process(message: Protocol.ServerboundMessage, session: WebSocketSession): WebsocketResponse {
@@ -73,12 +88,27 @@ class PacketServiceImpl(
         }
         if (message.hasRequest()) {
             val request = message.request
-            val response =  when (request.service) {
-                "org.cubewhy.qbychat.service.UserService" -> userService.process(request.method, request.payload, session, user)
-                else -> emptyWebsocketResponse()
+            // find handler
+            val processor = this.handlerMap[request.service]
+            val response = if (processor == null) {
+                logger.warn { "Session ${session.id} tried to access to an invalid service (${request.service})" }
+                emptyWebsocketResponse()
+            } else {
+                try {
+                    // do filter
+                    websocketSecurityFilter.doFilter(request.service, request.method, session)
+                    logger.info { "Session ${session.id} request ${request.service}:${request.method}" }
+                    // process packet
+                    processor.process(request.method, request.payload, session, user)
+                } catch (e: WebsocketUnauthorized) {
+                    // unauthorized
+                    emptyWebsocketResponse()
+                }
+            }.apply {
+                // add ticket to response
+                // this -> response
+                this.ticket = request.ticket
             }
-            // add ticket to response
-            response.ticket = request.ticket
             return response
         }
         return emptyWebsocketResponse()

@@ -44,6 +44,12 @@ class SessionServiceImpl(
             .collectList()
             .awaitLast()
 
+    override suspend fun isAuthorized(session: WebSocketSession): Boolean {
+        return userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
+            .any { it.websocketId == session.id }
+            .awaitLast()
+    }
+
     override suspend fun createSession(user: User, session: WebSocketSession): Session {
         val session1 = Session(
             user = user.id!!,

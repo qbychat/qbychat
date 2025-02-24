@@ -7,6 +7,7 @@ import org.springframework.web.reactive.socket.WebSocketSession
 
 interface SessionService {
     suspend fun findSessions(user: User): List<UserWebsocketSession>
+    suspend fun isAuthorized(session: WebSocketSession): Boolean
     suspend fun saveWebsocketSession(websocketSession: WebSocketSession, user: User)
     suspend fun removeWebsocketSessions(websocketSession: WebSocketSession)
     suspend fun isOnSession(session: WebSocketSession, user: User): Boolean
