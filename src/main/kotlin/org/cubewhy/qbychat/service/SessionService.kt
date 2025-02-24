@@ -12,4 +12,6 @@ interface SessionService {
     suspend fun removeWebsocketSessions(websocketSession: WebSocketSession)
     suspend fun isOnSession(session: WebSocketSession, user: User): Boolean
     suspend fun createSession(user: User, session: WebSocketSession): Session
+    suspend fun isSessionValid(sessionId: String): Boolean
+    suspend fun regenerateToken(sessionId: String, webSocketSession: WebSocketSession): String?
 }

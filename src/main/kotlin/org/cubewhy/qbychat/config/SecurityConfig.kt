@@ -72,6 +72,8 @@ class SecurityConfig(
     fun websocketSecurityRules(): WebsocketSecurityRules {
         return WebsocketSecurityRules.builder()
             .permitAll(UserService::class.java, "UsernamePasswordLogin")
+            .permitAll(UserService::class.java, "TokenLogin")
+            .permitAll(UserService::class.java, "RemoteLogin")
             .permitAll(UserService::class.java, "Register")
             .build()
     }

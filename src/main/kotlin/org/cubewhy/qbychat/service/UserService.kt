@@ -17,4 +17,9 @@ interface UserService : ReactiveUserDetailsService, PacketProcessor {
         request: WebsocketAuth.UsernamePasswordLoginRequest,
         session: WebSocketSession
     ): WebsocketResponse
+
+    suspend fun processTokenLogin(
+        request: WebsocketAuth.TokenLoginRequest,
+        session: WebSocketSession
+    ): WebsocketResponse
 }

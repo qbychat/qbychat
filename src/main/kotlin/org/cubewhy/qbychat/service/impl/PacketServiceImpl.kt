@@ -49,7 +49,8 @@ class PacketServiceImpl(
             session.clientInfo = ClientInfo(
                 name = clientHandshake.clientInfo.name,
                 version = clientHandshake.clientInfo.version,
-                platform = clientHandshake.clientInfo.platform
+                platform = clientHandshake.clientInfo.platform,
+                installationId = clientHandshake.clientInfo.installationId
             )
             if (!clientHandshake.hasPublicKey()) {
                 // encryption is disabled on clientside

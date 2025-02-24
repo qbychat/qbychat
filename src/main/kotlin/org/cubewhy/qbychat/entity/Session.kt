@@ -10,6 +10,7 @@ data class Session(
     val user: String,
     val clientName: String,
     val clientVersion: String,
+    val clientInstallationId: String,
     val platform: Protocol.Platform,
     val timestamp: Instant = Instant.now(),
 )
@@ -17,5 +18,6 @@ data class Session(
 data class ClientInfo(
     val name: String,
     val version: String,
+    val installationId: String,
     val platform: Protocol.Platform,
 )

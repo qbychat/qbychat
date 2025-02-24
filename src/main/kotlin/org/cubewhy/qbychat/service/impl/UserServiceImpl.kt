@@ -1,6 +1,7 @@
 package org.cubewhy.qbychat.service.impl
 
 import com.google.protobuf.ByteString
+import com.google.protobuf.GeneratedMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import java.time.Instant
 
 @Service
 class UserServiceImpl(
@@ -69,13 +71,22 @@ class UserServiceImpl(
         user: User?
     ): WebsocketResponse {
         return when (method) {
-            "UsernamePasswordLogin" -> this.processUsernamePasswordLogin(WebsocketAuth.UsernamePasswordLoginRequest.parseFrom(payload), session)
+            "UsernamePasswordLogin" -> this.processUsernamePasswordLogin(
+                WebsocketAuth.UsernamePasswordLoginRequest.parseFrom(
+                    payload
+                ), session
+            )
+
+            "TokenLogin" -> this.processTokenLogin(WebsocketAuth.TokenLoginRequest.parseFrom(payload), session)
             "Register" -> this.processRegister(WebsocketUser.RegisterRequest.parseFrom(payload), session)
             else -> emptyWebsocketResponse()
         }
     }
 
-    override suspend fun processRegister(request: WebsocketUser.RegisterRequest, session: WebSocketSession): WebsocketResponse {
+    override suspend fun processRegister(
+        request: WebsocketUser.RegisterRequest,
+        session: WebSocketSession
+    ): WebsocketResponse {
         // check username available
         // todo exists chat name
         if (userRepository.existsByUsernameIgnoreCase(request.username).awaitFirst()) {
@@ -110,7 +121,10 @@ class UserServiceImpl(
         }.build(), this.buildTokenUpdateEvent(jwt))
     }
 
-    override suspend fun processUsernamePasswordLogin(request: WebsocketAuth.UsernamePasswordLoginRequest, session: WebSocketSession): WebsocketResponse {
+    override suspend fun processUsernamePasswordLogin(
+        request: WebsocketAuth.UsernamePasswordLoginRequest,
+        session: WebSocketSession
+    ): WebsocketResponse {
         // find user by username
         val user = userRepository.findByUsernameIgnoreCase(request.username).awaitFirstOrNull()
             ?: return websocketResponse(WebsocketAuth.UsernamePasswordLoginResponse.newBuilder().apply {
@@ -133,6 +147,40 @@ class UserServiceImpl(
         }.build(), this.buildTokenUpdateEvent(jwt))
     }
 
+    override suspend fun processTokenLogin(
+        request: WebsocketAuth.TokenLoginRequest,
+        session: WebSocketSession
+    ): WebsocketResponse {
+        val rawToken = request.token
+        // parse token
+        val jwt = jwtUtil.resolveJwt(rawToken) ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
+        // verify token
+        // verify session
+        val sessionId = jwt.claims["session"]?.asString()
+            ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
+        val userId = jwt.claims["user"]?.asString()
+            ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
+        // find user
+        val user = userRepository.findById(userId).awaitFirstOrNull()
+            ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.USER_NOT_FOUND))
+        if (!sessionService.isSessionValid(sessionId)) {
+            // session was terminated
+            return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.SESSION_TERMINATED))
+        }
+        // verify if expired
+        val events = mutableListOf<GeneratedMessage>()
+        if (jwt.expiresAtAsInstant.isBefore(Instant.now())) {
+            // expired token
+            // try to regenerate one if session is still valid
+            val newToken = sessionService.regenerateToken(sessionId, session)
+                ?: // session is expired
+                return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.TOKEN_EXPIRED))
+            events.add(this.buildTokenUpdateEvent(newToken))
+        }
+        logger.info { "User ${user.username} logged in with token" }
+        return websocketResponse(userId, this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.SUCCESS), events)
+    }
+
     private fun buildTokenUpdateEvent(jwt: String): WebsocketAuth.TokenUpdateEvent {
         // parse jwt and get expire date
         val jwtExpireAt = jwtUtil.resolveJwt(jwt)!!.expiresAt
@@ -141,4 +189,10 @@ class UserServiceImpl(
             expireAt = jwtExpireAt.toProtobufType()
         }.build()
     }
+
+    private fun buildTokenLoginResponse(status: WebsocketAuth.LoginStatus): WebsocketAuth.TokenLoginResponse =
+        WebsocketAuth.TokenLoginResponse.newBuilder().apply {
+            this.status = status
+        }.build()
 }
+

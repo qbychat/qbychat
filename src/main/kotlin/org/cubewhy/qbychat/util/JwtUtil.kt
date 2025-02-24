@@ -29,7 +29,7 @@ class JwtUtil(
         return resolveJwt(token1)
     }
 
-    fun resolveJwt(token: String?): DecodedJWT? {
+    fun resolveJwt(token: String?, ignoreExpired: Boolean = false): DecodedJWT? {
         if (token == null) {
             return null // incorrect token
         }
@@ -37,6 +37,7 @@ class JwtUtil(
         val jwtVerifier: JWTVerifier = JWT.require(algorithm).build()
         try {
             val jwt: DecodedJWT = jwtVerifier.verify(token)
+            if (ignoreExpired) return jwt
             val expireAt: Date = jwt.expiresAt
             return if (Date().after(expireAt)) null else jwt
         } catch (error: JWTVerificationException) {
