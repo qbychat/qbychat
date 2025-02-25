@@ -4,7 +4,7 @@ import org.cubewhy.qbychat.entity.RestBean
 import org.cubewhy.qbychat.entity.vo.AuthorizeVO
 import org.cubewhy.qbychat.service.UserService
 import org.cubewhy.qbychat.util.JwtUtil
-import org.cubewhy.qbychat.util.security.WebsocketSecurityRules
+import org.cubewhy.qbychat.security.WebsocketSecurityRules
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -91,7 +91,7 @@ class SecurityConfig(
                 val jwt = jwtUtil.createJwt(user)
                 // parse jwt
                 val parsedJwt = jwtUtil.resolveJwt(jwt)!!
-                AuthorizeVO(user.username, jwt, parsedJwt.expiresAt.time, user.role.name).toMono()
+                AuthorizeVO(user.username, jwt, parsedJwt.expiresAt.time, user.roles.map { it.name }).toMono()
             }.flatMap { vo ->
                 webFilterExchange.exchange.responseSuccess(vo)
             }

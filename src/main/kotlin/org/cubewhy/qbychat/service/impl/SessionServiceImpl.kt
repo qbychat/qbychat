@@ -29,6 +29,10 @@ class SessionServiceImpl(
     }
 
     override suspend fun saveWebsocketSession(websocketSession: WebSocketSession, user: User) {
+        if (this.isOnSession(websocketSession, user)) {
+            logger.warn { "Skipping save session of user ${user.username} on websocket connection ${websocketSession.id} (already exists)" }
+            return
+        }
         logger.info { "Saving session for ${user.username} at connection ${websocketSession.id}" }
         val wsSessionObject = UserWebsocketSession(
             websocketId = websocketSession.id,

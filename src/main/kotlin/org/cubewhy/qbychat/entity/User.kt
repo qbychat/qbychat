@@ -9,7 +9,7 @@ data class User(
     @Id val id: String? = null,
     var username: String,
     var password: String,
-    var role: Role = Role.USER,
+    var roles: List<Role> = listOf(Role.USER),
 
     var nickname: String,
     var bio: String = "",

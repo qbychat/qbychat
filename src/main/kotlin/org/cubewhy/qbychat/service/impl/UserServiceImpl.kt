@@ -50,7 +50,7 @@ class UserServiceImpl(
                 org.springframework.security.core.userdetails.User.builder()
                     .username(user.username)
                     .password(user.password)
-                    .roles(user.role.toString())
+                    .roles(user.roles.toString())
                     .build().toMono()
             }
     }

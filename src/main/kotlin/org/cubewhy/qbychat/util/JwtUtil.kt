@@ -52,7 +52,7 @@ class JwtUtil(
             .withJWTId(UUID.randomUUID().toString())
             .withClaim("id", user.id) // internal id
             .withClaim("username", user.username)
-            .withClaim("role", user.role.name)
+            .withClaim("roles", user.roles.map { it.name })
             .withExpiresAt(expireDate) // now + {date}
             .withIssuedAt(Date()) // time now
             .sign(algorithm)
@@ -65,7 +65,7 @@ class JwtUtil(
             .withClaim("id", user.id) // user id
             .withClaim("session", session.id) // session id
             .withClaim("username", user.username)
-            .withClaim("role", user.role.name)
+            .withClaim("roles", user.roles.map { it.name })
             .withExpiresAt(expireDate) // now + {date}
             .withIssuedAt(Date()) // time now
             .sign(algorithm)

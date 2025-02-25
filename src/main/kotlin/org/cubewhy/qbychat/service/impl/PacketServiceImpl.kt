@@ -10,7 +10,7 @@ import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.service.UserService
 import org.cubewhy.qbychat.util.*
-import org.cubewhy.qbychat.util.security.WebsocketSecurityFilter
+import org.cubewhy.qbychat.security.WebsocketSecurityFilter
 import org.cubewhy.qbychat.websocket.protocol.Protocol
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.socket.WebSocketSession
@@ -97,11 +97,11 @@ class PacketServiceImpl(
             } else {
                 try {
                     // do filter
-                    websocketSecurityFilter.doFilter(request.service, request.method, session)
+                    websocketSecurityFilter.doFilter(request.service, request.method, session, user)
                     logger.info { "Session ${session.id} request ${request.service}:${request.method}" }
                     // process packet
                     processor.process(request.method, request.payload, session, user)
-                } catch (e: WebsocketUnauthorized) {
+                } catch (e: RuntimeException) {
                     // unauthorized
                     emptyWebsocketResponse()
                 }
