@@ -13,7 +13,7 @@ class UserMapperImpl : UserMapper {
             username = user.username
             nickname = user.nickname
             bio = user.bio
-            addAllRole(user.roles.map { it.toProtobufType() })
+            addAllRoles(user.roles.map { it.toProtobufType() })
             createdAt = user.createdAt.toProtobufType()
         }.build()
 
