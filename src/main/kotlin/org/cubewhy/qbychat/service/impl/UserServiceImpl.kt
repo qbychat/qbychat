@@ -156,12 +156,12 @@ class UserServiceImpl(
     ): WebsocketResponse {
         val rawToken = request.token
         // parse token
-        val jwt = jwtUtil.resolveJwt(rawToken) ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
+        val jwt = jwtUtil.resolveJwt(rawToken, ignoreExpired = true) ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
         // verify token
         // verify session
         val sessionId = jwt.claims["session"]?.asString()
             ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
-        val userId = jwt.claims["user"]?.asString()
+        val userId = jwt.claims["id"]?.asString()
             ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
         // find user
         val user = userRepository.findById(userId).awaitFirstOrNull()
