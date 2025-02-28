@@ -180,6 +180,8 @@ class UserServiceImpl(
                 return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.TOKEN_EXPIRED))
             events.add(this.buildTokenUpdateEvent(newToken))
         }
+        // add user to session store
+        sessionService.saveWebsocketSession(session, user)
         logger.info { "User ${user.username} logged in with token" }
         return websocketResponse(userId, this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.SUCCESS), events)
     }
