@@ -11,6 +11,7 @@ import org.cubewhy.qbychat.entity.emptyWebsocketResponse
 import org.cubewhy.qbychat.entity.websocketResponse
 import org.cubewhy.qbychat.repository.UserRepository
 import org.cubewhy.qbychat.service.SessionService
+import org.cubewhy.qbychat.service.UserMapper
 import org.cubewhy.qbychat.service.UserService
 import org.cubewhy.qbychat.util.JwtUtil
 import org.cubewhy.qbychat.util.toProtobufType
@@ -31,7 +32,8 @@ class UserServiceImpl(
     private val passwordEncoder: PasswordEncoder,
     private val userRepository: UserRepository,
     private val sessionService: SessionService,
-    private val jwtUtil: JwtUtil
+    private val jwtUtil: JwtUtil,
+    private val userMapper: UserMapper
 ) : UserService {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -76,9 +78,10 @@ class UserServiceImpl(
                     payload
                 ), session
             )
-
             "TokenLogin" -> this.processTokenLogin(WebsocketAuth.TokenLoginRequest.parseFrom(payload), session)
             "Register" -> this.processRegister(WebsocketUser.RegisterRequest.parseFrom(payload), session)
+
+            "Sync" -> this.processSync(WebsocketUser.SyncRequest.parseFrom(payload), session, user!!)
             else -> emptyWebsocketResponse()
         }
     }
@@ -180,6 +183,18 @@ class UserServiceImpl(
         logger.info { "User ${user.username} logged in with token" }
         return websocketResponse(userId, this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.SUCCESS), events)
     }
+
+    override suspend fun processSync(
+        request: WebsocketUser.SyncRequest,
+        session: WebSocketSession,
+        user: User): WebsocketResponse {
+        // build protobuf user
+        return websocketResponse(user.id!!, this.buildSyncResponse(userMapper.fullUserVO(user)))
+    }
+
+    private fun buildSyncResponse(user: WebsocketUser.User) = WebsocketUser.SyncResponse.newBuilder().apply {
+        this.user = user
+    }.build()
 
     private fun buildTokenUpdateEvent(jwt: String): WebsocketAuth.TokenUpdateEvent {
         // parse jwt and get expire date

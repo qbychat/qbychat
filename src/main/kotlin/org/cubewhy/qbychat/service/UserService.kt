@@ -22,4 +22,10 @@ interface UserService : ReactiveUserDetailsService, PacketProcessor {
         request: WebsocketAuth.TokenLoginRequest,
         session: WebSocketSession
     ): WebsocketResponse
+
+    suspend fun processSync(
+        request: WebsocketUser.SyncRequest,
+        session: WebSocketSession,
+        user: User
+    ): WebsocketResponse
 }
