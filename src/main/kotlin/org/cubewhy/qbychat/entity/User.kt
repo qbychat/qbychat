@@ -1,5 +1,6 @@
 package org.cubewhy.qbychat.entity
 
+import org.cubewhy.qbychat.websocket.chat.WebsocketChat.NotificationStatus
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
@@ -14,5 +15,10 @@ data class User(
     var nickname: String,
     var bio: String = "",
 
+    var groupNotificationPreferencesInt: Int = NotificationStatus.ALL_VALUE,
+
     val createdAt: Instant = Instant.now(),
-)
+) {
+    val groupNotificationPreferences: NotificationStatus
+        get() = NotificationStatus.forNumber(this.groupNotificationPreferencesInt)
+}
