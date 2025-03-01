@@ -16,5 +16,4 @@ class UserMapperImpl : UserMapper {
             addAllRoles(user.roles.map { it.toProtobufType() })
             createdAt = user.createdAt.toProtobufType()
         }.build()
-
 }

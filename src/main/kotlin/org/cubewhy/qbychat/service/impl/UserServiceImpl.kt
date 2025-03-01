@@ -9,6 +9,7 @@ import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.emptyWebsocketResponse
 import org.cubewhy.qbychat.entity.websocketResponse
+import org.cubewhy.qbychat.repository.ChatRepository
 import org.cubewhy.qbychat.repository.UserRepository
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.service.UserMapper
@@ -33,7 +34,8 @@ class UserServiceImpl(
     private val userRepository: UserRepository,
     private val sessionService: SessionService,
     private val jwtUtil: JwtUtil,
-    private val userMapper: UserMapper
+    private val userMapper: UserMapper,
+    private val chatRepository: ChatRepository
 ) : UserService {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -91,8 +93,7 @@ class UserServiceImpl(
         session: WebSocketSession
     ): WebsocketResponse {
         // check username available
-        // todo exists chat name
-        if (userRepository.existsByUsernameIgnoreCase(request.username).awaitFirst()) {
+        if (userRepository.existsByUsernameIgnoreCase(request.username).awaitFirst() || chatRepository.existsByName(request.username).awaitFirst()) {
             return websocketResponse(WebsocketUser.RegisterResponse.newBuilder().apply {
                 this.status = WebsocketUser.RegisterStatus.USERNAME_EXISTS
             }.build())
@@ -119,9 +120,12 @@ class UserServiceImpl(
         val sessionInfo = sessionService.createSession(savedUser, session)
         // create token from sessionInfo
         val jwt = jwtUtil.createJwt(savedUser, sessionInfo)
-        return websocketResponse(savedUser.id!!, WebsocketUser.RegisterResponse.newBuilder().apply {
+        return websocketResponse(WebsocketUser.RegisterResponse.newBuilder().apply {
             this.status = WebsocketUser.RegisterStatus.SUCCESS
-        }.build(), this.buildTokenUpdateEvent(jwt))
+        }.build(), this.buildTokenUpdateEvent(jwt)).apply {
+            // put user id
+            this.userId = savedUser.id!!
+        }
     }
 
     override suspend fun processUsernamePasswordLogin(
@@ -145,9 +149,11 @@ class UserServiceImpl(
         logger.info { "User ${user.username} logged in" }
         // generate jwt
         val jwt = jwtUtil.createJwt(user, sessionInfo)
-        return websocketResponse(user.id!!, WebsocketAuth.UsernamePasswordLoginResponse.newBuilder().apply {
+        return websocketResponse(WebsocketAuth.UsernamePasswordLoginResponse.newBuilder().apply {
             status = WebsocketAuth.LoginStatus.SUCCESS
-        }.build(), this.buildTokenUpdateEvent(jwt))
+        }.build(), this.buildTokenUpdateEvent(jwt)).apply {
+            userId = user.id!!
+        }
     }
 
     override suspend fun processTokenLogin(
@@ -183,15 +189,16 @@ class UserServiceImpl(
         // add user to session store
         sessionService.saveWebsocketSession(session, user)
         logger.info { "User ${user.username} logged in with token" }
-        return websocketResponse(userId, this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.SUCCESS), events)
+        return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.SUCCESS), events).apply {
+            this.userId = user.id!!
+        }
     }
 
     override suspend fun processSync(
         request: WebsocketUser.SyncRequest,
         session: WebSocketSession,
         user: User): WebsocketResponse {
-        // build protobuf user
-        return websocketResponse(user.id!!, this.buildSyncResponse(userMapper.fullUserVO(user)))
+        return websocketResponse(this.buildSyncResponse(userMapper.fullUserVO(user)))
     }
 
     private fun buildSyncResponse(user: WebsocketUser.User) = WebsocketUser.SyncResponse.newBuilder().apply {

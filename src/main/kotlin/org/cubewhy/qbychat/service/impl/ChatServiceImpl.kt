@@ -1,19 +1,27 @@
 package org.cubewhy.qbychat.service.impl
 
 import com.google.protobuf.ByteString
-import org.cubewhy.qbychat.entity.User
-import org.cubewhy.qbychat.entity.WebsocketResponse
-import org.cubewhy.qbychat.entity.emptyWebsocketResponse
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.reactive.awaitFirst
+import org.cubewhy.qbychat.entity.*
 import org.cubewhy.qbychat.repository.ChatRepository
+import org.cubewhy.qbychat.service.ChatMapper
 import org.cubewhy.qbychat.service.ChatService
-import org.cubewhy.qbychat.websocket.chat.WebsocketChat.CreateChatRequest
+import org.cubewhy.qbychat.websocket.chat.WebsocketChat.ChatType
+import org.cubewhy.qbychat.websocket.chat.WebsocketChat.CreateGroupRequest
+import org.cubewhy.qbychat.websocket.chat.WebsocketChat.CreateGroupResponse
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.socket.WebSocketSession
 
 @Service
 class ChatServiceImpl(
     private val chatRepository: ChatRepository,
+    private val chatMapper: ChatMapper,
 ) : ChatService {
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
+
     override suspend fun process(
         method: String,
         payload: ByteString,
@@ -21,12 +29,21 @@ class ChatServiceImpl(
         user: User?
     ): WebsocketResponse {
         return when (method) {
-            "CreateChat" -> this.processCreateChat(CreateChatRequest.parseFrom(payload), session, user!!)
+            "CreateGroup" -> this.processCreateGroup(CreateGroupRequest.parseFrom(payload), session, user!!)
             else -> emptyWebsocketResponse()
         }
     }
 
-    suspend fun processCreateChat(request: CreateChatRequest, session: WebSocketSession, user: User): WebsocketResponse {
-        TODO("create chat")
+    suspend fun processCreateGroup(request: CreateGroupRequest, session: WebSocketSession, user: User): WebsocketResponse {
+        val chat = Chat(
+            title = request.title,
+            chatTypeInt = ChatType.GROUP_VALUE,
+        )
+        // save
+        val savedChat = chatRepository.save(chat).awaitFirst()
+        logger.info { "Group chat ${savedChat.title} was created." }
+        // create event
+        val event = chatMapper.buildAddChatEvent(chat)
+        return websocketResponse(CreateGroupResponse.getDefaultInstance(), event)
     }
 }

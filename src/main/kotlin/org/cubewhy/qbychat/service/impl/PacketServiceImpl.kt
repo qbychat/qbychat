@@ -4,7 +4,6 @@ import com.google.protobuf.kotlin.toByteString
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.cubewhy.qbychat.entity.*
-import org.cubewhy.qbychat.exception.WebsocketUnauthorized
 import org.cubewhy.qbychat.service.PacketProcessor
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
@@ -98,7 +97,11 @@ class PacketServiceImpl(
                 try {
                     // do filter
                     websocketSecurityFilter.doFilter(request.service, request.method, session, user)
-                    logger.info { "Session ${session.id} request ${request.service}:${request.method}" }
+                    if (user != null) {
+                        logger.info { "Session ${session.id} (user ${user.username}) request ${request.service}:${request.method}" }
+                    } else {
+                        logger.info { "Session ${session.id} request ${request.service}:${request.method}" }
+                    }
                     // process packet
                     processor.process(request.method, request.payload, session, user)
                 } catch (e: RuntimeException) {
@@ -109,6 +112,10 @@ class PacketServiceImpl(
                 // add ticket to response
                 // this -> response
                 this.ticket = request.ticket
+                // add user id to response
+                user?.let {
+                    this.userId = it.id!!
+                }
             }
             return response
         }
