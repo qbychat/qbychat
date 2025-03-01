@@ -83,6 +83,6 @@ class ChatServiceImpl(
             owner = owner
         )
         memberRepository.save(member).awaitFirst()
-        logger.info { "Added ${user.username} to chat ${chat.name}" }
+        logger.info { "Added ${user.username} to chat ${chat.title}" }
     }
 }
