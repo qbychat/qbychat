@@ -43,7 +43,7 @@ class ChatServiceImpl(
         val savedChat = chatRepository.save(chat).awaitFirst()
         logger.info { "Group chat ${savedChat.title} was created." }
         // create event
-        val event = chatMapper.buildAddChatEvent(chat)
+        val event = chatMapper.buildAddChatEvent(savedChat)
         return websocketResponse(CreateGroupResponse.getDefaultInstance(), event)
     }
 }

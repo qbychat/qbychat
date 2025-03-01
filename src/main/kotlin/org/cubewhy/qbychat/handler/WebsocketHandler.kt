@@ -52,8 +52,7 @@ class WebsocketHandler(
             }.flatMap { response ->
                 // send response to session
                 session.sendWithEncryption(response)
-            }
-            .doOnError { e ->
+            }.doOnError { e ->
                 if (e !is AbortedException) {
                     // ignore session disconnected
                     logger.error(e) { "WebSocket processing error" }

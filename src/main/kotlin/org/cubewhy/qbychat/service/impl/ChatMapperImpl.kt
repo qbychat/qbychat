@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class ChatMapperImpl : ChatMapper {
     override fun toChatVO(chat: Chat): WebsocketChat.Chat = WebsocketChat.Chat.newBuilder().apply {
         chatId = chat.id!!
-        name = chat.name
+        chat.name?.let { this.name = it }
         title = chat.title
         description = chat.description
         type = chat.chatType
