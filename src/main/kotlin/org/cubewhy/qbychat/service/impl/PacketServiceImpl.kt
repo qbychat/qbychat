@@ -55,7 +55,7 @@ class PacketServiceImpl(
                 // encryption is disabled on clientside
                 logger.info { "Encryption of session ${session.id} is disabled (no ECDH public key provided)" }
                 session.handshakeStatus = true
-                return handshakeResponse(Protocol.ServerHandshake.getDefaultInstance())
+                return handshakeResponseOf(Protocol.ServerHandshake.getDefaultInstance())
             }
             logger.info { "Session ${session.id} key exchange" }
             // key exchange
@@ -77,7 +77,7 @@ class PacketServiceImpl(
             val response = Protocol.ServerHandshake.newBuilder().apply {
                 this.publicKey = keyPair.public.encoded.toByteString()
             }.build()
-            return handshakeResponse(response)
+            return handshakeResponseOf(response)
         }
         if (user != null) {
             if (!sessionService.isOnSession(session, user)) {

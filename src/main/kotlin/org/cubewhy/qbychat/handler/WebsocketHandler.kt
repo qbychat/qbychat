@@ -60,12 +60,12 @@ class WebsocketHandler(
                     mono {
                         // publish events
                         response.events.forEach { event ->
-                            if (response.userId == null) {
+                            if (response.userId == null || !event.shared) {
                                 // push locally
-                                session.sendEventWithEncryption(event, null).awaitFirstOrNull()
+                                session.sendEventWithEncryption(event.eventMessage, null).awaitFirstOrNull()
                             } else {
                                 // push remotely
-                                sessionService.pushEvent(response.userId!!, event)
+                                sessionService.pushEvent(response.userId!!, event.eventMessage)
                             }
                         }
                     }

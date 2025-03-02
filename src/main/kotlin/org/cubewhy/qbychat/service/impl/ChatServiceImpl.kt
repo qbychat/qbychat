@@ -50,7 +50,7 @@ class ChatServiceImpl(
             .flatMap { member -> mono { chatMapper.toChatVO(member) } }
             .collectList()
             .awaitLast()
-        return websocketResponse(SyncResponse.newBuilder().apply {
+        return websocketResponseOf(SyncResponse.newBuilder().apply {
             addAllChats(chats)
         }.build())
     }
@@ -71,7 +71,7 @@ class ChatServiceImpl(
         this.addToChat(user, savedChat, true)
         // create event
         val event = chatMapper.buildAddChatEvent(savedChat, user)
-        return websocketResponse(CreateGroupResponse.getDefaultInstance(), event)
+        return websocketResponseOf(CreateGroupResponse.getDefaultInstance(), sharedEventOf(event))
     }
 
     override suspend fun addToChat(user: User, chat: Chat, owner: Boolean) {

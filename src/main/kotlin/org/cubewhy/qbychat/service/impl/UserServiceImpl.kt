@@ -5,10 +5,7 @@ import com.google.protobuf.GeneratedMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.cubewhy.qbychat.entity.User
-import org.cubewhy.qbychat.entity.WebsocketResponse
-import org.cubewhy.qbychat.entity.emptyWebsocketResponse
-import org.cubewhy.qbychat.entity.websocketResponse
+import org.cubewhy.qbychat.entity.*
 import org.cubewhy.qbychat.repository.ChatRepository
 import org.cubewhy.qbychat.repository.UserRepository
 import org.cubewhy.qbychat.service.SessionService
@@ -94,13 +91,13 @@ class UserServiceImpl(
     ): WebsocketResponse {
         // check username available
         if (userRepository.existsByUsernameIgnoreCase(request.username).awaitFirst() || chatRepository.existsByName(request.username).awaitFirst()) {
-            return websocketResponse(WebsocketUser.RegisterResponse.newBuilder().apply {
+            return websocketResponseOf(WebsocketUser.RegisterResponse.newBuilder().apply {
                 this.status = WebsocketUser.RegisterStatus.USERNAME_EXISTS
             }.build())
         }
         // match regex
         if (!Regex(usernameRuleRegexString).matches(request.username)) {
-            return websocketResponse(WebsocketUser.RegisterResponse.newBuilder().apply {
+            return websocketResponseOf(WebsocketUser.RegisterResponse.newBuilder().apply {
                 this.status = WebsocketUser.RegisterStatus.BAD_USERNAME
                 this.message = usernameRuleDescription
             }.build())
@@ -120,9 +117,9 @@ class UserServiceImpl(
         val sessionInfo = sessionService.createSession(savedUser, session)
         // create token from sessionInfo
         val jwt = jwtUtil.createJwt(savedUser, sessionInfo)
-        return websocketResponse(WebsocketUser.RegisterResponse.newBuilder().apply {
+        return websocketResponseOf(WebsocketUser.RegisterResponse.newBuilder().apply {
             this.status = WebsocketUser.RegisterStatus.SUCCESS
-        }.build(), this.buildTokenUpdateEvent(jwt)).apply {
+        }.build(), eventOf(this.buildTokenUpdateEvent(jwt))).apply {
             // put user id
             this.userId = savedUser.id!!
         }
@@ -134,12 +131,12 @@ class UserServiceImpl(
     ): WebsocketResponse {
         // find user by username
         val user = userRepository.findByUsernameIgnoreCase(request.username).awaitFirstOrNull()
-            ?: return websocketResponse(WebsocketAuth.UsernamePasswordLoginResponse.newBuilder().apply {
+            ?: return websocketResponseOf(WebsocketAuth.UsernamePasswordLoginResponse.newBuilder().apply {
                 status = WebsocketAuth.LoginStatus.USER_NOT_FOUND
             }.build())
         // assert password
         if (!passwordEncoder.matches(request.password, user.password)) {
-            return websocketResponse(WebsocketAuth.UsernamePasswordLoginResponse.newBuilder().apply {
+            return websocketResponseOf(WebsocketAuth.UsernamePasswordLoginResponse.newBuilder().apply {
                 status = WebsocketAuth.LoginStatus.BAD_PASSWORD
             }.build())
         }
@@ -149,10 +146,10 @@ class UserServiceImpl(
         logger.info { "User ${user.username} logged in" }
         // generate jwt
         val jwt = jwtUtil.createJwt(user, sessionInfo)
-        return websocketResponse(WebsocketAuth.UsernamePasswordLoginResponse.newBuilder().apply {
+        return websocketResponseOf(WebsocketAuth.UsernamePasswordLoginResponse.newBuilder().apply {
             status = WebsocketAuth.LoginStatus.SUCCESS
-        }.build(), this.buildTokenUpdateEvent(jwt)).apply {
-            userId = user.id!!
+        }.build(), eventOf(this.buildTokenUpdateEvent(jwt))).apply {
+           this. userId = user.id!!
         }
     }
 
@@ -162,19 +159,19 @@ class UserServiceImpl(
     ): WebsocketResponse {
         val rawToken = request.token
         // parse token
-        val jwt = jwtUtil.resolveJwt(rawToken, ignoreExpired = true) ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
+        val jwt = jwtUtil.resolveJwt(rawToken, ignoreExpired = true) ?: return websocketResponseOf(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
         // verify token
         // verify session
         val sessionId = jwt.claims["session"]?.asString()
-            ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
+            ?: return websocketResponseOf(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
         val userId = jwt.claims["id"]?.asString()
-            ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
+            ?: return websocketResponseOf(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.BAD_TOKEN))
         // find user
         val user = userRepository.findById(userId).awaitFirstOrNull()
-            ?: return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.USER_NOT_FOUND))
+            ?: return websocketResponseOf(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.USER_NOT_FOUND))
         if (!sessionService.isSessionValid(sessionId)) {
             // session was terminated
-            return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.SESSION_TERMINATED))
+            return websocketResponseOf(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.SESSION_TERMINATED))
         }
         // verify if expired
         val events = mutableListOf<GeneratedMessage>()
@@ -183,13 +180,13 @@ class UserServiceImpl(
             // try to regenerate one if session is still valid
             val newToken = sessionService.regenerateToken(sessionId, session)
                 ?: // session is expired
-                return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.TOKEN_EXPIRED))
+                return websocketResponseOf(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.TOKEN_EXPIRED))
             events.add(this.buildTokenUpdateEvent(newToken))
         }
         // add user to session store
         sessionService.saveWebsocketSession(session, user)
         logger.info { "User ${user.username} logged in with token" }
-        return websocketResponse(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.SUCCESS), events).apply {
+        return websocketResponseOf(this.buildTokenLoginResponse(WebsocketAuth.LoginStatus.SUCCESS), eventOf(events)).apply {
             this.userId = user.id!!
         }
     }
@@ -198,7 +195,7 @@ class UserServiceImpl(
         request: WebsocketUser.SyncRequest,
         session: WebSocketSession,
         user: User): WebsocketResponse {
-        return websocketResponse(this.buildSyncResponse(userMapper.fullUserVO(user)))
+        return websocketResponseOf(this.buildSyncResponse(userMapper.fullUserVO(user)))
     }
 
     private fun buildSyncResponse(user: WebsocketUser.User) = WebsocketUser.SyncResponse.newBuilder().apply {

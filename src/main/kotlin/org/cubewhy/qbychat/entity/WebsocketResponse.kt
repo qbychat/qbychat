@@ -6,11 +6,16 @@ import org.cubewhy.qbychat.websocket.protocol.Protocol
 data class WebsocketResponse(
     var response: GeneratedMessage? = null,
     var type: WebsocketResponseType = WebsocketResponseType.COMMON,
-    var events: List<GeneratedMessage> = emptyList(),
+    var events: List<WebsocketEvent> = emptyList(),
 ) {
     var userId: String? = null
     var ticket: String? = null // request ticket
 }
+
+data class WebsocketEvent(
+    val eventMessage: GeneratedMessage,
+    val shared: Boolean // should this event shared over sessions that logged in the same account?
+)
 
 
 enum class WebsocketResponseType {
@@ -18,15 +23,16 @@ enum class WebsocketResponseType {
     HANDSHAKE
 }
 
-fun websocketResponse(response: GeneratedMessage, vararg events: GeneratedMessage): WebsocketResponse {
-    return WebsocketResponse(response, events = events.asList())
-}
+fun sharedEventOf(vararg events: GeneratedMessage) = events.map { WebsocketEvent(it, true) }
+fun sharedEventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, true) }
+fun eventOf(vararg events: GeneratedMessage) = events.map { WebsocketEvent(it, true) }
+fun eventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, true) }
 
-fun websocketResponse(response: GeneratedMessage, events: List<GeneratedMessage>): WebsocketResponse {
+fun websocketResponseOf(response: GeneratedMessage, events: List<WebsocketEvent> = listOf()): WebsocketResponse {
     return WebsocketResponse(response, events = events)
 }
 
-fun handshakeResponse(response: Protocol.ServerHandshake) =
+fun handshakeResponseOf(response: Protocol.ServerHandshake) =
     WebsocketResponse(response, type = WebsocketResponseType.HANDSHAKE)
 
 fun emptyWebsocketResponse() = WebsocketResponse()

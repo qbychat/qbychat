@@ -74,7 +74,7 @@ fun WebSocketSession.sendResponseWithEncryption(response: WebsocketResponse): Mo
 }
 
 fun WebSocketSession.sendEventWithEncryption(event: GeneratedMessage, userId: String?): Mono<Void> {
-    return this.sendWithEncryption(eventOf(event, userId).toByteArray())
+    return this.sendWithEncryption(protobufEventOf(event, userId).toByteArray())
 }
 
 fun WebSocketSession.sendWithEncryption(payload: ByteArray): Mono<Void> {

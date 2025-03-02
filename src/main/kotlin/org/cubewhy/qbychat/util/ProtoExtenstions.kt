@@ -17,7 +17,7 @@ fun Instant.toProtobufType(): Timestamp = Timestamp.newBuilder().apply {
     this.nanos = this@toProtobufType.nano
 }.build()
 
-fun eventOf(event: GeneratedMessage, userId: String?): Protocol.ClientboundMessage = Protocol.ClientboundMessage.newBuilder().apply {
+fun protobufEventOf(event: GeneratedMessage, userId: String?): Protocol.ClientboundMessage = Protocol.ClientboundMessage.newBuilder().apply {
     userId?.let { this.account = it }
     this.event = Any.pack(event)
 }.build()

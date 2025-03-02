@@ -17,7 +17,7 @@ import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.util.Const
 import org.cubewhy.qbychat.util.JwtUtil
 import org.cubewhy.qbychat.util.clientInfo
-import org.cubewhy.qbychat.util.eventOf
+import org.cubewhy.qbychat.util.protobufEventOf
 import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
@@ -63,7 +63,7 @@ class SessionServiceImpl(
         // convert to avro
         val payload = ClusterMessage.newBuilder().apply {
             this.userId = userId
-            this.payload = eventOf(event, userId).toByteString().asReadOnlyByteBuffer()
+            this.payload = protobufEventOf(event, userId).toByteString().asReadOnlyByteBuffer()
             this.timestamp = Instant.now().epochSecond
         }
         // send to broker
