@@ -4,6 +4,8 @@ plugins {
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.google.protobuf") version "0.9.4"
+
+    id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
 }
 
 group = "org.cubewhy"
@@ -15,20 +17,28 @@ java {
     }
 }
 
+avro {
+    outputCharacterEncoding = "UTF-8"
+}
+
 repositories {
+    maven("https://packages.confluent.io/maven/")
     mavenCentral()
 }
 
 dependencies {
     protobuf(files("proto"))
-
-    implementation("org.apache.kafka:kafka-streams")
+    implementation("com.github.loki4j:loki-logback-appender:1.6.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("com.auth0:java-jwt:4.4.0")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
     implementation("com.google.protobuf:protobuf-kotlin:4.30.0-RC1")
     implementation("com.google.protobuf:protobuf-java-util:4.30.0-RC1")
+    implementation("io.confluent:kafka-avro-serializer:7.8.0")
+    implementation("io.confluent:kafka-schema-registry-client:7.8.0")
+    implementation("org.apache.avro:avro:1.12.0")
+    implementation("org.apache.kafka:kafka-streams")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
