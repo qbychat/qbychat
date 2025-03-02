@@ -13,8 +13,7 @@ data class Chat(
     var description: String = "",
 
     val chatTypeInt: Int,
-    val createAt: Instant = Instant.now(),
-) {
+): AuditingEntity() {
     val chatType: WebsocketChat.ChatType
         get() = WebsocketChat.ChatType.forNumber(chatTypeInt)
 }

@@ -16,9 +16,7 @@ data class User(
     var bio: String = "",
 
     var groupNotificationPreferencesInt: Int = NotificationStatus.ALL_VALUE,
-
-    val createdAt: Instant = Instant.now(),
-) {
+): AuditingEntity() {
     val groupNotificationPreferences: NotificationStatus
         get() = NotificationStatus.forNumber(this.groupNotificationPreferencesInt)
 }

@@ -14,7 +14,5 @@ data class Member(
     var nickname: String? = null,
     var notificationPreferences: NotificationPreferences = NotificationPreferences(WebsocketChat.NotificationStatus.ALL_VALUE),
     var pinned: Boolean = false, // is this user pinned this chat?
-    val owner: Boolean = false,
-
-    val createdAt: Instant = Instant.now(),
-)
+    val owner: Boolean = false
+): AuditingEntity()

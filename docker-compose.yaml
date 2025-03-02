@@ -51,6 +51,7 @@ services:
     container_name: qbychat-schema-registry
     depends_on:
       - kafka
+    restart: always
     ports:
       - "8081:8081"
     environment:
@@ -65,6 +66,7 @@ services:
       - "8086:8080"
     depends_on:
       - kafka
+    restart: always
     environment:
       KAFKA_CLUSTERS_NAME: local
       KAFKA_CLUSTERS_BOOTSTRAPSERVERS: kafka:29092
@@ -79,6 +81,7 @@ services:
       - "9001:9001"
     volumes:
       - minio:/data
+    restart: always
     environment:
       MINIO_ROOT_USER: root
       MINIO_ROOT_PASSWORD: password
