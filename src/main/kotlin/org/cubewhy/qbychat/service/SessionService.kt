@@ -1,5 +1,6 @@
 package org.cubewhy.qbychat.service
 
+import com.google.protobuf.GeneratedMessage
 import org.cubewhy.qbychat.entity.Session
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.UserWebsocketSession
@@ -14,4 +15,7 @@ interface SessionService {
     suspend fun createSession(user: User, session: WebSocketSession): Session
     suspend fun isSessionValid(sessionId: String): Boolean
     suspend fun regenerateToken(sessionId: String, webSocketSession: WebSocketSession): String?
+    fun pushEvent(userId: String, event: GeneratedMessage)
+
+    suspend fun processWithSessionLocally(userId: String, func: suspend (WebSocketSession) -> Unit)
 }

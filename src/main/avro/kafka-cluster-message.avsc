@@ -1,0 +1,22 @@
+{
+  "type": "record",
+  "name": "ClusterMessage",
+  "namespace": "org.cubewhy.qbychat.avro",
+  "fields": [
+    {
+      "name": "userId",
+      "type": "string",
+      "doc": "The unique identifier of the user"
+    },
+    {
+      "name": "payload",
+      "type": "bytes",
+      "doc": "The data payload to be delivered"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "doc": "The timestamp when packet sent"
+    }
+  ]
+}

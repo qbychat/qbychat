@@ -10,15 +10,20 @@ spring:
     jwt:
       key: ${JWT_KEY:3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b}
       expire: ${JWT_EXPIRE:3}
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:localhost:9092}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-    consumer:
-      group-id: qbychat-brokers
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+  cloud:
+    stream:
+      bindings:
+        qbychatWebsocketPayloadConsumer-in-0:
+          destination: qbychat-1
+      kafka:
+        bindings:
+          supplier-out-0:
+            producer:
+              configuration:
+                schema.registry.url: http://localhost:8081
+                value.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+        binder:
+          brokers: ${KAFKA_BOOTSTRAP_SERVER:localhost:9092}
 
 qbychat:
   websocket:

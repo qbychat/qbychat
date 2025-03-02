@@ -9,8 +9,8 @@ import org.cubewhy.qbychat.websocket.protocol.Protocol
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
+import reactor.kotlin.core.publisher.toMono
 import javax.crypto.SecretKey
-import com.google.protobuf.Any as ProtobufAny
 
 var WebSocketSession.aesKey: SecretKey?
     get() =
@@ -38,7 +38,12 @@ fun GeneratedMessage.toProtobufResponse(ticket: String): Protocol.Response = Pro
     this.payload = this@toProtobufResponse.toByteString()
 }.build()
 
-fun WebSocketSession.sendWithEncryption(response: WebsocketResponse): Mono<Void> {
+/**
+ * Send response with encryption
+ *
+ * @param response websocket response
+ * */
+fun WebSocketSession.sendResponseWithEncryption(response: WebsocketResponse): Mono<Void> {
     // build messages
     val messages = mutableListOf<ByteArray>()
     response.response?.let { pbResponse ->
@@ -55,13 +60,6 @@ fun WebSocketSession.sendWithEncryption(response: WebsocketResponse): Mono<Void>
             }.build().toByteArray()
         )
     }
-    // add events
-    messages.addAll(response.events.map { event ->
-        Protocol.ClientboundMessage.newBuilder().apply {
-            response.userId?.let { this.account = it }
-            this.event = ProtobufAny.pack(event)
-        }.build().toByteArray()
-    })
     return this.send(messages.map { message ->
         this.binaryMessage { factory ->
             if (this.aesKey == null || response.type == HANDSHAKE) {
@@ -73,4 +71,21 @@ fun WebSocketSession.sendWithEncryption(response: WebsocketResponse): Mono<Void>
             }
         }
     }.toFlux())
+}
+
+fun WebSocketSession.sendEventWithEncryption(event: GeneratedMessage, userId: String?): Mono<Void> {
+    return this.sendWithEncryption(eventOf(event, userId).toByteArray())
+}
+
+fun WebSocketSession.sendWithEncryption(payload: ByteArray): Mono<Void> {
+    // encrypt & send
+    return this.send(this.binaryMessage { factory ->
+        if (this.aesKey == null) {
+            // unencrypted
+            factory.wrap(payload)
+        } else {
+            // do encrypt
+            factory.wrap(encryptAESGCM(payload, this.aesKey!!))
+        }
+    }.toMono())
 }

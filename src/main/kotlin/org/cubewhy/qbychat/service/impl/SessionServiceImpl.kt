@@ -1,27 +1,36 @@
 package org.cubewhy.qbychat.service.impl
 
+import com.google.protobuf.GeneratedMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitLast
+import kotlinx.coroutines.reactor.mono
+import org.cubewhy.qbychat.avro.ClusterMessage
 import org.cubewhy.qbychat.entity.Session
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.UserWebsocketSession
+import org.cubewhy.qbychat.handler.WebsocketHandler
 import org.cubewhy.qbychat.repository.SessionRepository
 import org.cubewhy.qbychat.repository.UserRepository
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.util.Const
 import org.cubewhy.qbychat.util.JwtUtil
 import org.cubewhy.qbychat.util.clientInfo
+import org.cubewhy.qbychat.util.eventOf
+import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.socket.WebSocketSession
+import reactor.kotlin.core.publisher.toFlux
+import java.time.Instant
 
 @Service
 class SessionServiceImpl(
     private val userWebsocketSessionReactiveRedisTemplate: ReactiveRedisTemplate<String, UserWebsocketSession>,
     private val sessionRepository: SessionRepository,
     private val jwtUtil: JwtUtil,
+    private val streamBridge: StreamBridge,
     private val userRepository: UserRepository,
 ) : SessionService {
     companion object {
@@ -50,6 +59,31 @@ class SessionServiceImpl(
         return sessionRepository.existsById(sessionId).awaitFirst()
     }
 
+    override fun pushEvent(userId: String, event: GeneratedMessage) {
+        // convert to avro
+        val payload = ClusterMessage.newBuilder().apply {
+            this.userId = userId
+            this.payload = eventOf(event, userId).toByteString().asReadOnlyByteBuffer()
+            this.timestamp = Instant.now().epochSecond
+        }
+        // send to broker
+        if (!streamBridge.send("qbychat-1", payload)) {
+            logger.error { "Failed to push event to user $${userId}" }
+        }
+    }
+
+    override suspend fun processWithSessionLocally(userId: String, func: suspend (WebSocketSession) -> Unit) {
+        // find the user
+        val user = userRepository.findById(userId).awaitFirst()
+        // find all available sessions
+        this.findSessions(user).toFlux().mapNotNull {
+            // find on local session map
+            WebsocketHandler.sessions[it.websocketId]
+        }.flatMap { session ->
+            mono { func.invoke(session!!) }
+        }.awaitLast()
+    }
+
     override suspend fun findSessions(user: User): List<UserWebsocketSession> =
         userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
             .filter { it.userId == user.id }
@@ -75,7 +109,9 @@ class SessionServiceImpl(
 
     override suspend fun regenerateToken(sessionId: String, webSocketSession: WebSocketSession): String? {
         // find session
-        val session = sessionRepository.findByIdAndClientInstallationId(sessionId, webSocketSession.clientInfo!!.installationId).awaitFirstOrNull() ?: return null
+        val session =
+            sessionRepository.findByIdAndClientInstallationId(sessionId, webSocketSession.clientInfo!!.installationId)
+                .awaitFirstOrNull() ?: return null
         // find user
         val user = userRepository.findById(session.user).awaitFirst()
         // regenerate token
@@ -88,7 +124,8 @@ class SessionServiceImpl(
             .filter { it.websocketId == websocketSession.id }
             .flatMap { session ->
                 // remove session
-                userWebsocketSessionReactiveRedisTemplate.opsForSet().remove(Const.USER_WEBSOCKET_SESSION_STORE, session)
+                userWebsocketSessionReactiveRedisTemplate.opsForSet()
+                    .remove(Const.USER_WEBSOCKET_SESSION_STORE, session)
             }
             .awaitFirstOrNull()
     }
