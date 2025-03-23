@@ -3,6 +3,9 @@ package org.cubewhy.qbychat.util
 import com.google.protobuf.Any
 import com.google.protobuf.GeneratedMessage
 import com.google.protobuf.Timestamp
+import org.cubewhy.qbychat.entity.Friend
+import org.cubewhy.qbychat.entity.User
+import org.cubewhy.qbychat.websocket.friend.WebsocketFriend
 import org.cubewhy.qbychat.websocket.protocol.Protocol
 import java.time.Instant
 import java.util.Date
