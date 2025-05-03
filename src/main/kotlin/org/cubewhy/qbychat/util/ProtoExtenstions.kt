@@ -3,12 +3,9 @@ package org.cubewhy.qbychat.util
 import com.google.protobuf.Any
 import com.google.protobuf.GeneratedMessage
 import com.google.protobuf.Timestamp
-import org.cubewhy.qbychat.entity.Friend
-import org.cubewhy.qbychat.entity.User
-import org.cubewhy.qbychat.websocket.friend.WebsocketFriend
-import org.cubewhy.qbychat.websocket.protocol.Protocol
+import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
 import java.time.Instant
-import java.util.Date
+import java.util.*
 
 fun Date.toProtobufType(): Timestamp = Timestamp.newBuilder().apply {
     this.seconds = this@toProtobufType.time
@@ -20,7 +17,8 @@ fun Instant.toProtobufType(): Timestamp = Timestamp.newBuilder().apply {
     this.nanos = this@toProtobufType.nano
 }.build()
 
-fun protobufEventOf(event: GeneratedMessage, userId: String?): Protocol.ClientboundMessage = Protocol.ClientboundMessage.newBuilder().apply {
-    userId?.let { this.account = it }
-    this.event = Any.pack(event)
-}.build()
+fun protobufEventOf(event: GeneratedMessage, userId: String?): ClientboundMessage =
+    ClientboundMessage.newBuilder().apply {
+        userId?.let { this.userId = it }
+        this.event = Any.pack(event)
+    }.build()

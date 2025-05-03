@@ -7,5 +7,4 @@ import reactor.core.publisher.Mono
 
 @Repository
 interface SessionRepository : ReactiveMongoRepository<Session, String> {
-    fun findByIdAndClientInstallationId(id: String, clientInstallationId: String): Mono<Session>
 }

@@ -1,6 +1,5 @@
 package org.cubewhy.qbychat.entity
 
-import org.cubewhy.qbychat.websocket.protocol.Protocol
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
@@ -8,16 +7,16 @@ import java.time.Instant
 data class Session(
     val id: String? = null,
     val user: String,
-    val clientName: String,
-    val clientVersion: String,
-    val clientInstallationId: String,
-    val platform: Int,
-    val timestamp: Instant = Instant.now(),
-)
+
+    val clientInfo: ClientInfo,
+): AuditingEntity()
 
 data class ClientInfo(
     val name: String,
     val version: String,
-    val installationId: String,
-    val platform: Int,
-)
+    val platform: Platform,
+) {
+    enum class Platform {
+        WINDOWS, LINUX, MACOS, ANDROID, IOS, UNKNOWN;
+    }
+}

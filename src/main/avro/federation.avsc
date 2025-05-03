@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "ClusterMessage",
+  "name": "FederationMessage",
   "namespace": "org.cubewhy.qbychat.avro",
   "fields": [
     {

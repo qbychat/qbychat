@@ -30,6 +30,8 @@ repositories {
 dependencies {
     protobuf(files("proto"))
 
+    implementation("org.bouncycastle:bcprov-jdk18on:1.80")
+    implementation("cn.hutool:hutool-crypto:5.8.37")
     implementation("com.auth0:java-jwt:4.4.0")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
     implementation("com.google.protobuf:protobuf-kotlin:4.30.0-RC1")

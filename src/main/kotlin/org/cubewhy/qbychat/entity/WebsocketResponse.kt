@@ -1,7 +1,7 @@
 package org.cubewhy.qbychat.entity
 
 import com.google.protobuf.GeneratedMessage
-import org.cubewhy.qbychat.websocket.protocol.Protocol
+import org.cubewhy.qbychat.websocket.protocol.v1.ServerHandshake
 
 data class WebsocketResponse(
     var response: GeneratedMessage? = null,
@@ -32,7 +32,7 @@ fun websocketResponseOf(response: GeneratedMessage, events: List<WebsocketEvent>
     return WebsocketResponse(response, events = events)
 }
 
-fun handshakeResponseOf(response: Protocol.ServerHandshake) =
+fun handshakeResponseOf(response: ServerHandshake) =
     WebsocketResponse(response, type = WebsocketResponseType.HANDSHAKE)
 
 fun emptyWebsocketResponse() = WebsocketResponse()

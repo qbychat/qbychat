@@ -10,18 +10,18 @@ services:
       - 'MONGO_INITDB_DATABASE=qbychat'
     volumes:
       - mongo:/data/db
-    restart: always
+    restart: no
   redis:
     image: redis:latest
     container_name: qbychat-redis
     ports:
       - '6379:6379'
-    restart: always
+    restart: no
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: qbychat-zookeeper
-    restart: always
+    restart: no
     ports:
       - '2181:2181'
     environment:
@@ -34,7 +34,7 @@ services:
     hostname: kafka
     depends_on:
       - zookeeper
-    restart: always
+    restart: no
     ports:
       - '9092:9092'
     environment:
@@ -51,7 +51,7 @@ services:
     container_name: qbychat-schema-registry
     depends_on:
       - kafka
-    restart: always
+    restart: no
     ports:
       - "8081:8081"
     environment:
@@ -59,33 +59,33 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
 
-  kafka-ui:
-    container_name: qbychat-kafka-ui
-    image: provectuslabs/kafka-ui:latest
-    ports:
-      - "8086:8080"
-    depends_on:
-      - kafka
-    restart: always
-    environment:
-      KAFKA_CLUSTERS_NAME: local
-      KAFKA_CLUSTERS_BOOTSTRAPSERVERS: kafka:29092
-      KAFKA_CLUSTERS_SCHEMAREGISTRY: http://schema-registry:8081
-      DYNAMIC_CONFIG_ENABLED: 'true'
+#  kafka-ui:
+#    container_name: qbychat-kafka-ui
+#    image: provectuslabs/kafka-ui:latest
+#    ports:
+#      - "8086:8080"
+#    depends_on:
+#      - kafka
+#    restart: no
+#    environment:
+#      KAFKA_CLUSTERS_NAME: local
+#      KAFKA_CLUSTERS_BOOTSTRAPSERVERS: kafka:29092
+#      KAFKA_CLUSTERS_SCHEMAREGISTRY: http://schema-registry:8081
+#      DYNAMIC_CONFIG_ENABLED: 'true'
 
-  minio:
-    image: minio/minio:latest
-    container_name: qbychat-minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - minio:/data
-    restart: always
-    environment:
-      MINIO_ROOT_USER: root
-      MINIO_ROOT_PASSWORD: password
-    command: server /data --console-address ":9001"
+#  minio:
+#    image: minio/minio:latest
+#    container_name: qbychat-minio
+#    ports:
+#      - "9000:9000"
+#      - "9001:9001"
+#    volumes:
+#      - minio:/data
+#    restart: no
+#    environment:
+#      MINIO_ROOT_USER: root
+#      MINIO_ROOT_PASSWORD: password
+#    command: server /data --console-address ":9001"
 
 volumes:
   mongo:

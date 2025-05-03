@@ -2,14 +2,19 @@ package org.cubewhy.qbychat.service.impl
 
 import com.google.protobuf.GeneratedMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactor.mono
-import org.cubewhy.qbychat.avro.ClusterMessage
+import org.cubewhy.qbychat.avro.FederationMessage
 import org.cubewhy.qbychat.entity.Session
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.UserWebsocketSession
+import org.cubewhy.qbychat.entity.config.InstanceProperties
 import org.cubewhy.qbychat.handler.WebsocketHandler
 import org.cubewhy.qbychat.repository.SessionRepository
 import org.cubewhy.qbychat.repository.UserRepository
@@ -20,6 +25,7 @@ import org.cubewhy.qbychat.util.clientInfo
 import org.cubewhy.qbychat.util.protobufEventOf
 import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.data.redis.core.ReactiveRedisTemplate
+import org.springframework.data.redis.core.removeAndAwait
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.kotlin.core.publisher.toFlux
@@ -29,12 +35,28 @@ import java.time.Instant
 class SessionServiceImpl(
     private val userWebsocketSessionReactiveRedisTemplate: ReactiveRedisTemplate<String, UserWebsocketSession>,
     private val sessionRepository: SessionRepository,
-    private val jwtUtil: JwtUtil,
     private val streamBridge: StreamBridge,
     private val userRepository: UserRepository,
+    private val instanceProperties: InstanceProperties,
 ) : SessionService {
     companion object {
         private val logger = KotlinLogging.logger {}
+    }
+
+    @PostConstruct
+    private fun clearGhostSessions() {
+        CoroutineScope(Dispatchers.Default).launch {
+            val ghostSessions = userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
+                .filter { it.instanceId == instanceProperties.id || it.instanceId == null }
+                .collectList()
+                .awaitLast()
+            ghostSessions.forEach { ghostSession ->
+                logger.info { "Remove ghost session ${ghostSession.websocketId}" }
+                userWebsocketSessionReactiveRedisTemplate
+                    .opsForSet()
+                    .removeAndAwait(Const.USER_WEBSOCKET_SESSION_STORE, ghostSession)
+            }
+        }
     }
 
     override suspend fun saveWebsocketSession(websocketSession: WebSocketSession, user: User) {
@@ -61,7 +83,7 @@ class SessionServiceImpl(
 
     override fun pushEvent(userId: String, event: GeneratedMessage) {
         // convert to avro
-        val payload = ClusterMessage.newBuilder().apply {
+        val payload = FederationMessage.newBuilder().apply {
             this.userId = userId
             this.payload = protobufEventOf(event, userId).toByteString().asReadOnlyByteBuffer()
             this.timestamp = Instant.now().epochSecond
@@ -99,24 +121,9 @@ class SessionServiceImpl(
     override suspend fun createSession(user: User, session: WebSocketSession): Session {
         val session1 = Session(
             user = user.id!!,
-            clientName = session.clientInfo!!.name,
-            clientVersion = session.clientInfo!!.version,
-            clientInstallationId = session.clientInfo!!.installationId,
-            platform = session.clientInfo!!.platform
+            clientInfo = session.clientInfo!!
         )
         return sessionRepository.save(session1).awaitFirst()
-    }
-
-    override suspend fun regenerateToken(sessionId: String, webSocketSession: WebSocketSession): String? {
-        // find session
-        val session =
-            sessionRepository.findByIdAndClientInstallationId(sessionId, webSocketSession.clientInfo!!.installationId)
-                .awaitFirstOrNull() ?: return null
-        // find user
-        val user = userRepository.findById(session.user).awaitFirst()
-        // regenerate token
-        logger.info { "Regenerating token for ${user.username}" }
-        return jwtUtil.createJwt(user, session)
     }
 
     override suspend fun removeWebsocketSessions(websocketSession: WebSocketSession) {

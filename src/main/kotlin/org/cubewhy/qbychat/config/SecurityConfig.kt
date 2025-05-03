@@ -1,17 +1,17 @@
 package org.cubewhy.qbychat.config
 
-import org.cubewhy.qbychat.entity.RestBean
 import org.cubewhy.qbychat.entity.vo.AuthorizeVO
+import org.cubewhy.qbychat.filter.JwtFilter
 import org.cubewhy.qbychat.service.UserService
 import org.cubewhy.qbychat.util.JwtUtil
-import org.cubewhy.qbychat.security.WebsocketSecurityRules
+import org.cubewhy.qbychat.util.responseFailure
+import org.cubewhy.qbychat.util.responseSuccess
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.invoke
 import org.springframework.security.core.Authentication
@@ -29,11 +29,11 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
-
 @Configuration
 @EnableWebFluxSecurity
 class SecurityConfig(
     private val jwtUtil: JwtUtil,
+    private val jwtFilter: JwtFilter,
     private val userService: UserService
 ) {
     @Bean
@@ -50,6 +50,7 @@ class SecurityConfig(
                 authenticationSuccessHandler = AuthSuccessHandler(jwtUtil, userService)
                 authenticationFailureHandler = AuthFailureHandler
             }
+            addFilterBefore(jwtFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             logout {
                 logoutUrl = "/api/user/logout"
                 logoutSuccessHandler = LogoutSuccessHandler(jwtUtil = jwtUtil)
@@ -66,16 +67,6 @@ class SecurityConfig(
             }
             httpBasic { }
         }
-    }
-
-    @Bean
-    fun websocketSecurityRules(): WebsocketSecurityRules {
-        return WebsocketSecurityRules.builder()
-            .permitAll(UserService::class.java, "UsernamePasswordLogin")
-            .permitAll(UserService::class.java, "TokenLogin")
-            .permitAll(UserService::class.java, "RemoteLogin")
-            .permitAll(UserService::class.java, "Register")
-            .build()
     }
 
     class AuthSuccessHandler(private val jwtUtil: JwtUtil, private val userService: UserService) :
@@ -135,22 +126,4 @@ class SecurityConfig(
             return exchange.responseFailure(403, denied.message!!)
         }
     }
-}
-
-private fun <T> ServerWebExchange.responseSuccess(data: T?): Mono<Void> {
-    this.response.statusCode = HttpStatus.OK
-    this.response.headers.contentType = MediaType.APPLICATION_JSON
-    return this.response.writeWith(
-        this.response.bufferFactory()
-            .wrap(RestBean.success<T?>(data).toJson().encodeToByteArray()).toMono()
-    ).then(Mono.defer { this.response.setComplete() })
-}
-
-private fun ServerWebExchange.responseFailure(code: Int, message: String): Mono<Void> {
-    this.response.statusCode = HttpStatus.valueOf(code)
-    this.response.headers.contentType = MediaType.APPLICATION_JSON
-    return this.response.writeWith(
-        this.response.bufferFactory()
-            .wrap(RestBean.failure<Nothing?>(code, message).toJson().encodeToByteArray()).toMono()
-    ).then(Mono.defer { this.response.setComplete() })
 }

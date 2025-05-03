@@ -5,7 +5,9 @@ import org.cubewhy.qbychat.entity.ClientInfo
 import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.WebsocketResponseType.COMMON
 import org.cubewhy.qbychat.entity.WebsocketResponseType.HANDSHAKE
-import org.cubewhy.qbychat.websocket.protocol.Protocol
+import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
+import org.cubewhy.qbychat.websocket.protocol.v1.Response
+import org.cubewhy.qbychat.websocket.protocol.v1.ServerHandshake
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
@@ -33,7 +35,7 @@ var WebSocketSession.clientInfo: ClientInfo?
         this.attributes["clientInfo"] = value
     }
 
-fun GeneratedMessage.toProtobufResponse(ticket: String): Protocol.Response = Protocol.Response.newBuilder().apply {
+fun GeneratedMessage.toProtobufResponse(ticket: String): Response = Response.newBuilder().apply {
     this.ticket = ticket
     this.payload = this@toProtobufResponse.toByteString()
 }.build()
@@ -49,13 +51,13 @@ fun WebSocketSession.sendResponseWithEncryption(response: WebsocketResponse): Mo
     response.response?.let { pbResponse ->
         messages.add(
             when (response.type) {
-                COMMON -> Protocol.ClientboundMessage.newBuilder().apply {
-                    response.userId?.let { this.account = it }
+                COMMON -> ClientboundMessage.newBuilder().apply {
+                    response.userId?.let { this.userId = it }
                     this.response = pbResponse.toProtobufResponse(response.ticket!!)
                 }
 
-                HANDSHAKE -> Protocol.ClientboundMessage.newBuilder().apply {
-                    this.serverHandshake = pbResponse as Protocol.ServerHandshake
+                HANDSHAKE -> ClientboundMessage.newBuilder().apply {
+                    this.serverHandshake = pbResponse as ServerHandshake
                 }
             }.build().toByteArray()
         )
@@ -67,6 +69,7 @@ fun WebSocketSession.sendResponseWithEncryption(response: WebsocketResponse): Mo
                 factory.wrap(message)
             } else {
                 // encrypt
+                // TODO encrypt
                 factory.wrap(encryptAESGCM(message, this.aesKey!!))
             }
         }

@@ -1,14 +1,14 @@
 package org.cubewhy.qbychat.entity
 
-import org.cubewhy.qbychat.websocket.user.WebsocketUser
+import org.cubewhy.qbychat.websocket.user.v1.Role as ProtoRole
 
 enum class Role {
     USER, ADMIN;
 
-    fun toProtobufType(): WebsocketUser.Role {
+    fun toProtobufType(): ProtoRole {
         return when (this) {
-            USER -> WebsocketUser.Role.USER
-            ADMIN -> WebsocketUser.Role.ADMIN
+            USER -> ProtoRole.USER
+            ADMIN -> ProtoRole.ADMIN
         }
     }
 }

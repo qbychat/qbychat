@@ -8,4 +8,5 @@ data class UserWebsocketSession(
     var websocketId: String,
 
     var timestamp: Instant = Instant.now(),
+    val instanceId: String? = null,
 ) : Serializable

@@ -9,7 +9,7 @@ import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.util.*
-import org.cubewhy.qbychat.websocket.protocol.Protocol
+import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
@@ -39,9 +39,9 @@ class WebsocketHandler(
                 val inputStream = message.payload.asInputStream()
                 val pbMessage = if (session.aesKey != null) {
                     // decrypt message
-                    // [iv(12 bytes)][encrypted data]
                     val iv = readIvFromInputStream(inputStream) // parse iv
-                    Protocol.ServerboundMessage.parseFrom(
+                    // TODO parse encryptedMessage
+                    ServerboundMessage.parseFrom(
                         decryptInputStream(
                             inputStream,
                             session.aesKey!!,
@@ -50,7 +50,7 @@ class WebsocketHandler(
                     )
                 } else {
                     // non-encrypted
-                    Protocol.ServerboundMessage.parseFrom(inputStream)
+                    ServerboundMessage.parseFrom(inputStream)
                 }
                 // process packet
                 mono { packetService.process(pbMessage, session) }
