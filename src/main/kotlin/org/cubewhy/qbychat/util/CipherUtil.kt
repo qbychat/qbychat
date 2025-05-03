@@ -1,65 +1,88 @@
 package org.cubewhy.qbychat.util
 
-import com.google.protobuf.kotlin.toByteString
+import com.google.protobuf.ByteString
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair
+import org.bouncycastle.crypto.CipherParameters
+import org.bouncycastle.crypto.agreement.X25519Agreement
 import org.bouncycastle.crypto.generators.X25519KeyPairGenerator
-import org.bouncycastle.crypto.params.X25519PrivateKeyParameters
-import org.bouncycastle.crypto.params.X25519PublicKeyParameters
 import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
+import java.nio.ByteBuffer
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object CipherUtil {
 
+    const val AES_KEY_SIZE = 16
+    const val GCM_IV_LENGTH = 12
+    const val GCM_TAG_LENGTH = 128
+
     private const val AES_ALGORITHM = "AES"
-    private const val AES_CIPHER_TRANSFORMATION = "AES/GCM/NoPadding"
 
     fun generateX25519KeyPair(): AsymmetricCipherKeyPair = X25519KeyPairGenerator().generateKeyPair()
 
-    // X25519 密钥交换
-    fun performKeyExchange(privateKey: ByteArray, publicKey: ByteArray): ByteArray {
-        val privateKeyParams = X25519PrivateKeyParameters(privateKey, 0)
-        val publicKeyParams = X25519PublicKeyParameters(publicKey, 0)
-        TODO("wip")
-//        val sharedSecret = X25519.computeAgreement(privateKeyParams, publicKeyParams)
-//
-//        return sharedSecret
+    fun performKeyExchange(privateKey: CipherParameters, remotePublicKey: CipherParameters): ByteArray {
+        val agreement = X25519Agreement()
+        agreement.init(privateKey)
+
+        val sharedSecret = ByteArray(agreement.agreementSize)
+        agreement.calculateAgreement(remotePublicKey, sharedSecret, 0)
+        return sharedSecret
     }
 
-    // 使用共享密钥生成 AES 密钥
     fun generateAESKey(sharedSecret: ByteArray): SecretKey {
         return SecretKeySpec(sharedSecret.copyOfRange(0, 16), AES_ALGORITHM)
     }
 
-    // 加密消息
-    fun encryptMessage(sharedSecret: ByteArray, message: ByteArray): EncryptedMessage {
-        val aesKey = generateAESKey(sharedSecret)
-        val cipher = Cipher.getInstance(AES_CIPHER_TRANSFORMATION)
-        val nonce = ByteArray(12) // GCM需要12字节的nonce
+    fun encryptMessage(
+        sharedSecret: ByteArray,
+        message: ByteArray,
+        sessionId: Long,
+        sequenceNumber: Long
+    ): EncryptedMessage {
+        val aesKey = SecretKeySpec(sharedSecret.copyOf(AES_KEY_SIZE), "AES")
+        val nonce = ByteArray(GCM_IV_LENGTH)
         SecureRandom().nextBytes(nonce)
-        cipher.init(Cipher.ENCRYPT_MODE, aesKey)
 
-        val ciphertext = cipher.doFinal(message)
-        val authTag = cipher.getIV() // 保存 IV 作为 auth_tag
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        val spec = GCMParameterSpec(GCM_TAG_LENGTH, nonce)
+        cipher.init(Cipher.ENCRYPT_MODE, aesKey, spec)
+
+        // Use sessionId + sequenceNumber as AAD to protect them from tampering
+        val aad = ByteBuffer.allocate(16)
+            .putLong(sessionId)
+            .putLong(sequenceNumber)
+            .array()
+        cipher.updateAAD(aad)
+
+        val cipherText = cipher.doFinal(message) // includes tag
 
         return EncryptedMessage.newBuilder().apply {
-            this.sessionId = System.currentTimeMillis()
-            this.sequenceNumber = 1
-            this.nonce = nonce.toByteString()
-            this.ciphertext = ciphertext.toByteString()
-            this.authTag = authTag.toByteString()
+            this.sessionId = sessionId
+            this.sequenceNumber = sequenceNumber
+            this.nonce = ByteString.copyFrom(nonce)
+            this.ciphertext = ByteString.copyFrom(cipherText) // includes authTag in tail
         }.build()
     }
 
     fun decryptMessage(sharedSecret: ByteArray, encryptedMessage: EncryptedMessage): ByteArray {
-        val aesKey = generateAESKey(sharedSecret)
-        val cipher = Cipher.getInstance(AES_CIPHER_TRANSFORMATION)
-        val ivSpec = javax.crypto.spec.IvParameterSpec(encryptedMessage.nonce.toByteArray())
-        cipher.init(Cipher.DECRYPT_MODE, aesKey, ivSpec)
+        val aesKey = SecretKeySpec(sharedSecret.copyOf(AES_KEY_SIZE), "AES")
+        val nonce = encryptedMessage.nonce.toByteArray()
 
-        return cipher.doFinal(encryptedMessage.ciphertext.toByteArray())
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        val spec = GCMParameterSpec(GCM_TAG_LENGTH, nonce)
+        cipher.init(Cipher.DECRYPT_MODE, aesKey, spec)
+
+        // Set same AAD for validation
+        val aad = ByteBuffer.allocate(16)
+            .putLong(encryptedMessage.sessionId)
+            .putLong(encryptedMessage.sequenceNumber)
+            .array()
+        cipher.updateAAD(aad)
+
+        return cipher.doFinal(encryptedMessage.ciphertext.toByteArray()) // will throw AEADBadTagException if tampered
     }
 
 }
