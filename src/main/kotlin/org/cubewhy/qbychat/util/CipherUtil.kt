@@ -3,9 +3,14 @@ package org.cubewhy.qbychat.util
 import com.google.protobuf.ByteString
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair
 import org.bouncycastle.crypto.CipherParameters
+import org.bouncycastle.crypto.KeyGenerationParameters
 import org.bouncycastle.crypto.agreement.X25519Agreement
+import org.bouncycastle.crypto.digests.SHA256Digest
+import org.bouncycastle.crypto.generators.HKDFBytesGenerator
 import org.bouncycastle.crypto.generators.X25519KeyPairGenerator
+import org.bouncycastle.crypto.params.HKDFParameters
 import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
+import java.io.InputStream
 import java.nio.ByteBuffer
 import java.security.SecureRandom
 import javax.crypto.Cipher
@@ -15,13 +20,12 @@ import javax.crypto.spec.SecretKeySpec
 
 object CipherUtil {
 
-    const val AES_KEY_SIZE = 16
     const val GCM_IV_LENGTH = 12
     const val GCM_TAG_LENGTH = 128
 
-    private const val AES_ALGORITHM = "AES"
-
-    fun generateX25519KeyPair(): AsymmetricCipherKeyPair = X25519KeyPairGenerator().generateKeyPair()
+    fun generateX25519KeyPair(): AsymmetricCipherKeyPair = X25519KeyPairGenerator().apply {
+        init(KeyGenerationParameters(SecureRandom(), 256))
+    }.generateKeyPair()
 
     fun performKeyExchange(privateKey: CipherParameters, remotePublicKey: CipherParameters): ByteArray {
         val agreement = X25519Agreement()
@@ -32,17 +36,29 @@ object CipherUtil {
         return sharedSecret
     }
 
-    fun generateAESKey(sharedSecret: ByteArray): SecretKey {
-        return SecretKeySpec(sharedSecret.copyOfRange(0, 16), AES_ALGORITHM)
+    fun deriveAesKeyFromX25519(
+        sharedSecret: ByteArray,
+        info: ByteArray,
+        salt: ByteArray,
+        keyLength: Int = 16
+    ): SecretKey {
+        val hkdf = HKDFBytesGenerator(SHA256Digest())
+
+        val hkdfParameters = HKDFParameters(sharedSecret, salt, info)
+        hkdf.init(hkdfParameters)
+
+        val derivedKey = ByteArray(keyLength) // 16 bytes for AES-128, 32 for AES-256
+        hkdf.generateBytes(derivedKey, 0, keyLength)
+
+        return SecretKeySpec(derivedKey, "AES")
     }
 
     fun encryptMessage(
-        sharedSecret: ByteArray,
+        aesKey: SecretKey,
         message: ByteArray,
         sessionId: Long,
         sequenceNumber: Long
     ): EncryptedMessage {
-        val aesKey = SecretKeySpec(sharedSecret.copyOf(AES_KEY_SIZE), "AES")
         val nonce = ByteArray(GCM_IV_LENGTH)
         SecureRandom().nextBytes(nonce)
 
@@ -67,8 +83,7 @@ object CipherUtil {
         }.build()
     }
 
-    fun decryptMessage(sharedSecret: ByteArray, encryptedMessage: EncryptedMessage): ByteArray {
-        val aesKey = SecretKeySpec(sharedSecret.copyOf(AES_KEY_SIZE), "AES")
+    fun decryptMessage(aesKey: SecretKey, encryptedMessage: EncryptedMessage): ByteArray {
         val nonce = encryptedMessage.nonce.toByteArray()
 
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
@@ -85,5 +100,9 @@ object CipherUtil {
         return cipher.doFinal(encryptedMessage.ciphertext.toByteArray()) // will throw AEADBadTagException if tampered
     }
 
+    fun decryptInputStream(aesKey: SecretKey, inputStream: InputStream): ByteArray {
+        // parse encrypted message
+        return decryptMessage(aesKey, EncryptedMessage.parseFrom(inputStream))
+    }
 }
 

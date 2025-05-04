@@ -7,11 +7,11 @@ import org.cubewhy.qbychat.entity.WebsocketResponseType.COMMON
 import org.cubewhy.qbychat.entity.WebsocketResponseType.HANDSHAKE
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
 import org.cubewhy.qbychat.websocket.protocol.v1.Response
-import org.cubewhy.qbychat.websocket.protocol.v1.ServerHandshake
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
+import java.util.concurrent.atomic.AtomicLong
 import javax.crypto.SecretKey
 
 var WebSocketSession.aesKey: SecretKey?
@@ -35,6 +35,22 @@ var WebSocketSession.clientInfo: ClientInfo?
         this.attributes["clientInfo"] = value
     }
 
+var WebSocketSession.sessionId: Long?
+    get() =
+        this.attributes["sessionId"] as Long?
+    set(value) {
+        this.attributes["sessionId"] = value
+    }
+
+val WebSocketSession.packetCounter: AtomicLong
+    get() {
+        val counter = this.attributes["packetCounter"] as AtomicLong?
+        if (counter == null) {
+            this.attributes["packetCounter"] = AtomicLong(0)
+        }
+        return this.attributes["packetCounter"] as AtomicLong
+    }
+
 fun GeneratedMessage.toProtobufResponse(ticket: String): Response = Response.newBuilder().apply {
     this.ticket = ticket
     this.payload = this@toProtobufResponse.toByteString()
@@ -54,24 +70,26 @@ fun WebSocketSession.sendResponseWithEncryption(response: WebsocketResponse): Mo
                 COMMON -> ClientboundMessage.newBuilder().apply {
                     response.userId?.let { this.userId = it }
                     this.response = pbResponse.toProtobufResponse(response.ticket!!)
-                }
+                }.build()
 
-                HANDSHAKE -> ClientboundMessage.newBuilder().apply {
-                    this.serverHandshake = pbResponse as ServerHandshake
-                }
-            }.build().toByteArray()
+                HANDSHAKE -> pbResponse
+            }.toByteArray()
         )
     }
     return this.send(messages.map { message ->
         this.binaryMessage { factory ->
             if (this.aesKey == null || response.type == HANDSHAKE) {
                 // handshake packet should be unencrypted
-                factory.wrap(message)
+                message
             } else {
                 // encrypt
-                // TODO encrypt
-                factory.wrap(encryptAESGCM(message, this.aesKey!!))
-            }
+                CipherUtil.encryptMessage(
+                    aesKey = this.aesKey!!,
+                    message = message,
+                    sessionId = this.sessionId!!,
+                    sequenceNumber = this.packetCounter.incrementAndGet()
+                ).toByteArray()
+            }.let { factory.wrap(it) }
         }
     }.toFlux())
 }

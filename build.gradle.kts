@@ -30,6 +30,7 @@ repositories {
 dependencies {
     protobuf(files("proto"))
 
+    implementation("org.bouncycastle:bcpg-jdk18on:1.80")
     implementation("org.bouncycastle:bcprov-jdk18on:1.80")
     implementation("cn.hutool:hutool-crypto:5.8.37")
     implementation("com.auth0:java-jwt:4.4.0")

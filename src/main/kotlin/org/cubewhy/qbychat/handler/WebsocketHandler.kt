@@ -8,7 +8,13 @@ import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
-import org.cubewhy.qbychat.util.*
+import org.cubewhy.qbychat.util.CipherUtil
+import org.cubewhy.qbychat.util.aesKey
+import org.cubewhy.qbychat.util.handshakeStatus
+import org.cubewhy.qbychat.util.sendEventWithEncryption
+import org.cubewhy.qbychat.util.sendResponseWithEncryption
+import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
+import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundHandshake
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
@@ -36,22 +42,25 @@ class WebsocketHandler(
                 sessions[session.id] = session
             }.flatMap { message ->
                 // resolve pbMessage
-                val inputStream = message.payload.asInputStream()
+                val payloadDataBuffer = message.payload
+
+                val payload = payloadDataBuffer.asInputStream(true)
+                if (!session.handshakeStatus) {
+                    // this is the handshake packet
+                    // parse packet
+                    val handshakePacket = ServerboundHandshake.parseFrom(payload)
+                    return@flatMap mono { packetService.processHandshake(handshakePacket, session) }
+                }
+
                 val pbMessage = if (session.aesKey != null) {
                     // decrypt message
-                    val iv = readIvFromInputStream(inputStream) // parse iv
-                    // TODO parse encryptedMessage
-                    ServerboundMessage.parseFrom(
-                        decryptInputStream(
-                            inputStream,
-                            session.aesKey!!,
-                            iv
-                        )
-                    )
+                    val decryptedBytes = CipherUtil.decryptInputStream(session.aesKey!!, payload)
+                    ServerboundMessage.parseFrom(decryptedBytes)
                 } else {
                     // non-encrypted
-                    ServerboundMessage.parseFrom(inputStream)
+                    ServerboundMessage.parseFrom(payload)
                 }
+
                 // process packet
                 mono { packetService.process(pbMessage, session) }
             }.flatMap { response ->
