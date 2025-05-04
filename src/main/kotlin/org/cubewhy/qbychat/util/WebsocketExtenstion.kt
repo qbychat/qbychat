@@ -42,13 +42,14 @@ var WebSocketSession.sessionId: Long?
         this.attributes["sessionId"] = value
     }
 
-val WebSocketSession.packetCounter: AtomicLong
+val WebSocketSession.s2cPacketCounter: AtomicLong
     get() {
-        val counter = this.attributes["packetCounter"] as AtomicLong?
+        val key = "packet-counter"
+        val counter = this.attributes[key] as AtomicLong?
         if (counter == null) {
-            this.attributes["packetCounter"] = AtomicLong(0)
+            this.attributes[key] = AtomicLong(0)
         }
-        return this.attributes["packetCounter"] as AtomicLong
+        return this.attributes[key] as AtomicLong
     }
 
 fun GeneratedMessage.toProtobufResponse(ticket: String): Response = Response.newBuilder().apply {
@@ -62,6 +63,10 @@ fun GeneratedMessage.toProtobufResponse(ticket: String): Response = Response.new
  * @param response websocket response
  * */
 fun WebSocketSession.sendResponseWithEncryption(response: WebsocketResponse): Mono<Void> {
+    if (!this.isOpen) {
+        // session closed
+        return Mono.empty()
+    }
     // build messages
     val messages = mutableListOf<ByteArray>()
     response.response?.let { pbResponse ->
@@ -87,7 +92,7 @@ fun WebSocketSession.sendResponseWithEncryption(response: WebsocketResponse): Mo
                     aesKey = this.aesKey!!,
                     message = message,
                     sessionId = this.sessionId!!,
-                    sequenceNumber = this.packetCounter.incrementAndGet()
+                    sequenceNumber = this.s2cPacketCounter.incrementAndGet()
                 ).toByteArray()
             }.let { factory.wrap(it) }
         }
@@ -106,7 +111,14 @@ fun WebSocketSession.sendWithEncryption(payload: ByteArray): Mono<Void> {
             factory.wrap(payload)
         } else {
             // do encrypt
-            factory.wrap(encryptAESGCM(payload, this.aesKey!!))
+            factory.wrap(
+                CipherUtil.encryptMessage(
+                    this.aesKey!!,
+                    payload,
+                    this.sessionId!!,
+                    this.s2cPacketCounter.incrementAndGet()
+                ).toByteArray()
+            )
         }
     }.toMono())
 }

@@ -2,9 +2,11 @@ package org.cubewhy.qbychat.service.impl
 
 import com.google.protobuf.kotlin.toByteString
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bouncycastle.crypto.params.X25519PublicKeyParameters
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.WebsocketResponse
+import org.cubewhy.qbychat.entity.config.QbyChatProperties
 import org.cubewhy.qbychat.entity.emptyWebsocketResponse
 import org.cubewhy.qbychat.entity.handshakeResponseOf
 import org.cubewhy.qbychat.service.PacketService
@@ -18,6 +20,7 @@ import org.cubewhy.qbychat.websocket.protocol.v1.ServerEncryptionInfo
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundHandshake
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.socket.CloseStatus
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.SignalType
 import java.security.SecureRandom
@@ -25,6 +28,7 @@ import java.security.SecureRandom
 @Service
 class PacketServiceImpl(
     private val sessionService: SessionService,
+    private val qbyChatProperties: QbyChatProperties
 ) : PacketService {
 
     companion object {
@@ -39,7 +43,12 @@ class PacketServiceImpl(
         session.handshakeStatus = true
         if (!handshake.hasEncryptionInfo()) {
             // client doesn't want this session be encrypted.
-            // TODO: require encryption
+            if (qbyChatProperties.websocket.requireEncryption) {
+                // the server requires client use an encrypted connection
+                // close session
+                session.close(CloseStatus.create(1001, "This instance requires an encrypted connection.")).awaitFirstOrNull()
+                return emptyWebsocketResponse()
+            }
             return handshakeResponseOf(ClientboundHandshake.getDefaultInstance())
         }
         // do key exchange

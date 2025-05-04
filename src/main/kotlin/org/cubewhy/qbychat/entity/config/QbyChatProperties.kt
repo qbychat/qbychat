@@ -7,6 +7,7 @@ data class QbyChatProperties(
     var websocket: WebsocketProperties
 ) {
     data class WebsocketProperties(
-        var path: String
+        var path: String,
+        var requireEncryption: Boolean
     )
 }

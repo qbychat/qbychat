@@ -9,11 +9,13 @@ import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.util.CipherUtil
+import org.cubewhy.qbychat.util.SlidingWindowManager
 import org.cubewhy.qbychat.util.aesKey
 import org.cubewhy.qbychat.util.handshakeStatus
 import org.cubewhy.qbychat.util.sendEventWithEncryption
 import org.cubewhy.qbychat.util.sendResponseWithEncryption
-import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
+import org.cubewhy.qbychat.util.sessionId
+import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundHandshake
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
 import org.springframework.stereotype.Component
@@ -36,29 +38,38 @@ class WebsocketHandler(
     }
 
     override fun handle(session: WebSocketSession): Mono<Void> {
+        val window = SlidingWindowManager()
         return session.receive()
             .doFirst {
                 // connected
                 sessions[session.id] = session
-            }.flatMap { message ->
+            }.concatMap { message ->
                 // resolve pbMessage
                 val payloadDataBuffer = message.payload
 
-                val payload = payloadDataBuffer.asInputStream(true)
+                val inputStream = payloadDataBuffer.asInputStream(true)
                 if (!session.handshakeStatus) {
                     // this is the handshake packet
                     // parse packet
-                    val handshakePacket = ServerboundHandshake.parseFrom(payload)
-                    return@flatMap mono { packetService.processHandshake(handshakePacket, session) }
+                    val handshakePacket = ServerboundHandshake.parseFrom(inputStream)
+                    return@concatMap mono { packetService.processHandshake(handshakePacket, session) }
                 }
 
                 val pbMessage = if (session.aesKey != null) {
+                    // deserialize packet
+                    val encryptedMessage = EncryptedMessage.parseFrom(inputStream)
+                    // verify packet
+                    if (encryptedMessage.sessionId != session.sessionId || window.accept(encryptedMessage.sequenceNumber)) {
+                        // ignore this packet because session id doesn't match
+                        return@concatMap Mono.empty()
+                    }
+
                     // decrypt message
-                    val decryptedBytes = CipherUtil.decryptInputStream(session.aesKey!!, payload)
+                    val decryptedBytes = CipherUtil.decryptMessage(session.aesKey!!, encryptedMessage)
                     ServerboundMessage.parseFrom(decryptedBytes)
                 } else {
                     // non-encrypted
-                    ServerboundMessage.parseFrom(payload)
+                    ServerboundMessage.parseFrom(inputStream)
                 }
 
                 // process packet
