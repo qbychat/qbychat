@@ -6,23 +6,16 @@ import org.bouncycastle.crypto.CipherParameters
 import org.bouncycastle.crypto.KeyGenerationParameters
 import org.bouncycastle.crypto.agreement.X25519Agreement
 import org.bouncycastle.crypto.digests.SHA256Digest
-import org.bouncycastle.crypto.generators.HKDFBytesGenerator
 import org.bouncycastle.crypto.generators.X25519KeyPairGenerator
-import org.bouncycastle.crypto.params.HKDFParameters
+import org.bouncycastle.crypto.macs.HMac
+import org.bouncycastle.crypto.modes.ChaCha20Poly1305
+import org.bouncycastle.crypto.params.AEADParameters
+import org.bouncycastle.crypto.params.KeyParameter
 import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
-import java.io.InputStream
 import java.nio.ByteBuffer
 import java.security.SecureRandom
-import javax.crypto.Cipher
-import javax.crypto.SecretKey
-import javax.crypto.spec.GCMParameterSpec
-import javax.crypto.spec.SecretKeySpec
 
 object CipherUtil {
-
-    const val GCM_IV_LENGTH = 12
-    const val GCM_TAG_LENGTH = 128
-
     fun generateX25519KeyPair(): AsymmetricCipherKeyPair = X25519KeyPairGenerator().apply {
         init(KeyGenerationParameters(SecureRandom(), 256))
     }.generateKeyPair()
@@ -36,73 +29,94 @@ object CipherUtil {
         return sharedSecret
     }
 
-    fun deriveAesKeyFromX25519(
-        sharedSecret: ByteArray,
-        info: ByteArray,
-        salt: ByteArray,
-        keyLength: Int = 16
-    ): SecretKey {
-        val hkdf = HKDFBytesGenerator(SHA256Digest())
+    private fun hkdfExpand(prk: ByteArray, info: ByteArray, length: Int): ByteArray {
+        val hmac = HMac(SHA256Digest())
+        hmac.init(KeyParameter(prk))
 
-        val hkdfParameters = HKDFParameters(sharedSecret, salt, info)
-        hkdf.init(hkdfParameters)
+        val block = ByteArray(hmac.macSize)
+        var result = ByteArray(0)
+        var i = 1
 
-        val derivedKey = ByteArray(keyLength) // 16 bytes for AES-128, 32 for AES-256
-        hkdf.generateBytes(derivedKey, 0, keyLength)
+        while (result.size < length) {
+            hmac.update(block, 0, block.size)
+            hmac.update(info, 0, info.size)
+            hmac.update(byteArrayOf(i.toByte()), 0, 1)
 
-        return SecretKeySpec(derivedKey, "AES")
+            hmac.doFinal(block, 0)
+
+            result += block.take(minOf(block.size, length - result.size)).toByteArray()
+            i++
+        }
+
+        return result
+    }
+
+    fun deriveChaCha20Key(sharedSecret: ByteArray, info: ByteArray): ByteArray {
+        return hkdfExpand(sharedSecret, info, 32)
     }
 
     fun encryptMessage(
-        aesKey: SecretKey,
+        chachaKey: ByteArray,
         message: ByteArray,
         sessionId: Long,
         sequenceNumber: Long
     ): EncryptedMessage {
-        val nonce = ByteArray(GCM_IV_LENGTH)
+        // Generate a random nonce (12 bytes for ChaCha20)
+        val nonce = ByteArray(12)
         SecureRandom().nextBytes(nonce)
-
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val spec = GCMParameterSpec(GCM_TAG_LENGTH, nonce)
-        cipher.init(Cipher.ENCRYPT_MODE, aesKey, spec)
 
         // Use sessionId + sequenceNumber as AAD to protect them from tampering
         val aad = ByteBuffer.allocate(16)
             .putLong(sessionId)
             .putLong(sequenceNumber)
             .array()
-        cipher.updateAAD(aad)
 
-        val cipherText = cipher.doFinal(message) // includes tag
+        // Prepare the ChaCha20 cipher
+        val cipher = ChaCha20Poly1305()
+        val params = AEADParameters(KeyParameter(chachaKey), 128, nonce, aad)
+        cipher.init(true, params)
 
+        // Encrypt the message
+        val cipherText = ByteArray(cipher.getOutputSize(message.size))
+        val len = cipher.processBytes(message, 0, message.size, cipherText, 0)
+        cipher.doFinal(cipherText, len)
+
+        // Return the encrypted message
         return EncryptedMessage.newBuilder().apply {
             this.sessionId = sessionId
             this.sequenceNumber = sequenceNumber
             this.nonce = ByteString.copyFrom(nonce)
-            this.ciphertext = ByteString.copyFrom(cipherText) // includes authTag in tail
+            this.ciphertext = ByteString.copyFrom(cipherText)
         }.build()
     }
 
-    fun decryptMessage(aesKey: SecretKey, encryptedMessage: EncryptedMessage): ByteArray {
+    fun decryptMessage(
+        chachaKey: ByteArray,
+        encryptedMessage: EncryptedMessage
+    ): ByteArray {
+        // Extract components
         val nonce = encryptedMessage.nonce.toByteArray()
+        val cipherText = encryptedMessage.ciphertext.toByteArray()
+        val sessionId = encryptedMessage.sessionId
+        val sequenceNumber = encryptedMessage.sequenceNumber
 
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val spec = GCMParameterSpec(GCM_TAG_LENGTH, nonce)
-        cipher.init(Cipher.DECRYPT_MODE, aesKey, spec)
-
-        // Set same AAD for validation
+        // Reconstruct AAD
         val aad = ByteBuffer.allocate(16)
-            .putLong(encryptedMessage.sessionId)
-            .putLong(encryptedMessage.sequenceNumber)
+            .putLong(sessionId)
+            .putLong(sequenceNumber)
             .array()
-        cipher.updateAAD(aad)
 
-        return cipher.doFinal(encryptedMessage.ciphertext.toByteArray()) // will throw AEADBadTagException if tampered
-    }
+        // Prepare ChaCha20-Poly1305 cipher for decryption
+        val cipher = ChaCha20Poly1305()
+        val params = AEADParameters(KeyParameter(chachaKey), 128, nonce, aad)
+        cipher.init(false, params)
 
-    fun decryptInputStream(aesKey: SecretKey, inputStream: InputStream): ByteArray {
-        // parse encrypted message
-        return decryptMessage(aesKey, EncryptedMessage.parseFrom(inputStream))
+        // Decrypt
+        val plainText = ByteArray(cipher.getOutputSize(cipherText.size))
+        val len = cipher.processBytes(cipherText, 0, cipherText.size, plainText, 0)
+        cipher.doFinal(plainText, len)
+
+        return plainText
     }
 }
 

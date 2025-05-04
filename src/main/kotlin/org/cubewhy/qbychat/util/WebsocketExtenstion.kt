@@ -12,13 +12,12 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 import java.util.concurrent.atomic.AtomicLong
-import javax.crypto.SecretKey
 
-var WebSocketSession.aesKey: SecretKey?
+var WebSocketSession.chachaKey: ByteArray?
     get() =
-        this.attributes["aesk"] as SecretKey?
+        this.attributes["chachakey"] as ByteArray?
     set(value) {
-        this.attributes["aesk"] = value
+        this.attributes["chachakey"] = value
     }
 
 var WebSocketSession.handshakeStatus: Boolean
@@ -83,13 +82,13 @@ fun WebSocketSession.sendResponseWithEncryption(response: WebsocketResponse): Mo
     }
     return this.send(messages.map { message ->
         this.binaryMessage { factory ->
-            if (this.aesKey == null || response.type == HANDSHAKE) {
+            if (this.chachaKey == null || response.type == HANDSHAKE) {
                 // handshake packet should be unencrypted
                 message
             } else {
                 // encrypt
                 CipherUtil.encryptMessage(
-                    aesKey = this.aesKey!!,
+                    chachaKey = this.chachaKey!!,
                     message = message,
                     sessionId = this.sessionId!!,
                     sequenceNumber = this.s2cPacketCounter.incrementAndGet()
@@ -106,14 +105,14 @@ fun WebSocketSession.sendEventWithEncryption(event: GeneratedMessage, userId: St
 fun WebSocketSession.sendWithEncryption(payload: ByteArray): Mono<Void> {
     // encrypt & send
     return this.send(this.binaryMessage { factory ->
-        if (this.aesKey == null) {
+        if (this.chachaKey == null) {
             // unencrypted
             factory.wrap(payload)
         } else {
             // do encrypt
             factory.wrap(
                 CipherUtil.encryptMessage(
-                    this.aesKey!!,
+                    this.chachaKey!!,
                     payload,
                     this.sessionId!!,
                     this.s2cPacketCounter.incrementAndGet()

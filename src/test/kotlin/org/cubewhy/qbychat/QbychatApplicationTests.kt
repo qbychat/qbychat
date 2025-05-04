@@ -1,14 +1,12 @@
 package org.cubewhy.qbychat
 
+import org.bouncycastle.crypto.InvalidCipherTextException
 import org.cubewhy.qbychat.util.CipherUtil
 import org.junit.jupiter.api.Assertions.assertArrayEquals
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
+import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.context.SpringBootTest
-import java.io.ByteArrayInputStream
-import javax.crypto.SecretKey
+import java.security.SecureRandom
 
 @SpringBootTest
 class QbychatApplicationTests {
@@ -17,108 +15,101 @@ class QbychatApplicationTests {
     fun contextLoads() {
     }
 
+
     @Test
-    fun `test generate X25519 key pair`() {
-        val keyPair = CipherUtil.generateX25519KeyPair()
-        assertNotNull(keyPair)
-        assertNotNull(keyPair.public)
-        assertNotNull(keyPair.private)
+    fun `ChaCha20 encryption and decryption should be reversible`() {
+        val key = ByteArray(32).apply { SecureRandom().nextBytes(this) }
+        val message = "Hello, qbychat!".toByteArray()
+        val sessionId = 12345L
+        val sequence = 1L
+
+        val encrypted = CipherUtil.encryptMessage(key, message, sessionId, sequence)
+        val decrypted = CipherUtil.decryptMessage(key, encrypted)
+
+        assertArrayEquals(message, decrypted)
     }
 
     @Test
-    fun `test perform key exchange`() {
-        val keyPair1 = CipherUtil.generateX25519KeyPair()
-        val keyPair2 = CipherUtil.generateX25519KeyPair()
+    fun `decrypt should fail if ciphertext is tampered (ChaCha20-Poly1305)`() {
+        val key = ByteArray(32).apply { SecureRandom().nextBytes(this) }
+        val message = "Don't tamper me".toByteArray()
+        val sessionId = 555L
+        val sequence = 9L
 
-        val sharedSecret1 = CipherUtil.performKeyExchange(keyPair1.private, keyPair2.public)
-        val sharedSecret2 = CipherUtil.performKeyExchange(keyPair2.private, keyPair1.public)
+        val encrypted = CipherUtil.encryptMessage(key, message, sessionId, sequence)
 
-        assertArrayEquals(sharedSecret1, sharedSecret2) // Shared secrets should be identical
-    }
+        // Tamper with ciphertext
+        val tamperedBytes = encrypted.ciphertext.toByteArray().apply {
+            this[0] = (this[0].toInt() xor 0xFF).toByte()
+        }
+        val tampered = encrypted.toBuilder().setCiphertext(com.google.protobuf.ByteString.copyFrom(tamperedBytes)).build()
 
-    @Test
-    fun `test derive AES key from X25519 shared secret`() {
-        val keyPair1 = CipherUtil.generateX25519KeyPair()
-        val keyPair2 = CipherUtil.generateX25519KeyPair()
-
-        val sharedSecret = CipherUtil.performKeyExchange(keyPair1.private, keyPair2.public)
-
-        // Derive AES key (16 bytes for AES-128)
-        val aesKey: SecretKey = CipherUtil.deriveAesKeyFromX25519(sharedSecret, ByteArray(0), ByteArray(0), 16)
-        assertNotNull(aesKey)
-        assertEquals(16, aesKey.encoded.size) // Ensure the AES key length is 16 bytes for AES-128
-    }
-
-    @Test
-    fun `test encrypt and decrypt message`() {
-        val keyPair1 = CipherUtil.generateX25519KeyPair()
-        val keyPair2 = CipherUtil.generateX25519KeyPair()
-
-        val sharedSecret = CipherUtil.performKeyExchange(keyPair1.private, keyPair2.public)
-        val aesKey = CipherUtil.deriveAesKeyFromX25519(sharedSecret, ByteArray(0), ByteArray(0), 16)
-
-        val message = "Hello, world!".toByteArray()
-        val sessionId = 123L
-        val sequenceNumber = 1L
-
-        val encryptedMessage = CipherUtil.encryptMessage(aesKey, message, sessionId, sequenceNumber)
-
-        // Now decrypt the message and check if it's the same
-        val decryptedMessage = CipherUtil.decryptMessage(aesKey, encryptedMessage)
-        assertArrayEquals(message, decryptedMessage) // The decrypted message should match the original
-    }
-
-    @Test
-    fun `test decrypt message with tampered data`() {
-        val keyPair1 = CipherUtil.generateX25519KeyPair()
-        val keyPair2 = CipherUtil.generateX25519KeyPair()
-
-        val sharedSecret = CipherUtil.performKeyExchange(keyPair1.private, keyPair2.public)
-        val aesKey = CipherUtil.deriveAesKeyFromX25519(sharedSecret, ByteArray(0), ByteArray(0), 16)
-
-        val message = "Hello, world!".toByteArray()
-        val sessionId = 123L
-        val sequenceNumber = 1L
-
-        val encryptedMessage = CipherUtil.encryptMessage(aesKey, message, sessionId, sequenceNumber)
-
-        // Tamper with the ciphertext
-        val tamperedCiphertext = encryptedMessage.ciphertext.toByteArray().copyOf()
-        tamperedCiphertext[0] = (tamperedCiphertext[0] + 1).toByte() // Modify the first byte
-
-        // Create a new EncryptedMessage with tampered data
-        val tamperedEncryptedMessage = encryptedMessage.toBuilder().setCiphertext(com.google.protobuf.ByteString.copyFrom(tamperedCiphertext)).build()
-
-        try {
-            // Try to decrypt the tampered message, should throw AEADBadTagException
-            CipherUtil.decryptMessage(aesKey, tamperedEncryptedMessage)
-            fail("Expected AEADBadTagException to be thrown")
-        } catch (e: javax.crypto.AEADBadTagException) {
-            // Expected exception
+        assertThrows<Exception> {
+            CipherUtil.decryptMessage(key, tampered)
         }
     }
 
     @Test
-    fun `test decrypt message from input stream`() {
-        val keyPair1 = CipherUtil.generateX25519KeyPair()
-        val keyPair2 = CipherUtil.generateX25519KeyPair()
+    fun `decrypt should fail if ChaCha20 ciphertext is tampered`() {
+        val key = ByteArray(32).apply { SecureRandom().nextBytes(this) }
+        val message = "This is a secret".toByteArray()
+        val sessionId = 1234L
+        val sequenceNumber = 1L
 
-        val sharedSecret = CipherUtil.performKeyExchange(keyPair1.private, keyPair2.public)
-        val aesKey = CipherUtil.deriveAesKeyFromX25519(sharedSecret, ByteArray(0), ByteArray(0), 16)
+        val encrypted = CipherUtil.encryptMessage(
+            chachaKey = key,
+            message = message,
+            sessionId = sessionId,
+            sequenceNumber = sequenceNumber
+        )
 
-        val message = "Hello from input stream!".toByteArray()
-        val sessionId = 456L
-        val sequenceNumber = 2L
+        val tamperedCiphertext = encrypted.ciphertext.toByteArray().apply {
+            this[0] = (this[0].toInt() xor 0xFF).toByte()
+        }
 
-        val encryptedMessage = CipherUtil.encryptMessage(aesKey, message, sessionId, sequenceNumber)
+        val tamperedMessage = encrypted.toBuilder()
+            .setCiphertext(com.google.protobuf.ByteString.copyFrom(tamperedCiphertext))
+            .build()
 
-        // Create an input stream from the encrypted message
-        val inputStream = ByteArrayInputStream(encryptedMessage.toByteArray())
+        assertThrows<InvalidCipherTextException> {
+            CipherUtil.decryptMessage(key, tamperedMessage)
+        }
+    }
 
-        // Now decrypt the message from the input stream
-        val decryptedMessage = CipherUtil.decryptInputStream(aesKey, inputStream)
+    @Test
+    fun `decrypt should fail if sessionId is tampered`() {
+        val key: ByteArray = ByteArray(32).apply { SecureRandom().nextBytes(this) }
+        val message: ByteArray = "Test AAD tampering".toByteArray()
+        val sessionId = 42L
+        val sequenceNumber = 99L
 
-        assertArrayEquals(message, decryptedMessage) // The decrypted message should match the original
+        val encrypted = CipherUtil.encryptMessage(key, message, sessionId, sequenceNumber)
+
+        val tampered = encrypted.toBuilder()
+            .setSessionId(sessionId + 1) // bad AAD
+            .build()
+
+        assertThrows<InvalidCipherTextException> {
+            CipherUtil.decryptMessage(key, tampered)
+        }
+    }
+
+    @Test
+    fun `decrypt should fail if sequenceNumber is tampered`() {
+        val key: ByteArray = ByteArray(32).apply { SecureRandom().nextBytes(this) }
+        val message: ByteArray = "Test AAD tampering".toByteArray()
+        val sessionId = 42L
+        val sequenceNumber = 99L
+
+        val encrypted = CipherUtil.encryptMessage(key, message, sessionId, sequenceNumber)
+
+        val tampered = encrypted.toBuilder()
+            .setSequenceNumber(sequenceNumber + 1) // bad AAD
+            .build()
+
+        assertThrows<InvalidCipherTextException> {
+            CipherUtil.decryptMessage(key, tampered)
+        }
     }
 
 }

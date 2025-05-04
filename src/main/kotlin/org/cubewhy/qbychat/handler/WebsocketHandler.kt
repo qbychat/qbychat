@@ -8,13 +8,7 @@ import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
-import org.cubewhy.qbychat.util.CipherUtil
-import org.cubewhy.qbychat.util.SlidingWindowManager
-import org.cubewhy.qbychat.util.aesKey
-import org.cubewhy.qbychat.util.handshakeStatus
-import org.cubewhy.qbychat.util.sendEventWithEncryption
-import org.cubewhy.qbychat.util.sendResponseWithEncryption
-import org.cubewhy.qbychat.util.sessionId
+import org.cubewhy.qbychat.util.*
 import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundHandshake
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
@@ -55,7 +49,7 @@ class WebsocketHandler(
                     return@concatMap mono { packetService.processHandshake(handshakePacket, session) }
                 }
 
-                val pbMessage = if (session.aesKey != null) {
+                val pbMessage = if (session.chachaKey != null) {
                     // deserialize packet
                     val encryptedMessage = EncryptedMessage.parseFrom(inputStream)
                     // verify packet
@@ -65,7 +59,7 @@ class WebsocketHandler(
                     }
 
                     // decrypt message
-                    val decryptedBytes = CipherUtil.decryptMessage(session.aesKey!!, encryptedMessage)
+                    val decryptedBytes = CipherUtil.decryptMessage(chachaKey = session.chachaKey!!, encryptedMessage)
                     ServerboundMessage.parseFrom(decryptedBytes)
                 } else {
                     // non-encrypted

@@ -12,7 +12,7 @@ import org.cubewhy.qbychat.entity.handshakeResponseOf
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.util.CipherUtil
-import org.cubewhy.qbychat.util.aesKey
+import org.cubewhy.qbychat.util.chachaKey
 import org.cubewhy.qbychat.util.handshakeStatus
 import org.cubewhy.qbychat.util.sessionId
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
@@ -61,14 +61,13 @@ class PacketServiceImpl(
             remotePublicKey = X25519PublicKeyParameters(clientEncryptionInfo.publicKey.toByteArray())
         )
         // compute AES key
-        val aesKey = CipherUtil.deriveAesKeyFromX25519(
+        val chachaKey = CipherUtil.deriveChaCha20Key(
             sharedSecret,
-            info = clientEncryptionInfo.aesKeyInfo.toByteArray(),
-            salt = clientEncryptionInfo.aesKeySalt.toByteArray()
+            info = clientEncryptionInfo.chacha20KeyInfo.toByteArray()
         )
         // save AES key
-        session.aesKey = aesKey
-        // generate session id (current timestamp)
+        session.chachaKey = chachaKey
+        // generate session id (random long)
         session.sessionId = SecureRandom().nextLong()
         // build handshake response
         val serverEncryptionInfo = ServerEncryptionInfo.newBuilder().apply {
