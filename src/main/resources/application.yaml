@@ -31,3 +31,4 @@ instance:
 qbychat:
   websocket:
     path: /ws
+    requireEncryption: true
