@@ -60,12 +60,12 @@ class PacketServiceImpl(
             privateKey = keypair.private,
             remotePublicKey = X25519PublicKeyParameters(clientEncryptionInfo.publicKey.toByteArray())
         )
-        // compute AES key
+        // compute ChaCha20 key
         val chachaKey = CipherUtil.deriveChaCha20Key(
             sharedSecret,
             info = clientEncryptionInfo.chacha20KeyInfo.toByteArray()
         )
-        // save AES key
+        // save ChaCha20 key
         session.chachaKey = chachaKey
         // generate session id (random long)
         session.sessionId = SecureRandom().nextLong()
