@@ -26,10 +26,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.entity.User
+import org.cubewhy.qbychat.entity.WebsocketResponseType
+import org.cubewhy.qbychat.entity.responseOf
+import org.cubewhy.qbychat.entity.websocketResponseOf
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.util.*
 import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
+import org.cubewhy.qbychat.websocket.protocol.v1.Response
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundHandshake
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
 import org.springframework.stereotype.Component
@@ -69,7 +73,7 @@ class WebsocketHandler(
                     return@concatMap mono { packetService.processHandshake(handshakePacket, session) }
                 }
 
-                val pbMessage = if (session.chachaKey != null) {
+                val serverboundMessage = if (session.chachaKey != null) {
                     // deserialize packet
                     val encryptedMessage = EncryptedMessage.parseFrom(inputStream)
                     // verify packet
@@ -87,7 +91,31 @@ class WebsocketHandler(
                 }
 
                 // process packet
-                mono { packetService.process(pbMessage, session) }
+                mono {
+                    try {
+                        packetService.process(serverboundMessage, session).apply {
+                            // put ticket
+                            this.ticket = serverboundMessage.request.ticket.toByteArray()
+                            if (this.response == null && this.type == WebsocketResponseType.COMMON) {
+                                // response must be non null
+                                this.response = responseOf(
+                                    ticket!!,
+                                    null,
+                                    Response.Status.INTERNAL_ERROR,
+                                    "Server returns an empty response"
+                                )
+                            }
+                        }
+                    } catch (e: Exception) {
+                        val response = responseOf(
+                            serverboundMessage.request.ticket.toByteArray(),
+                            null,
+                            Response.Status.INTERNAL_ERROR,
+                            e.message ?: "Internal Error"
+                        )
+                        websocketResponseOf(response)
+                    }
+                }
             }.flatMap { response ->
                 // send response to session
                 session.sendResponseWithEncryption(response).then(

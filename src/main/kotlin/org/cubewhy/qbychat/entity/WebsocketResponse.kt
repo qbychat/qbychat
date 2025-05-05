@@ -21,7 +21,9 @@
 package org.cubewhy.qbychat.entity
 
 import com.google.protobuf.GeneratedMessage
+import com.google.protobuf.kotlin.toByteString
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
+import org.cubewhy.qbychat.websocket.protocol.v1.Response
 
 data class WebsocketResponse(
     var response: GeneratedMessage? = null,
@@ -48,7 +50,19 @@ fun sharedEventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(
 fun eventOf(vararg events: GeneratedMessage) = events.map { WebsocketEvent(it, true) }
 fun eventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, true) }
 
-fun websocketResponseOf(response: GeneratedMessage, events: List<WebsocketEvent> = listOf()): WebsocketResponse {
+fun responseOf(
+    ticket: ByteArray,
+    payload: ByteArray?,
+    status: Response.Status = Response.Status.SUCCESS,
+    message: String? = null
+) = Response.newBuilder().apply {
+    this.ticket = ticket.toByteString()
+    payload?.let { this.payload = it.toByteString() }
+    this.status = status
+    message?.let { this.message = it }
+}.build()!!
+
+fun websocketResponseOf(response: Response, events: List<WebsocketEvent> = listOf()): WebsocketResponse {
     return WebsocketResponse(response, events = events)
 }
 
