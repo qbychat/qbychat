@@ -33,7 +33,7 @@ import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.util.*
 import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
-import org.cubewhy.qbychat.websocket.protocol.v1.Response
+import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundHandshake
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
 import org.springframework.stereotype.Component
@@ -101,7 +101,7 @@ class WebsocketHandler(
                                 this.response = responseOf(
                                     ticket!!,
                                     null,
-                                    Response.Status.INTERNAL_ERROR,
+                                    RPCResponse.Status.INTERNAL_ERROR,
                                     "Server returns an empty response"
                                 )
                             }
@@ -110,7 +110,7 @@ class WebsocketHandler(
                         val response = responseOf(
                             serverboundMessage.request.ticket.toByteArray(),
                             null,
-                            Response.Status.INTERNAL_ERROR,
+                            RPCResponse.Status.INTERNAL_ERROR,
                             e.message ?: "Internal Error"
                         )
                         websocketResponseOf(response)

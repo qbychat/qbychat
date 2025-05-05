@@ -27,7 +27,7 @@ import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.WebsocketResponseType.COMMON
 import org.cubewhy.qbychat.entity.WebsocketResponseType.HANDSHAKE
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
-import org.cubewhy.qbychat.websocket.protocol.v1.Response
+import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
@@ -72,7 +72,7 @@ val WebSocketSession.s2cPacketCounter: AtomicLong
         return this.attributes[key] as AtomicLong
     }
 
-fun GeneratedMessage.toProtobufResponse(ticket: ByteArray): Response = Response.newBuilder().apply {
+fun GeneratedMessage.toProtobufResponse(ticket: ByteArray): RPCResponse = RPCResponse.newBuilder().apply {
     this.ticket = ticket.toByteString()
     this.payload = this@toProtobufResponse.toByteString()
 }.build()

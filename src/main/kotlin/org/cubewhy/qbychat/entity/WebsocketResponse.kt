@@ -23,7 +23,7 @@ package org.cubewhy.qbychat.entity
 import com.google.protobuf.GeneratedMessage
 import com.google.protobuf.kotlin.toByteString
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
-import org.cubewhy.qbychat.websocket.protocol.v1.Response
+import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
 
 data class WebsocketResponse(
     var response: GeneratedMessage? = null,
@@ -53,16 +53,16 @@ fun eventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, tr
 fun responseOf(
     ticket: ByteArray,
     payload: ByteArray?,
-    status: Response.Status = Response.Status.SUCCESS,
+    status: RPCResponse.Status = RPCResponse.Status.SUCCESS,
     message: String? = null
-) = Response.newBuilder().apply {
+) = RPCResponse.newBuilder().apply {
     this.ticket = ticket.toByteString()
     payload?.let { this.payload = it.toByteString() }
     this.status = status
     message?.let { this.message = it }
 }.build()!!
 
-fun websocketResponseOf(response: Response, events: List<WebsocketEvent> = listOf()): WebsocketResponse {
+fun websocketResponseOf(response: RPCResponse, events: List<WebsocketEvent> = listOf()): WebsocketResponse {
     return WebsocketResponse(response, events = events)
 }
 
