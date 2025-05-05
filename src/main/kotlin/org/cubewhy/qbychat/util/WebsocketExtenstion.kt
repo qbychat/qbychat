@@ -21,6 +21,7 @@
 package org.cubewhy.qbychat.util
 
 import com.google.protobuf.GeneratedMessage
+import com.google.protobuf.kotlin.toByteString
 import org.cubewhy.qbychat.entity.ClientInfo
 import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.WebsocketResponseType.COMMON
@@ -71,8 +72,8 @@ val WebSocketSession.s2cPacketCounter: AtomicLong
         return this.attributes[key] as AtomicLong
     }
 
-fun GeneratedMessage.toProtobufResponse(ticket: String): Response = Response.newBuilder().apply {
-    this.ticket = ticket
+fun GeneratedMessage.toProtobufResponse(ticket: ByteArray): Response = Response.newBuilder().apply {
+    this.ticket = ticket.toByteString()
     this.payload = this@toProtobufResponse.toByteString()
 }.build()
 

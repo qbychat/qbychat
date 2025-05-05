@@ -52,7 +52,7 @@ class WebsocketHandler(
     }
 
     override fun handle(session: WebSocketSession): Mono<Void> {
-        val window = SlidingWindowManager()
+        val window = SlidingWindow()
         return session.receive()
             .doFirst {
                 // connected

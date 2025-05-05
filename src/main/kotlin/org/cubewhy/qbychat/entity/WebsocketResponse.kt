@@ -29,7 +29,7 @@ data class WebsocketResponse(
     var events: List<WebsocketEvent> = emptyList(),
 ) {
     var userId: String? = null
-    var ticket: String? = null // request ticket
+    var ticket: ByteArray? = null // request ticket
 }
 
 data class WebsocketEvent(

@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-class SlidingWindowManager(
+class SlidingWindow(
     private val windowSize: Long = 64
 ) {
     private var baseSeq: Long = 0
