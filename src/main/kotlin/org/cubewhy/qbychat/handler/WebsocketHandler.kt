@@ -74,19 +74,32 @@ class WebsocketHandler(
                 }
 
                 val serverboundMessage = if (session.chachaKey != null) {
-                    // deserialize packet
+                    // Encrypted path
                     val encryptedMessage = EncryptedMessage.parseFrom(inputStream)
-                    // verify packet
-                    if (encryptedMessage.sessionId != session.sessionId || window.accept(encryptedMessage.sequenceNumber)) {
-                        // ignore this packet because session id doesn't match
+
+                    if (encryptedMessage.sessionId != session.sessionId) {
+                        // Session ID mismatch
                         return@concatMap Mono.empty()
                     }
 
-                    // decrypt message
-                    val decryptedBytes = CipherUtil.decryptMessage(chachaKey = session.chachaKey!!, encryptedMessage)
+                    val decryptedBytes = try {
+                        CipherUtil.decryptMessage(
+                            chachaKey = session.chachaKey!!,
+                            encryptedMessage = encryptedMessage
+                        )
+                    } catch (_: Exception) {
+                        // Tampered message or decryption error
+                        return@concatMap Mono.empty()
+                    }
+
+                    if (!window.accept(encryptedMessage.sequenceNumber)) {
+                        // Sequence number invalid (replay or out of window)
+                        return@concatMap Mono.empty()
+                    }
+
                     ServerboundMessage.parseFrom(decryptedBytes)
                 } else {
-                    // non-encrypted
+                    // Unencrypted path
                     ServerboundMessage.parseFrom(inputStream)
                 }
 
