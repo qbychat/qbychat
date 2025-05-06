@@ -26,10 +26,10 @@ import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
 import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
 
 data class WebsocketResponse(
-    var response: GeneratedMessage? = null,
-    var type: WebsocketResponseType = WebsocketResponseType.COMMON,
+    var response: RPCResponse? = null,
     var events: List<WebsocketEvent> = emptyList(),
 ) {
+    var clientboundHandshake: ClientboundHandshake? = null
     var userId: String? = null
     var ticket: ByteArray? = null // request ticket
 }
@@ -38,12 +38,6 @@ data class WebsocketEvent(
     val eventMessage: GeneratedMessage,
     val shared: Boolean // should this event shared over sessions that logged in the same account?
 )
-
-
-enum class WebsocketResponseType {
-    COMMON,
-    HANDSHAKE
-}
 
 fun sharedEventOf(vararg events: GeneratedMessage) = events.map { WebsocketEvent(it, true) }
 fun sharedEventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, true) }
@@ -67,6 +61,8 @@ fun websocketResponseOf(response: RPCResponse, events: List<WebsocketEvent> = li
 }
 
 fun handshakeResponseOf(response: ClientboundHandshake) =
-    WebsocketResponse(response, type = WebsocketResponseType.HANDSHAKE)
+    WebsocketResponse(null).apply {
+        this.clientboundHandshake = response
+    }
 
 fun emptyWebsocketResponse() = WebsocketResponse()

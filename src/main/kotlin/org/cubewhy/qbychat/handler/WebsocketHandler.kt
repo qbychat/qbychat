@@ -26,7 +26,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.entity.User
-import org.cubewhy.qbychat.entity.WebsocketResponseType
 import org.cubewhy.qbychat.entity.responseOf
 import org.cubewhy.qbychat.entity.websocketResponseOf
 import org.cubewhy.qbychat.service.PacketService
@@ -109,7 +108,7 @@ class WebsocketHandler(
                         packetService.process(serverboundMessage, session).apply {
                             // put ticket
                             this.ticket = serverboundMessage.request.ticket.toByteArray()
-                            if (this.response == null && this.type == WebsocketResponseType.COMMON) {
+                            if (this.response == null && this.clientboundHandshake == null) {
                                 // response must be non null
                                 this.response = responseOf(
                                     ticket!!,

@@ -21,13 +21,9 @@
 package org.cubewhy.qbychat.util
 
 import com.google.protobuf.GeneratedMessage
-import com.google.protobuf.kotlin.toByteString
 import org.cubewhy.qbychat.entity.ClientInfo
 import org.cubewhy.qbychat.entity.WebsocketResponse
-import org.cubewhy.qbychat.entity.WebsocketResponseType.COMMON
-import org.cubewhy.qbychat.entity.WebsocketResponseType.HANDSHAKE
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
-import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
@@ -72,11 +68,6 @@ val WebSocketSession.s2cPacketCounter: AtomicLong
         return this.attributes[key] as AtomicLong
     }
 
-fun GeneratedMessage.toProtobufResponse(ticket: ByteArray): RPCResponse = RPCResponse.newBuilder().apply {
-    this.ticket = ticket.toByteString()
-    this.payload = this@toProtobufResponse.toByteString()
-}.build()
-
 /**
  * Send response with encryption
  *
@@ -91,19 +82,20 @@ fun WebSocketSession.sendResponseWithEncryption(response: WebsocketResponse): Mo
     val messages = mutableListOf<ByteArray>()
     response.response?.let { pbResponse ->
         messages.add(
-            when (response.type) {
-                COMMON -> ClientboundMessage.newBuilder().apply {
-                    response.userId?.let { this.userId = it }
-                    this.response = pbResponse.toProtobufResponse(response.ticket!!)
-                }.build()
-
-                HANDSHAKE -> pbResponse
-            }.toByteArray()
+            ClientboundMessage.newBuilder().apply {
+                response.userId?.let { this.userId = it }
+                this.response = pbResponse
+            }.build().toByteArray()
         )
+    } ?: run {
+        response.clientboundHandshake?.let {
+            messages.add(it.toByteArray())
+        } ?: throw IllegalStateException("Both response and clientboundHandshake are null.")
     }
+
     return this.send(messages.map { message ->
         this.binaryMessage { factory ->
-            if (this.chachaKey == null || response.type == HANDSHAKE) {
+            if (this.chachaKey == null || response.clientboundHandshake != null) {
                 // handshake packet should be unencrypted
                 message
             } else {
