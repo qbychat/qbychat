@@ -119,7 +119,6 @@ class PacketServiceImpl(
                 }
 
                 is GeneratedMessage -> {
-                    // build response
                     websocketResponseOf(response.toByteArray())
                 }
 
@@ -151,6 +150,7 @@ class PacketServiceImpl(
                 e.message
             )
         } catch (e: RuntimeException) {
+            logger.error(e) { "Failed to handle packet" }
             errorWebsocketResponseOf(
                 RPCResponse.Status.INTERNAL_ERROR,
                 "Internal Server Error"
