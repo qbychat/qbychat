@@ -61,9 +61,12 @@ class SecurityConfig(
         return http {
             authorizeExchange {
                 authorize(
-                    pathMatchers("/ws", "/.well-known/**"), permitAll
+                    pathMatchers("/ws", "/.well-known/**", "/dashboard/**", "/dashboard"), permitAll
                 )
-                authorize(anyExchange, authenticated)
+                authorize(
+                    pathMatchers("/api/**"), authenticated
+                )
+                authorize(anyExchange, permitAll)
             }
             formLogin {
                 loginPage = "/api/user/login"

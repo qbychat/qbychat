@@ -43,7 +43,7 @@ import reactor.netty.channel.AbortedException
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
-class WebsocketHandler(
+class WebSocketRPCHandler(
     private val packetService: PacketService,
     private val scope: CoroutineScope,
     private val sessionService: SessionService,

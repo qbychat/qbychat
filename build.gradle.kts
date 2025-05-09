@@ -7,6 +7,8 @@ plugins {
 
     id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
 }
+
+val frontendDir = "./dashboard"
 val springCloudVersion by extra("2024.0.0")
 
 group = "org.cubewhy"
@@ -80,6 +82,43 @@ protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:4.30.0-RC1"
     }
+}
+
+tasks.register<Exec>("npmInstall") {
+    workingDir = file(frontendDir)
+    commandLine = listOf("pnpm", "install")
+
+    inputs.files(fileTree(frontendDir).matching { include("package.json", "pnpm-lock.yaml") })
+
+    outputs.dir("$frontendDir/node_modules")
+}
+
+
+tasks.register<Exec>("npmBuild") {
+    workingDir = file(frontendDir)
+    commandLine = listOf("pnpm", "run", "build")
+    dependsOn("npmInstall")
+
+    inputs.files(fileTree(frontendDir).matching { include("package.json", "src/**/*.ts", "src/**/*.js") })
+    outputs.dir("$frontendDir/dist")
+}
+
+
+tasks.register<Copy>("copyFrontendToBuild") {
+    dependsOn("npmBuild")
+
+    from("$frontendDir/dist")
+
+    val output = "${layout.buildDirectory.get().asFile}/resources/main/static"
+    into(output)
+
+    inputs.dir("$frontendDir/dist")
+    outputs.dir(output)
+}
+
+
+tasks.named("processResources") {
+    dependsOn("copyFrontendToBuild")
 }
 
 tasks.withType<Test> {

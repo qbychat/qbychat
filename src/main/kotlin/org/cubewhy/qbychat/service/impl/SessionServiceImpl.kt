@@ -35,7 +35,7 @@ import org.cubewhy.qbychat.entity.Session
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.UserWebsocketSession
 import org.cubewhy.qbychat.entity.config.InstanceProperties
-import org.cubewhy.qbychat.handler.WebsocketHandler
+import org.cubewhy.qbychat.handler.WebSocketRPCHandler
 import org.cubewhy.qbychat.repository.SessionRepository
 import org.cubewhy.qbychat.repository.UserRepository
 import org.cubewhy.qbychat.service.SessionService
@@ -120,7 +120,7 @@ class SessionServiceImpl(
         // find all available sessions
         this.findSessions(user).toFlux().mapNotNull {
             // find on local session map
-            WebsocketHandler.sessions[it.websocketId]
+            WebSocketRPCHandler.sessions[it.websocketId]
         }.flatMap { session ->
             mono { func.invoke(session!!) }
         }.awaitLast()

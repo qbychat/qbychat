@@ -20,7 +20,7 @@
 
 package org.cubewhy.qbychat.config
 
-import org.cubewhy.qbychat.handler.WebsocketHandler
+import org.cubewhy.qbychat.handler.WebSocketRPCHandler
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -29,7 +29,7 @@ import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping
 
 @Configuration
 class WebConfig(
-    private val websocketHandler: WebsocketHandler,
+    private val webSocketRPCHandler: WebSocketRPCHandler,
 ) {
     @Value("\${qbychat.websocket.path}")
     private lateinit var websocketPath: String
@@ -37,7 +37,7 @@ class WebConfig(
     @Bean
     fun handlerMapping(): HandlerMapping {
         val map = mapOf(
-            websocketPath to websocketHandler,
+            websocketPath to webSocketRPCHandler,
         )
         val order = -1
 
