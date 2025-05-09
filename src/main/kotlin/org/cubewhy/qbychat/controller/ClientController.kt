@@ -22,14 +22,18 @@ package org.cubewhy.qbychat.controller
 
 import org.cubewhy.qbychat.annotations.rpc.RPCHandler
 import org.cubewhy.qbychat.entity.WebsocketResponse
-import org.cubewhy.qbychat.entity.emptyWebsocketResponse
+import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.websocket.protocol.v1.RequestMethod
 import org.springframework.stereotype.Controller
+import org.springframework.web.reactive.socket.WebSocketSession
+import org.cubewhy.qbychat.websocket.session.v1.RegisterClientRequest as RegisterClientRequestV1
 
 @Controller
-class ClientController {
+class ClientController(
+    private val sessionService: SessionService,
+) {
     @RPCHandler(RequestMethod.REGISTER_CLIENT_V1, allowAnonymous = true)
-    suspend fun registerClientV1(): WebsocketResponse {
-        return emptyWebsocketResponse() // TODO register client
+    suspend fun registerClientV1(session: WebSocketSession, payload: RegisterClientRequestV1): WebsocketResponse {
+        return sessionService.registerClient(session, payload)
     }
 }

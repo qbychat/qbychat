@@ -20,9 +20,13 @@
 
 package org.cubewhy.qbychat.annotations.rpc
 
+import com.google.protobuf.GeneratedMessage
 import org.cubewhy.qbychat.entity.User
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketSession
+import java.lang.reflect.Method
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 
 interface RPCArgumentResolver {
@@ -50,6 +54,43 @@ class UserArgumentResolver : RPCArgumentResolver {
 
     override fun resolveKArgument(param: KParameter, context: RPCContext): Any? {
         return context.user ?: throw IllegalStateException("User not found in context")
+    }
+}
+
+@Component
+class PayloadArgumentResolver : RPCArgumentResolver {
+
+    object ProtobufParserCache {
+        private val methodCache = ConcurrentHashMap<Class<*>, Method>()
+
+        fun parseFrom(clazz: Class<*>, data: ByteArray): Any {
+            val method = methodCache.computeIfAbsent(clazz) {
+                it.getMethod("parseFrom", ByteArray::class.java)
+            }
+            return method.invoke(null, data)
+        }
+    }
+
+
+    override fun supportsParameter(param: java.lang.reflect.Parameter): Boolean {
+        return GeneratedMessage::class.java.isAssignableFrom(param.type)
+    }
+
+    override fun supportsKParameter(param: KParameter): Boolean {
+        val clazz = (param.type.classifier as? KClass<*>)?.java ?: return false
+        return GeneratedMessage::class.java.isAssignableFrom(clazz)
+    }
+
+    override fun resolveArgument(param: java.lang.reflect.Parameter, context: RPCContext): Any? {
+        val payload = context.payload ?: throw IllegalStateException("Payload is null")
+        return ProtobufParserCache.parseFrom(param.type, payload)
+    }
+
+    override fun resolveKArgument(param: KParameter, context: RPCContext): Any? {
+        val clazz = (param.type.classifier as? KClass<*>)?.java
+            ?: throw IllegalStateException("Could not determine parameter class")
+        val payload = context.payload ?: throw IllegalStateException("Payload is null")
+        return ProtobufParserCache.parseFrom(clazz, payload)
     }
 }
 

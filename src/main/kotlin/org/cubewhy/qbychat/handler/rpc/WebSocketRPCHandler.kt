@@ -18,7 +18,7 @@
  *
  */
 
-package org.cubewhy.qbychat.handler
+package org.cubewhy.qbychat.handler.rpc
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope

@@ -18,14 +18,14 @@
  *
  */
 
-package org.cubewhy.qbychat.entity
+package org.cubewhy.qbychat.util
 
-import org.springframework.data.mongodb.core.mapping.Document
+import java.security.SecureRandom
+import java.util.*
 
-@Document
-data class Session(
-    val id: String? = null,
-    val user: String,
-
-    val clientInfo: ClientMetadata, // TODO use client id
-) : AuditingEntity()
+fun generateSecureSecret(byteLength: Int = 32): String {
+    val random = SecureRandom()
+    val bytes = ByteArray(byteLength)
+    random.nextBytes(bytes)
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
+}

@@ -32,6 +32,7 @@ import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.config.QbyChatProperties
 import org.cubewhy.qbychat.entity.errorWebsocketResponseOf
 import org.cubewhy.qbychat.entity.websocketResponseOf
+import org.cubewhy.qbychat.exception.WebsocketBadRequest
 import org.cubewhy.qbychat.exception.WebsocketForbidden
 import org.cubewhy.qbychat.exception.WebsocketNotFound
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
@@ -110,7 +111,8 @@ class PacketServiceImpl(
             val response = rpcHandlerRegistry.invokeHandler(
                 message.request.method, RPCContext(
                     user = user,
-                    session = session
+                    session = session,
+                    payload = message.request.payload.toByteArray()
                 )
             )
             when (response) {
@@ -124,6 +126,10 @@ class PacketServiceImpl(
 
                 is ByteArray -> {
                     websocketResponseOf(response)
+                }
+
+                null -> {
+                    errorWebsocketResponseOf(RPCResponse.Status.INTERNAL_ERROR, "The handler responded \"null\"")
                 }
 
                 else -> {
@@ -149,6 +155,11 @@ class PacketServiceImpl(
                 RPCResponse.Status.NOT_FOUND,
                 e.message
             )
+        } catch (e: WebsocketBadRequest) {
+            errorWebsocketResponseOf(
+                RPCResponse.Status.BAD_REQUEST,
+                e.message
+            )
         } catch (e: RuntimeException) {
             logger.error(e) { "Failed to handle packet" }
             errorWebsocketResponseOf(
@@ -161,7 +172,6 @@ class PacketServiceImpl(
     override suspend fun processDisconnect(signalType: SignalType, session: WebSocketSession, user: User?) {
         // remove sessions from session store
         logger.debug { "Session ${session.id} disconnected" }
-        sessionService.removeWebsocketSessions(session)
+        sessionService.removeWebsocketSession(session)
     }
-
 }

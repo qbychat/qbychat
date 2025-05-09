@@ -18,14 +18,6 @@
  *
  */
 
-package org.cubewhy.qbychat.entity
+package org.cubewhy.qbychat.exception
 
-import org.springframework.data.mongodb.core.mapping.Document
-
-@Document
-data class Session(
-    val id: String? = null,
-    val user: String,
-
-    val clientInfo: ClientMetadata, // TODO use client id
-) : AuditingEntity()
+class WebsocketBadRequest(message: String = "Bad Request") : RuntimeException(message)

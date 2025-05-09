@@ -20,12 +20,29 @@
 
 package org.cubewhy.qbychat.entity
 
-import org.springframework.data.mongodb.core.mapping.Document
+import org.cubewhy.qbychat.common.v1.Platform as PbPlatform
 
-@Document
-data class Session(
-    val id: String? = null,
-    val user: String,
+data class ClientMetadata(
+    val name: String,
+    val version: String,
+    val platform: Platform,
+) {
 
-    val clientInfo: ClientMetadata, // TODO use client id
-) : AuditingEntity()
+    enum class Platform {
+        WINDOWS, LINUX, MACOS, ANDROID, IOS, UNKNOWN;
+
+        companion object {
+            fun fromProtobuf(proto: PbPlatform): ClientMetadata.Platform {
+                return when (proto) {
+                    PbPlatform.ANDROID -> ANDROID
+                    PbPlatform.IOS -> IOS
+                    PbPlatform.WINDOWS -> WINDOWS
+                    PbPlatform.LINUX -> LINUX
+                    PbPlatform.OSX -> MACOS
+
+                    else -> UNKNOWN
+                }
+            }
+        }
+    }
+}

@@ -20,12 +20,11 @@
 
 package org.cubewhy.qbychat.entity
 
-import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.annotation.Id
 
-@Document
-data class Session(
-    val id: String? = null,
-    val user: String,
+data class Client(
+    @Id val id: String? = null,
 
-    val clientInfo: ClientMetadata, // TODO use client id
-) : AuditingEntity()
+    val metadata: ClientMetadata,
+    val authToken: String,
+): AuditingEntity()

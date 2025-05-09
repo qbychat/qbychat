@@ -91,13 +91,14 @@ fun websocketResponseOf(
     return WebsocketResponse(payload, status, message, events = events)
 }
 
+fun websocketResponseOf(
+    payload: GeneratedMessage,
+    events: List<WebsocketEvent> = listOf()
+): WebsocketResponse {
+    return WebsocketResponse(payload.toByteArray(), RPCResponse.Status.SUCCESS, null, events = events)
+}
+
 fun errorWebsocketResponseOf(
     status: RPCResponse.Status,
     message: String?
 ) = websocketResponseOf(null, status, message)
-
-fun emptyWebsocketResponse() = WebsocketResponse(
-    payload = null,
-    status = RPCResponse.Status.INTERNAL_ERROR,
-    message = "Empty Response"
-)

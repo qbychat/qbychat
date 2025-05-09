@@ -31,24 +31,28 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.avro.FederationMessage
-import org.cubewhy.qbychat.entity.Session
-import org.cubewhy.qbychat.entity.User
-import org.cubewhy.qbychat.entity.UserWebsocketSession
+import org.cubewhy.qbychat.entity.*
 import org.cubewhy.qbychat.entity.config.InstanceProperties
-import org.cubewhy.qbychat.handler.WebSocketRPCHandler
+import org.cubewhy.qbychat.exception.WebsocketBadRequest
+import org.cubewhy.qbychat.handler.rpc.WebSocketRPCHandler
+import org.cubewhy.qbychat.repository.ClientRepository
 import org.cubewhy.qbychat.repository.SessionRepository
 import org.cubewhy.qbychat.repository.UserRepository
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.util.Const
-import org.cubewhy.qbychat.util.clientInfo
+import org.cubewhy.qbychat.util.clientMetadata
+import org.cubewhy.qbychat.util.generateSecureSecret
 import org.cubewhy.qbychat.util.protobufEventOf
 import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.core.removeAndAwait
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.kotlin.core.publisher.toFlux
 import java.time.Instant
+import org.cubewhy.qbychat.websocket.session.v1.RegisterClientRequest as RegisterClientRequestV1
+import org.cubewhy.qbychat.websocket.session.v1.RegisterClientResponse as RegisterClientResponseV1
 
 @Service
 class SessionServiceImpl(
@@ -57,11 +61,31 @@ class SessionServiceImpl(
     private val streamBridge: StreamBridge,
     private val userRepository: UserRepository,
     private val instanceProperties: InstanceProperties,
+    private val passwordEncoder: PasswordEncoder,
+    private val clientRepository: ClientRepository,
 ) : SessionService {
     companion object {
         private val logger = KotlinLogging.logger {}
     }
 
+    /**
+     * Clears "ghost" WebSocket sessions from the active session store.
+     *
+     * A "ghost" session is defined as a session that:
+     * - Belongs to the current instance (based on `instanceProperties.id`), or
+     * - Has no associated `instanceId` (i.e., it is orphaned or incomplete).
+     *
+     * This function runs asynchronously in a coroutine scope and performs the following steps:
+     * 1. Scans the Redis store for active WebSocket sessions.
+     * 2. Filters out sessions that either belong to the current instance or have no `instanceId`.
+     * 3. Logs the removal of each ghost session.
+     * 4. Removes each identified ghost session from the Redis store.
+     *
+     * This method is invoked automatically after the bean is initialized, ensuring any ghost sessions are cleared
+     * when the application starts up.
+     *
+     * @throws Exception If there are any errors during the Redis operations
+     */
     @PostConstruct
     private fun clearGhostSessions() {
         CoroutineScope(Dispatchers.Default).launch {
@@ -96,7 +120,7 @@ class SessionServiceImpl(
 
     override suspend fun isOnline(userId: String) =
         userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
-            .any { it.userId == userId }.awaitFirstOrNull()?: false
+            .any { it.userId == userId }.awaitFirstOrNull() ?: false
 
     override suspend fun isSessionValid(sessionId: String): Boolean {
         return sessionRepository.existsById(sessionId).awaitFirst()
@@ -130,6 +154,35 @@ class SessionServiceImpl(
         }.awaitLast()
     }
 
+    override suspend fun registerClient(
+        session: WebSocketSession,
+        payload: RegisterClientRequestV1
+    ): WebsocketResponse {
+        // Check if the client is already registered in this session
+        if (session.clientMetadata != null) {
+            throw WebsocketBadRequest("Client is already registered for this WebSocket session.")
+        }
+        val clientMetadata = ClientMetadata(
+            name = payload.clientMetadata.clientName,
+            version = payload.clientMetadata.clientVersion,
+            platform = ClientMetadata.Platform.fromProtobuf(payload.clientMetadata.platform)
+        )
+        // generate base token
+        val authToken = generateSecureSecret(byteLength = 32)
+
+        val client = clientRepository.save(
+            Client(
+                metadata = clientMetadata,
+                authToken = passwordEncoder.encode(authToken)
+            )
+        ).awaitFirst()
+        // join token
+        val finalToken = "${client.id}:$authToken"
+        return websocketResponseOf(RegisterClientResponseV1.newBuilder().apply {
+            this.token = finalToken
+        }.build())
+    }
+
     override suspend fun findSessions(user: User): List<UserWebsocketSession> =
         userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
             .filter { it.userId == user.id }.collectList().awaitLast()
@@ -149,12 +202,12 @@ class SessionServiceImpl(
 
     override suspend fun createSession(user: User, session: WebSocketSession): Session {
         val session1 = Session(
-            user = user.id!!, clientInfo = session.clientInfo!!
+            user = user.id!!, clientInfo = session.clientMetadata!!
         )
         return sessionRepository.save(session1).awaitFirst()
     }
 
-    override suspend fun removeWebsocketSessions(websocketSession: WebSocketSession) {
+    override suspend fun removeWebsocketSession(websocketSession: WebSocketSession) {
         userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
             .filter { it.websocketId == websocketSession.id }.flatMap { session ->
                 // remove session

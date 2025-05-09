@@ -22,9 +22,7 @@ package org.cubewhy.qbychat.annotations.rpc
 
 import org.cubewhy.qbychat.entity.Role
 import org.cubewhy.qbychat.websocket.protocol.v1.RequestMethod
-import org.springframework.boot.actuate.endpoint.annotation.Endpoint
 
-@Endpoint
 @MustBeDocumented
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)

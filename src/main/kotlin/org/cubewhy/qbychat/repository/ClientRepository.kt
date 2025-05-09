@@ -18,14 +18,11 @@
  *
  */
 
-package org.cubewhy.qbychat.entity
+package org.cubewhy.qbychat.repository
 
-import org.springframework.data.mongodb.core.mapping.Document
+import org.cubewhy.qbychat.entity.Client
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository
+import org.springframework.stereotype.Repository
 
-@Document
-data class Session(
-    val id: String? = null,
-    val user: String,
-
-    val clientInfo: ClientMetadata, // TODO use client id
-) : AuditingEntity()
+@Repository
+interface ClientRepository : ReactiveMongoRepository<Client, String>

@@ -20,7 +20,7 @@
 
 package org.cubewhy.qbychat.config
 
-import org.cubewhy.qbychat.handler.WebSocketRPCHandler
+import org.cubewhy.qbychat.handler.rpc.WebSocketRPCHandler
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
