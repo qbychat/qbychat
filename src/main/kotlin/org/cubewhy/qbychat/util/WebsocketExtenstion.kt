@@ -80,17 +80,13 @@ fun WebSocketSession.sendResponseWithEncryption(response: WebsocketResponse): Mo
     }
     // build messages
     val messages = mutableListOf<ByteArray>()
-    response.response?.let { pbResponse ->
+    response.buildRPCResponse().let { pbResponse ->
         messages.add(
             ClientboundMessage.newBuilder().apply {
                 response.userId?.let { this.userId = it }
                 this.response = pbResponse
             }.build().toByteArray()
         )
-    } ?: run {
-        response.clientboundHandshake?.let {
-            messages.add(it.toByteArray())
-        } ?: throw IllegalStateException("Both response and clientboundHandshake are null.")
     }
 
     return this.send(messages.map { message ->

@@ -21,6 +21,8 @@
 package org.cubewhy.qbychat.annotations.rpc
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cubewhy.qbychat.exception.WebsocketForbidden
+import org.cubewhy.qbychat.exception.WebsocketUnauthorized
 import org.cubewhy.qbychat.util.isKotlinClass
 import org.cubewhy.qbychat.websocket.protocol.v1.RequestMethod
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -105,6 +107,13 @@ class RPCHandlerRegistry : ApplicationContextAware {
 
     suspend fun invokeHandler(method: RequestMethod, context: RPCContext): Any? {
         val def = handlers[method] ?: throw IllegalArgumentException("No RPC handler for method: $method")
+        // check permission
+        if (context.user == null && !def.annotation.allowAnonymous) throw WebsocketUnauthorized()
+        if (context.user != null &&
+            def.annotation.roles.isNotEmpty() &&
+            context.user.roles.none { it in def.annotation.roles }
+        ) throw WebsocketForbidden()
+
         def.method?.let { method ->
             val parameters = method.parameters
             val resolvedArgs = arrayOfNulls<Any?>(parameters.size)
@@ -184,5 +193,5 @@ class RPCHandlerRegistry : ApplicationContextAware {
     }
 
 
-    fun getRegisteredHandlers(): Map<RequestMethod, RPCMethodDefinition> = handlers.toMap()
+    val registeredHandlers: Map<RequestMethod, RPCMethodDefinition> = handlers.toMap()
 }

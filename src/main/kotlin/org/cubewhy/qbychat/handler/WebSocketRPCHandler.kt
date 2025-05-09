@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.entity.User
-import org.cubewhy.qbychat.entity.responseOf
+import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.websocketResponseOf
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
@@ -39,7 +39,9 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
+import reactor.core.publisher.SignalType
 import reactor.netty.channel.AbortedException
+import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
@@ -51,113 +53,118 @@ class WebSocketRPCHandler(
     companion object {
         private val logger = KotlinLogging.logger {}
 
-        val sessions: ConcurrentHashMap<String, WebSocketSession> = ConcurrentHashMap() // id:sessionObj
+        val sessions: ConcurrentHashMap<String, WebSocketSession> = ConcurrentHashMap()
     }
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         val window = SlidingWindow()
+
         return session.receive()
-            .doFirst {
-                // connected
-                sessions[session.id] = session
-            }.concatMap { message ->
-                // resolve pbMessage
+            .doFirst { sessions[session.id] = session }
+            .concatMap { message ->
                 val payloadDataBuffer = message.payload
-
                 val inputStream = payloadDataBuffer.asInputStream(true)
+
                 if (!session.handshakeStatus) {
-                    // this is the handshake packet
-                    // parse packet
-                    val handshakePacket = ServerboundHandshake.parseFrom(inputStream)
-                    return@concatMap mono { packetService.processHandshake(handshakePacket, session) }
+                    // process handshake
+                    return@concatMap handleHandshake(inputStream, session).then(Mono.empty())
                 }
 
-                val serverboundMessage = if (session.chachaKey != null) {
-                    // Encrypted path
-                    val encryptedMessage = EncryptedMessage.parseFrom(inputStream)
-
-                    if (encryptedMessage.sessionId != session.sessionId) {
-                        // Session ID mismatch
-                        return@concatMap Mono.empty()
-                    }
-
-                    val decryptedBytes = try {
-                        CipherUtil.decryptMessage(
-                            chachaKey = session.chachaKey!!,
-                            encryptedMessage = encryptedMessage
-                        )
-                    } catch (_: Exception) {
-                        // Tampered message or decryption error
-                        return@concatMap Mono.empty()
-                    }
-
-                    if (!window.accept(encryptedMessage.sequenceNumber)) {
-                        // Sequence number invalid (replay or out of window)
-                        return@concatMap Mono.empty()
-                    }
-
-                    ServerboundMessage.parseFrom(decryptedBytes)
-                } else {
-                    // Unencrypted path
-                    ServerboundMessage.parseFrom(inputStream)
-                }
+                // deserialize packet
+                val serverboundMessage = processIncomingMessage(inputStream, session, window)
+                    ?: return@concatMap Mono.empty()
 
                 // process packet
-                mono {
-                    try {
-                        packetService.process(serverboundMessage, session).apply {
-                            // put ticket
-                            this.ticket = serverboundMessage.request.ticket.toByteArray()
-                            if (this.response == null && this.clientboundHandshake == null) {
-                                // response must be non null
-                                this.response = responseOf(
-                                    ticket!!,
-                                    null,
-                                    RPCResponse.Status.INTERNAL_ERROR,
-                                    "Server returns an empty response"
-                                )
-                            }
-                        }
-                    } catch (e: Exception) {
-                        val response = responseOf(
-                            serverboundMessage.request.ticket.toByteArray(),
-                            null,
-                            RPCResponse.Status.INTERNAL_ERROR,
-                            e.message ?: "Internal Error"
-                        )
-                        websocketResponseOf(response)
-                    }
-                }
-            }.flatMap { response ->
-                // send response to session
-                session.sendResponseWithEncryption(response).then(
-                    mono {
-                        // publish events
-                        response.events.forEach { event ->
-                            if (response.userId == null || !event.shared) {
-                                // push locally
-                                session.sendEventWithEncryption(event.eventMessage, null).awaitFirstOrNull()
-                            } else {
-                                // push remotely
-                                sessionService.pushEvent(response.userId!!, event.eventMessage)
-                            }
-                        }
-                    }
-                )
-            }.doOnError { e ->
-                if (e !is AbortedException) {
-                    // ignore session disconnected
-                    logger.error(e) { "WebSocket processing error" }
-                }
-            }.doFinally { signalType ->
-                // remove session from session map
-                sessions.remove(session.id)
-                // remove session id and close session
-                val user = session.attributes["user"] as User?
-                // remove session
-                scope.launch {
-                    packetService.processDisconnect(signalType, session, user)
-                }
-            }.then()
+                processPacket(serverboundMessage, session)
+            }
+            .flatMap { response ->
+                sendResponseAndEvents(response, session)
+            }
+            .doOnError { e -> handleWebSocketError(e) }
+            .doFinally { signalType -> handleSessionCleanup(signalType, session) }
+            .then()
     }
+
+    private fun handleHandshake(inputStream: InputStream, session: WebSocketSession): Mono<Void> {
+        val handshakePacket = ServerboundHandshake.parseFrom(inputStream)
+        return mono {
+            packetService.processHandshake(handshakePacket, session)
+        }.flatMap { clientboundHandshake ->
+            session.sendWithEncryption(clientboundHandshake.toByteArray())
+        }
+    }
+
+    private fun processIncomingMessage(
+        inputStream: InputStream,
+        session: WebSocketSession,
+        window: SlidingWindow
+    ): ServerboundMessage? {
+        return if (session.chachaKey != null) {
+            // Process encrypted message
+            val encryptedMessage = EncryptedMessage.parseFrom(inputStream)
+
+            if (encryptedMessage.sessionId != session.sessionId) return null
+
+            val decryptedBytes = try {
+                CipherUtil.decryptMessage(session.chachaKey!!, encryptedMessage)
+            } catch (_: Exception) {
+                // failed to decrypt or verify fail
+                return null
+            }
+
+            if (!window.accept(encryptedMessage.sequenceNumber)) return null
+            ServerboundMessage.parseFrom(decryptedBytes)
+        } else {
+            // Process unencrypted message
+            ServerboundMessage.parseFrom(inputStream)
+        }
+    }
+
+    private fun processPacket(
+        serverboundMessage: ServerboundMessage,
+        session: WebSocketSession
+    ): Mono<WebsocketResponse> {
+        return mono {
+            try {
+                packetService.process(serverboundMessage, session)
+            } catch (e: Exception) {
+                websocketResponseOf(
+                    serverboundMessage.request.ticket.toByteArray(),
+                    RPCResponse.Status.INTERNAL_ERROR,
+                    e.message ?: "Internal Error"
+                ).apply { this.ticket = serverboundMessage.request.ticket.toByteArray() }
+            }
+        }
+    }
+
+    private fun sendResponseAndEvents(response: WebsocketResponse, session: WebSocketSession): Mono<Void> {
+        return session.sendResponseWithEncryption(response).then(
+            mono {
+                response.events.forEach { event ->
+                    if (response.userId == null || !event.shared) {
+                        // Push events locally
+                        session.sendEventWithEncryption(event.eventMessage, null).awaitFirstOrNull()
+                    } else {
+                        // Push to the broker
+                        sessionService.pushEvent(response.userId!!, event.eventMessage)
+                    }
+                }
+            }
+        ).then()
+    }
+
+    private fun handleWebSocketError(e: Throwable) {
+        if (e !is AbortedException) {
+            logger.error(e) { "WebSocket processing error" }
+        }
+    }
+
+    private fun handleSessionCleanup(signalType: SignalType, session: WebSocketSession) {
+        sessions.remove(session.id)
+        val user = session.attributes["user"] as User?
+        scope.launch {
+            packetService.processDisconnect(signalType, session, user)
+        }
+    }
+
 }

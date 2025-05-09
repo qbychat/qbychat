@@ -21,17 +21,55 @@
 package org.cubewhy.qbychat.entity
 
 import com.google.protobuf.GeneratedMessage
-import com.google.protobuf.kotlin.toByteString
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
 import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
 
 data class WebsocketResponse(
-    var response: RPCResponse? = null,
+    val payload: ByteArray?,
+    val status: RPCResponse.Status = RPCResponse.Status.SUCCESS,
+    val message: String? = null,
     var events: List<WebsocketEvent> = emptyList(),
 ) {
     var clientboundHandshake: ClientboundHandshake? = null
     var userId: String? = null
-    var ticket: ByteArray? = null // request ticket
+    var ticket: ByteArray? = null
+
+    fun buildRPCResponse() = RPCResponse.newBuilder().apply {
+        this.ticket = ticket
+        this.payload = payload
+        this.status = status
+        this.message = message
+    }.build()!!
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as WebsocketResponse
+
+        if (!payload.contentEquals(other.payload)) return false
+        if (status != other.status) return false
+        if (message != other.message) return false
+        if (events != other.events) return false
+        if (clientboundHandshake != other.clientboundHandshake) return false
+        if (userId != other.userId) return false
+        if (!ticket.contentEquals(other.ticket)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = payload?.contentHashCode() ?: 0
+        result = 31 * result + status.hashCode()
+        result = 31 * result + (message?.hashCode() ?: 0)
+        result = 31 * result + events.hashCode()
+        result = 31 * result + (clientboundHandshake?.hashCode() ?: 0)
+        result = 31 * result + (userId?.hashCode() ?: 0)
+        result = 31 * result + (ticket?.contentHashCode() ?: 0)
+        return result
+    }
+
+
 }
 
 data class WebsocketEvent(
@@ -44,25 +82,22 @@ fun sharedEventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(
 fun eventOf(vararg events: GeneratedMessage) = events.map { WebsocketEvent(it, true) }
 fun eventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, true) }
 
-fun responseOf(
-    ticket: ByteArray,
+fun websocketResponseOf(
     payload: ByteArray?,
     status: RPCResponse.Status = RPCResponse.Status.SUCCESS,
-    message: String? = null
-) = RPCResponse.newBuilder().apply {
-    this.ticket = ticket.toByteString()
-    payload?.let { this.payload = it.toByteString() }
-    this.status = status
-    message?.let { this.message = it }
-}.build()!!
-
-fun websocketResponseOf(response: RPCResponse, events: List<WebsocketEvent> = listOf()): WebsocketResponse {
-    return WebsocketResponse(response, events = events)
+    message: String? = null,
+    events: List<WebsocketEvent> = listOf()
+): WebsocketResponse {
+    return WebsocketResponse(payload, status, message, events = events)
 }
 
-fun handshakeResponseOf(response: ClientboundHandshake) =
-    WebsocketResponse(null).apply {
-        this.clientboundHandshake = response
-    }
+fun errorWebsocketResponseOf(
+    status: RPCResponse.Status,
+    message: String?
+) = websocketResponseOf(null, status, message)
 
-fun emptyWebsocketResponse() = WebsocketResponse()
+fun emptyWebsocketResponse() = WebsocketResponse(
+    payload = null,
+    status = RPCResponse.Status.INTERNAL_ERROR,
+    message = "Empty Response"
+)

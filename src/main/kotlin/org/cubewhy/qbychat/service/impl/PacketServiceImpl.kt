@@ -20,25 +20,25 @@
 
 package org.cubewhy.qbychat.service.impl
 
+import com.google.protobuf.GeneratedMessage
 import com.google.protobuf.kotlin.toByteString
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bouncycastle.crypto.params.X25519PublicKeyParameters
+import org.cubewhy.qbychat.annotations.rpc.RPCContext
+import org.cubewhy.qbychat.annotations.rpc.RPCHandlerRegistry
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.config.QbyChatProperties
-import org.cubewhy.qbychat.entity.emptyWebsocketResponse
-import org.cubewhy.qbychat.entity.handshakeResponseOf
+import org.cubewhy.qbychat.entity.errorWebsocketResponseOf
+import org.cubewhy.qbychat.entity.websocketResponseOf
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.util.CipherUtil
 import org.cubewhy.qbychat.util.chachaKey
 import org.cubewhy.qbychat.util.handshakeStatus
 import org.cubewhy.qbychat.util.sessionId
-import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
-import org.cubewhy.qbychat.websocket.protocol.v1.ServerEncryptionInfo
-import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundHandshake
-import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
+import org.cubewhy.qbychat.websocket.protocol.v1.*
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.socket.CloseStatus
 import org.springframework.web.reactive.socket.WebSocketSession
@@ -48,7 +48,8 @@ import java.security.SecureRandom
 @Service
 class PacketServiceImpl(
     private val sessionService: SessionService,
-    private val qbyChatProperties: QbyChatProperties
+    private val qbyChatProperties: QbyChatProperties,
+    private val rpcHandlerRegistry: RPCHandlerRegistry
 ) : PacketService {
 
     companion object {
@@ -58,7 +59,7 @@ class PacketServiceImpl(
     override suspend fun processHandshake(
         handshake: ServerboundHandshake,
         session: WebSocketSession
-    ): WebsocketResponse {
+    ): ClientboundHandshake? {
         // mark shook hand
         session.handshakeStatus = true
         if (!handshake.hasEncryptionInfo()) {
@@ -68,9 +69,9 @@ class PacketServiceImpl(
                 // close session
                 session.close(CloseStatus.create(1001, "This instance requires an encrypted connection."))
                     .awaitFirstOrNull()
-                return emptyWebsocketResponse()
+                return null
             }
-            return handshakeResponseOf(ClientboundHandshake.getDefaultInstance())
+            return ClientboundHandshake.getDefaultInstance()
         }
         // do key exchange
         val clientEncryptionInfo = handshake.encryptionInfo
@@ -95,14 +96,37 @@ class PacketServiceImpl(
             this.publicKey = (keypair.public as X25519PublicKeyParameters).encoded.toByteString()
             this.sessionId = session.sessionId!!
         }.build()
-        return handshakeResponseOf(ClientboundHandshake.newBuilder().apply {
+        return ClientboundHandshake.newBuilder().apply {
             encryptionInfo = serverEncryptionInfo
-        }.build())
+        }.build()
     }
 
     override suspend fun process(message: ServerboundMessage, session: WebSocketSession): WebsocketResponse {
-        // TODO process requests
-        return emptyWebsocketResponse()
+        val user = sessionService.getUser(session)
+        val response = rpcHandlerRegistry.invokeHandler(
+            message.request.method, RPCContext(
+                user = user,
+                session = session
+            )
+        )
+        return when (response) {
+            is WebsocketResponse -> {
+                response
+            }
+
+            is GeneratedMessage -> {
+                // build response
+                websocketResponseOf(response.toByteArray())
+            }
+
+            else -> {
+                // bad handler
+                errorWebsocketResponseOf(
+                    RPCResponse.Status.INTERNAL_ERROR,
+                    "The handler doesn't response a correct type (need WebsocketResponse or GeneratedMessage)"
+                )
+            }
+        }
     }
 
     override suspend fun processDisconnect(signalType: SignalType, session: WebSocketSession, user: User?) {
