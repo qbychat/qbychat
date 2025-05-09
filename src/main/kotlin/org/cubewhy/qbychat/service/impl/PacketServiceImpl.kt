@@ -32,6 +32,9 @@ import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.config.QbyChatProperties
 import org.cubewhy.qbychat.entity.errorWebsocketResponseOf
 import org.cubewhy.qbychat.entity.websocketResponseOf
+import org.cubewhy.qbychat.exception.WebsocketForbidden
+import org.cubewhy.qbychat.exception.WebsocketNotFound
+import org.cubewhy.qbychat.exception.WebsocketUnauthorized
 import org.cubewhy.qbychat.service.PacketService
 import org.cubewhy.qbychat.service.SessionService
 import org.cubewhy.qbychat.util.CipherUtil
@@ -103,29 +106,55 @@ class PacketServiceImpl(
 
     override suspend fun process(message: ServerboundMessage, session: WebSocketSession): WebsocketResponse {
         val user = sessionService.getUser(session)
-        val response = rpcHandlerRegistry.invokeHandler(
-            message.request.method, RPCContext(
-                user = user,
-                session = session
-            )
-        )
-        return when (response) {
-            is WebsocketResponse -> {
-                response
-            }
-
-            is GeneratedMessage -> {
-                // build response
-                websocketResponseOf(response.toByteArray())
-            }
-
-            else -> {
-                // bad handler
-                errorWebsocketResponseOf(
-                    RPCResponse.Status.INTERNAL_ERROR,
-                    "The handler doesn't response a correct type (need WebsocketResponse or GeneratedMessage)"
+        return try {
+            val response = rpcHandlerRegistry.invokeHandler(
+                message.request.method, RPCContext(
+                    user = user,
+                    session = session
                 )
+            )
+            when (response) {
+                is WebsocketResponse -> {
+                    response
+                }
+
+                is GeneratedMessage -> {
+                    // build response
+                    websocketResponseOf(response.toByteArray())
+                }
+
+                is ByteArray -> {
+                    websocketResponseOf(response)
+                }
+
+                else -> {
+                    // bad handler
+                    errorWebsocketResponseOf(
+                        RPCResponse.Status.INTERNAL_ERROR,
+                        "The handler doesn't response a correct type (need WebsocketResponse or GeneratedMessage)"
+                    )
+                }
             }
+        } catch (e: WebsocketUnauthorized) {
+            errorWebsocketResponseOf(
+                RPCResponse.Status.UNAUTHORIZED,
+                e.message
+            )
+        } catch (e: WebsocketForbidden) {
+            errorWebsocketResponseOf(
+                RPCResponse.Status.FORBIDDEN,
+                e.message
+            )
+        } catch (e: WebsocketNotFound) {
+            errorWebsocketResponseOf(
+                RPCResponse.Status.NOT_FOUND,
+                e.message
+            )
+        } catch (e: RuntimeException) {
+            errorWebsocketResponseOf(
+                RPCResponse.Status.INTERNAL_ERROR,
+                "Internal Server Error"
+            )
         }
     }
 
