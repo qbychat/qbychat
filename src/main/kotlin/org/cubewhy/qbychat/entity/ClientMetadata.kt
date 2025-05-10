@@ -29,7 +29,7 @@ data class ClientMetadata(
 ) {
 
     enum class Platform {
-        WINDOWS, LINUX, MACOS, ANDROID, IOS, UNKNOWN;
+        WINDOWS, LINUX, MACOS, ANDROID, IOS, BROWSER, UNKNOWN;
 
         companion object {
             fun fromProtobuf(proto: PbPlatform): ClientMetadata.Platform {
@@ -39,6 +39,7 @@ data class ClientMetadata(
                     PbPlatform.WINDOWS -> WINDOWS
                     PbPlatform.LINUX -> LINUX
                     PbPlatform.OSX -> MACOS
+                    PbPlatform.BROWSER -> BROWSER
 
                     else -> UNKNOWN
                 }
