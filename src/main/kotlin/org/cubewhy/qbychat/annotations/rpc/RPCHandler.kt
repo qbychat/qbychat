@@ -29,5 +29,5 @@ import org.cubewhy.qbychat.websocket.protocol.v1.RequestMethod
 annotation class RPCHandler(
     val method: RequestMethod,
     val roles: Array<Role> = [],
-    val allowAnonymous: Boolean = false
+    val permissions: RPCPermissionFlag = RPCPermissionFlag.ALLOW_AUTHORIZED_ONLY // allow authorized users to access endpoints
 )

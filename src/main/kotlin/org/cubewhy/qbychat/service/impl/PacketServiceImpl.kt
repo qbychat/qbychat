@@ -37,7 +37,7 @@ import org.cubewhy.qbychat.exception.WebsocketForbidden
 import org.cubewhy.qbychat.exception.WebsocketNotFound
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
 import org.cubewhy.qbychat.service.PacketService
-import org.cubewhy.qbychat.service.SessionService
+import org.cubewhy.qbychat.service.SessionManager
 import org.cubewhy.qbychat.util.CipherUtil
 import org.cubewhy.qbychat.util.chachaKey
 import org.cubewhy.qbychat.util.handshakeStatus
@@ -51,7 +51,7 @@ import java.security.SecureRandom
 
 @Service
 class PacketServiceImpl(
-    private val sessionService: SessionService,
+    private val sessionManager: SessionManager,
     private val qbyChatProperties: QbyChatProperties,
     private val rpcHandlerRegistry: RPCHandlerRegistry
 ) : PacketService {
@@ -106,7 +106,7 @@ class PacketServiceImpl(
     }
 
     override suspend fun process(message: ServerboundMessage, session: WebSocketSession): WebsocketResponse {
-        val user = sessionService.getUser(session)
+        val user = sessionManager.getUser(session)
         return try {
             val response = rpcHandlerRegistry.invokeHandler(
                 message.request.method, RPCContext(
@@ -172,6 +172,6 @@ class PacketServiceImpl(
     override suspend fun processDisconnect(signalType: SignalType, session: WebSocketSession, user: User?) {
         // remove sessions from session store
         logger.debug { "Session ${session.id} disconnected" }
-        sessionService.removeWebsocketSession(session)
+        sessionManager.removeWebsocketSession(session)
     }
 }

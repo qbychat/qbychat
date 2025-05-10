@@ -29,7 +29,7 @@ import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.websocketResponseOf
 import org.cubewhy.qbychat.service.PacketService
-import org.cubewhy.qbychat.service.SessionService
+import org.cubewhy.qbychat.service.SessionManager
 import org.cubewhy.qbychat.util.*
 import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
 import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
@@ -49,7 +49,7 @@ import java.util.concurrent.ConcurrentHashMap
 class WebSocketRPCHandler(
     private val packetService: PacketService,
     private val scope: CoroutineScope,
-    private val sessionService: SessionService,
+    private val sessionManager: SessionManager,
 ) : WebSocketHandler {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -147,7 +147,7 @@ class WebSocketRPCHandler(
                         session.sendEventWithEncryption(event.eventMessage, null).awaitFirstOrNull()
                     } else {
                         // Push to the broker
-                        sessionService.pushEvent(response.userId!!, event.eventMessage)
+                        sessionManager.pushEvent(response.userId!!, event.eventMessage)
                     }
                 }
             }

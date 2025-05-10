@@ -23,7 +23,7 @@ package org.cubewhy.qbychat.service.impl
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.repository.UserRepository
-import org.cubewhy.qbychat.service.SessionService
+import org.cubewhy.qbychat.service.SessionManager
 import org.cubewhy.qbychat.service.UserService
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -35,7 +35,7 @@ import reactor.kotlin.core.publisher.toMono
 class UserServiceImpl(
     private val passwordEncoder: PasswordEncoder,
     private val userRepository: UserRepository,
-    private val sessionService: SessionService
+    private val sessionManager: SessionManager
 ) : UserService {
     companion object {
         private val logger = KotlinLogging.logger {}

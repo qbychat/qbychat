@@ -18,18 +18,12 @@
  *
  */
 
-package org.cubewhy.qbychat.entity
+package org.cubewhy.qbychat.annotations.rpc
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
+enum class RPCPermissionFlag {
+    ALLOW_ANONYMOUS_ONLY, // Only allows requests from unregistered clients
+    ALLOW_UNAUTHORIZED_ONLY, // Only allows requests from registered clients who are not logged in
+    ALLOW_AUTHORIZED_ONLY, //  Only allows access from authenticated users
 
-@Document
-data class User(
-    @Id val id: String? = null,
-    var username: String,
-    var password: String,
-    var roles: List<Role> = listOf(Role.USER),
-
-    var nickname: String,
-    var bio: String = ""
-) : AuditingEntity()
+    ALLOW_ALL // No permission check (open access)
+}

@@ -27,5 +27,5 @@ data class Session(
     val id: String? = null,
     val user: String,
 
-    val clientInfo: ClientMetadata, // TODO use client id
+    val clientId: String,
 ) : AuditingEntity()

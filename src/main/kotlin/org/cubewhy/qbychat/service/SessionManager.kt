@@ -24,12 +24,9 @@ import com.google.protobuf.GeneratedMessage
 import org.cubewhy.qbychat.entity.Session
 import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.UserWebsocketSession
-import org.cubewhy.qbychat.entity.WebsocketResponse
-import org.cubewhy.qbychat.exception.WebsocketBadRequest
 import org.springframework.web.reactive.socket.WebSocketSession
-import org.cubewhy.qbychat.websocket.session.v1.RegisterClientRequest as RegisterClientRequestV1
 
-interface SessionService {
+interface SessionManager {
     /**
      * Retrieves a list of active WebSocket sessions for a given user.
      *
@@ -90,18 +87,4 @@ interface SessionService {
 
     fun pushEvent(userId: String, event: GeneratedMessage)
     suspend fun processWithSessionLocally(userId: String, func: suspend (WebSocketSession) -> Unit)
-
-    /**
-     * Registers a client to the current WebSocket session.
-     *
-     * Requirements:
-     * - Can only be registered once;
-     * - If the client is already registered, it returns an error;
-     *
-     * @param session The current WebSocket session
-     * @param payload The client registration request payload
-     * @return The response after successful registration
-     * @throws WebsocketBadRequest If the client has already been registered
-     */
-    suspend fun registerClient(session: WebSocketSession, payload: RegisterClientRequestV1): WebsocketResponse
 }

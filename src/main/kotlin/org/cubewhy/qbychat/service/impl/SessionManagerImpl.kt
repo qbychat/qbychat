@@ -33,15 +33,13 @@ import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.avro.FederationMessage
 import org.cubewhy.qbychat.entity.*
 import org.cubewhy.qbychat.entity.config.InstanceProperties
-import org.cubewhy.qbychat.exception.WebsocketBadRequest
 import org.cubewhy.qbychat.handler.rpc.WebSocketRPCHandler
 import org.cubewhy.qbychat.repository.ClientRepository
 import org.cubewhy.qbychat.repository.SessionRepository
 import org.cubewhy.qbychat.repository.UserRepository
-import org.cubewhy.qbychat.service.SessionService
+import org.cubewhy.qbychat.service.SessionManager
 import org.cubewhy.qbychat.util.Const
 import org.cubewhy.qbychat.util.clientMetadata
-import org.cubewhy.qbychat.util.generateSecureSecret
 import org.cubewhy.qbychat.util.protobufEventOf
 import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -51,11 +49,9 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.kotlin.core.publisher.toFlux
 import java.time.Instant
-import org.cubewhy.qbychat.websocket.session.v1.RegisterClientRequest as RegisterClientRequestV1
-import org.cubewhy.qbychat.websocket.session.v1.RegisterClientResponse as RegisterClientResponseV1
 
 @Service
-class SessionServiceImpl(
+class SessionManagerImpl(
     private val userWebsocketSessionReactiveRedisTemplate: ReactiveRedisTemplate<String, UserWebsocketSession>,
     private val sessionRepository: SessionRepository,
     private val streamBridge: StreamBridge,
@@ -63,7 +59,7 @@ class SessionServiceImpl(
     private val instanceProperties: InstanceProperties,
     private val passwordEncoder: PasswordEncoder,
     private val clientRepository: ClientRepository,
-) : SessionService {
+) : SessionManager {
     companion object {
         private val logger = KotlinLogging.logger {}
     }
@@ -152,35 +148,6 @@ class SessionServiceImpl(
         }.flatMap { session ->
             mono { func.invoke(session!!) }
         }.awaitLast()
-    }
-
-    override suspend fun registerClient(
-        session: WebSocketSession,
-        payload: RegisterClientRequestV1
-    ): WebsocketResponse {
-        // Check if the client is already registered in this session
-        if (session.clientMetadata != null) {
-            throw WebsocketBadRequest("Client is already registered for this WebSocket session.")
-        }
-        val clientMetadata = ClientMetadata(
-            name = payload.clientMetadata.clientName,
-            version = payload.clientMetadata.clientVersion,
-            platform = ClientMetadata.Platform.fromProtobuf(payload.clientMetadata.platform)
-        )
-        // generate base token
-        val authToken = generateSecureSecret(byteLength = 32)
-
-        val client = clientRepository.save(
-            Client(
-                metadata = clientMetadata,
-                authToken = passwordEncoder.encode(authToken)
-            )
-        ).awaitFirst()
-        // join token
-        val finalToken = "${client.id}:$authToken"
-        return websocketResponseOf(RegisterClientResponseV1.newBuilder().apply {
-            this.token = finalToken
-        }.build())
     }
 
     override suspend fun findSessions(user: User): List<UserWebsocketSession> =
