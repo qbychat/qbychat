@@ -40,6 +40,7 @@ import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
 import reactor.core.publisher.SignalType
+import reactor.kotlin.core.publisher.toMono
 import reactor.netty.channel.AbortedException
 import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
@@ -90,7 +91,7 @@ class WebSocketRPCHandler(
         return mono {
             packetService.processHandshake(handshakePacket, session)
         }.flatMap { clientboundHandshake ->
-            session.sendWithEncryption(clientboundHandshake.toByteArray())
+            session.send(session.binaryMessage { it.wrap(clientboundHandshake.toByteArray()) }.toMono())
         }
     }
 
