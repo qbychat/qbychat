@@ -108,8 +108,9 @@ class WebSocketRPCHandler(
 
             val decryptedBytes = try {
                 CipherUtil.decryptMessage(session.chachaKey!!, encryptedMessage)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 // failed to decrypt or verify fail
+                logger.warn(e) { "Failed to decrypt message (bad cipherText)" }
                 return null
             }
 

@@ -30,7 +30,7 @@ import org.cubewhy.qbychat.exception.WebsocketBadRequest
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
 import org.cubewhy.qbychat.repository.ClientRepository
 import org.cubewhy.qbychat.service.v1.SessionServiceV1
-import org.cubewhy.qbychat.util.clientMetadata
+import org.cubewhy.qbychat.util.clientId
 import org.cubewhy.qbychat.util.generateSecureSecret
 import org.cubewhy.qbychat.websocket.session.v1.RegisterClientRequest
 import org.cubewhy.qbychat.websocket.session.v1.RegisterClientResponse
@@ -63,7 +63,7 @@ class SessionServiceV1Impl(
                 authToken = passwordEncoder.encode(authToken)
             )
         ).awaitFirst()
-        session.clientMetadata = clientMetadata
+        session.clientId = client.id!!
         // join token
         val finalToken = "${client.id}:$authToken"
         return websocketResponseOf(RegisterClientResponse.newBuilder().apply {
@@ -95,11 +95,7 @@ class SessionServiceV1Impl(
             throw WebsocketUnauthorized("Invalid token.")
         }
 
-        session.clientMetadata = ClientMetadata(
-            name = client.metadata.name,
-            version = client.metadata.version,
-            platform = client.metadata.platform
-        )
+        session.clientId = client.id!!
 
         return websocketResponseOf(ResumeClientResponse.newBuilder().apply {
         }.build())

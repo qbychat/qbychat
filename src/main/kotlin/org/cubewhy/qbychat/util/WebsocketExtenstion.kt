@@ -21,7 +21,6 @@
 package org.cubewhy.qbychat.util
 
 import com.google.protobuf.GeneratedMessage
-import org.cubewhy.qbychat.entity.ClientMetadata
 import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
 import org.springframework.web.reactive.socket.WebSocketSession
@@ -44,11 +43,11 @@ var WebSocketSession.handshakeStatus: Boolean
         this.attributes["handshake"] = value
     }
 
-var WebSocketSession.clientMetadata: ClientMetadata?
+var WebSocketSession.clientId: String?
     get() =
-        this.attributes["client-metadata"] as ClientMetadata?
+        this.attributes["client-id"] as String?
     set(value) {
-        this.attributes["client-metadata"] = value
+        this.attributes["client-id"] = value
     }
 
 var WebSocketSession.sessionId: Long?

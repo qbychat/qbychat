@@ -34,17 +34,15 @@ import org.cubewhy.qbychat.avro.FederationMessage
 import org.cubewhy.qbychat.entity.*
 import org.cubewhy.qbychat.entity.config.InstanceProperties
 import org.cubewhy.qbychat.handler.rpc.WebSocketRPCHandler
-import org.cubewhy.qbychat.repository.ClientRepository
 import org.cubewhy.qbychat.repository.SessionRepository
 import org.cubewhy.qbychat.repository.UserRepository
 import org.cubewhy.qbychat.service.SessionManager
 import org.cubewhy.qbychat.util.Const
-import org.cubewhy.qbychat.util.clientMetadata
+import org.cubewhy.qbychat.util.clientId
 import org.cubewhy.qbychat.util.protobufEventOf
 import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.core.removeAndAwait
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.kotlin.core.publisher.toFlux
@@ -57,8 +55,6 @@ class SessionManagerImpl(
     private val streamBridge: StreamBridge,
     private val userRepository: UserRepository,
     private val instanceProperties: InstanceProperties,
-    private val passwordEncoder: PasswordEncoder,
-    private val clientRepository: ClientRepository,
 ) : SessionManager {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -169,7 +165,7 @@ class SessionManagerImpl(
 
     override suspend fun createSession(user: User, session: WebSocketSession): Session {
         val session1 = Session(
-            user = user.id!!, clientInfo = session.clientMetadata!!
+            user = user.id!!, clientId = session.clientId!!
         )
         return sessionRepository.save(session1).awaitFirst()
     }

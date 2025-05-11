@@ -24,7 +24,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cubewhy.qbychat.exception.WebsocketForbidden
 import org.cubewhy.qbychat.exception.WebsocketNotFound
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
-import org.cubewhy.qbychat.util.clientMetadata
+import org.cubewhy.qbychat.util.clientId
 import org.cubewhy.qbychat.util.isKotlinClass
 import org.cubewhy.qbychat.websocket.protocol.v1.RequestMethod
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -194,7 +194,7 @@ class RPCHandlerRegistry : ApplicationContextAware {
         // Check if the permission allows anonymous (unregistered) clients
         if (RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY == def.annotation.permissions) {
             // Ensure that the client is unregistered
-            if (context.session.clientMetadata != null) {
+            if (context.session.clientId != null) {
                 throw WebsocketUnauthorized("Client must not be registered.")
             }
         }
@@ -202,7 +202,7 @@ class RPCHandlerRegistry : ApplicationContextAware {
         // Check if the permission allows only unauthorized clients (registered but not logged in)
         if (RPCPermissionFlag.ALLOW_UNAUTHORIZED_ONLY == def.annotation.permissions) {
             // Ensure that the client is registered but the user is not logged in
-            if (context.session.clientMetadata == null) {
+            if (context.session.clientId == null) {
                 throw WebsocketUnauthorized("Client must be registered.")
             }
             if (context.user != null) {

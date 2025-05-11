@@ -87,8 +87,8 @@ object CipherUtil {
 
         // Use sessionId + sequenceNumber as AAD to protect them from tampering
         val aad = ByteBuffer.allocate(16)
-            .putLong(sessionId)
-            .putLong(sequenceNumber)
+            .putLong(0, sessionId)
+            .putLong(8, sequenceNumber)
             .array()
 
         // Prepare the ChaCha20 cipher
@@ -122,8 +122,8 @@ object CipherUtil {
 
         // Reconstruct AAD
         val aad = ByteBuffer.allocate(16)
-            .putLong(sessionId)
-            .putLong(sequenceNumber)
+            .putLong(0, sessionId)
+            .putLong(8, sequenceNumber)
             .array()
 
         // Prepare ChaCha20-Poly1305 cipher for decryption
