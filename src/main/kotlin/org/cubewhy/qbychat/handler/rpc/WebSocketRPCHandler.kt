@@ -127,15 +127,15 @@ class WebSocketRPCHandler(
         session: WebSocketSession
     ): Mono<WebsocketResponse> {
         return mono {
-            try {
+            (try {
                 packetService.process(serverboundMessage, session)
             } catch (e: Exception) {
                 websocketResponseOf(
                     serverboundMessage.request.ticket.toByteArray(),
                     RPCResponse.Status.INTERNAL_ERROR,
                     e.message ?: "Internal Error"
-                ).apply { this.ticket = serverboundMessage.request.ticket.toByteArray() }
-            }
+                )
+            }).apply { this.ticket = serverboundMessage.request.ticket.toByteArray() }
         }
     }
 

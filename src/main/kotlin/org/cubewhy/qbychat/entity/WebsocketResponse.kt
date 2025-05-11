@@ -21,6 +21,7 @@
 package org.cubewhy.qbychat.entity
 
 import com.google.protobuf.GeneratedMessage
+import com.google.protobuf.kotlin.toByteString
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
 import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
 
@@ -35,10 +36,10 @@ data class WebsocketResponse(
     var ticket: ByteArray? = null
 
     fun buildRPCResponse() = RPCResponse.newBuilder().apply {
-        this.ticket = ticket
-        this.payload = payload
-        this.status = status
-        this.message = message
+        this.ticket = this@WebsocketResponse.ticket!!.toByteString()
+        this.payload = this@WebsocketResponse.payload?.toByteString()
+        this.status = this@WebsocketResponse.status
+        this@WebsocketResponse.message?.let { this.message = it }
     }.build()!!
 
     override fun equals(other: Any?): Boolean {
