@@ -69,6 +69,7 @@ interface SessionManager {
      * @param websocketSession The WebSocket session to be removed from the store
      */
     suspend fun removeWebsocketSession(websocketSession: WebSocketSession)
+
     suspend fun isOnSession(session: WebSocketSession, user: User): Boolean
 
     /**
@@ -84,6 +85,8 @@ interface SessionManager {
     suspend fun createSession(user: User, session: WebSocketSession): Session
     suspend fun isSessionValid(sessionId: String): Boolean
     suspend fun isOnline(userId: String): Boolean
+
+    suspend fun isClientOnline(clientId: String): Boolean
 
     fun pushEvent(userId: String, event: GeneratedMessage)
     suspend fun processWithSessionLocally(userId: String, func: suspend (WebSocketSession) -> Unit)

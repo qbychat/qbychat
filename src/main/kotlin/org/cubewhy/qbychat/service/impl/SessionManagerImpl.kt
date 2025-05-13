@@ -31,7 +31,9 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.avro.FederationMessage
-import org.cubewhy.qbychat.entity.*
+import org.cubewhy.qbychat.entity.Session
+import org.cubewhy.qbychat.entity.User
+import org.cubewhy.qbychat.entity.UserWebsocketSession
 import org.cubewhy.qbychat.entity.config.InstanceProperties
 import org.cubewhy.qbychat.handler.rpc.WebSocketRPCHandler
 import org.cubewhy.qbychat.repository.SessionRepository
@@ -93,6 +95,11 @@ class SessionManagerImpl(
         }
     }
 
+    override suspend fun isClientOnline(clientId: String): Boolean {
+        return userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
+            .any { it.clientId == clientId }.awaitFirstOrNull() ?: false
+    }
+
     override suspend fun saveWebsocketSession(websocketSession: WebSocketSession, user: User) {
         if (this.isOnSession(websocketSession, user)) {
             logger.warn { "Skipping save session of user ${user.username} on websocket connection ${websocketSession.id} (already exists)" }
@@ -100,7 +107,9 @@ class SessionManagerImpl(
         }
         logger.info { "Saving session for ${user.username} at connection ${websocketSession.id}" }
         val wsSessionObject = UserWebsocketSession(
-            websocketId = websocketSession.id, userId = user.id!!
+            websocketId = websocketSession.id,
+            userId = user.id!!,
+            clientId = websocketSession.clientId!!
         )
         userWebsocketSessionReactiveRedisTemplate.opsForSet().add(Const.USER_WEBSOCKET_SESSION_STORE, wsSessionObject)
             .awaitFirst()
@@ -165,7 +174,7 @@ class SessionManagerImpl(
 
     override suspend fun createSession(user: User, session: WebSocketSession): Session {
         val session1 = Session(
-            user = user.id!!, clientId = session.clientId!!
+            userId = user.id!!, clientId = session.clientId!!
         )
         return sessionRepository.save(session1).awaitFirst()
     }

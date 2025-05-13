@@ -27,8 +27,11 @@ import org.cubewhy.qbychat.entity.ClientMetadata
 import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.entity.websocketResponseOf
 import org.cubewhy.qbychat.exception.WebsocketBadRequest
+import org.cubewhy.qbychat.exception.WebsocketForbidden
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
 import org.cubewhy.qbychat.repository.ClientRepository
+import org.cubewhy.qbychat.repository.SessionRepository
+import org.cubewhy.qbychat.service.SessionManager
 import org.cubewhy.qbychat.service.v1.SessionServiceV1
 import org.cubewhy.qbychat.util.clientId
 import org.cubewhy.qbychat.util.generateSecureSecret
@@ -42,8 +45,10 @@ import org.springframework.web.reactive.socket.WebSocketSession
 
 @Service
 class SessionServiceV1Impl(
+    private val sessionManager: SessionManager,
     private val clientRepository: ClientRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val sessionRepository: SessionRepository
 ) : SessionServiceV1 {
     override suspend fun registerClient(
         session: WebSocketSession,
@@ -85,6 +90,10 @@ class SessionServiceV1Impl(
         val clientId = tokenParts[0]
         val providedAuthToken = tokenParts[1]
 
+        if (sessionManager.isClientOnline(clientId)) {
+            throw WebsocketForbidden("This client is current online, you cannot login using the same token.")
+        }
+
         // Retrieve the client from the repository using clientId
         val client = clientRepository.findById(clientId).awaitFirstOrNull()
             ?: throw WebsocketUnauthorized("Client not found or token is invalid.")
@@ -97,7 +106,12 @@ class SessionServiceV1Impl(
 
         session.clientId = client.id!!
 
+        // find accounts
+        val accounts = sessionRepository.findAllByClientId(clientId).map { it.userId }.collectList().awaitFirst()
+
         return websocketResponseOf(ResumeClientResponse.newBuilder().apply {
+            this.addAllAccountIds(accounts)
+            this.currentAccountId = client.mainAccountId
         }.build())
     }
 }

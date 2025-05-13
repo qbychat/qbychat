@@ -26,6 +26,7 @@ import java.time.Instant
 data class UserWebsocketSession(
     var userId: String,
     var websocketId: String,
+    var clientId: String,
 
     var timestamp: Instant = Instant.now(),
     val instanceId: String? = null,

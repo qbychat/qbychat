@@ -23,7 +23,9 @@ package org.cubewhy.qbychat.repository
 import org.cubewhy.qbychat.entity.Session
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
 
 @Repository
 interface SessionRepository : ReactiveMongoRepository<Session, String> {
+    fun findAllByClientId(clientId: String): Flux<Session>
 }

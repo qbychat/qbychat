@@ -25,7 +25,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document
 data class Session(
     val id: String? = null,
-    val user: String,
+    val userId: String,
 
     val clientId: String,
 ) : AuditingEntity()
