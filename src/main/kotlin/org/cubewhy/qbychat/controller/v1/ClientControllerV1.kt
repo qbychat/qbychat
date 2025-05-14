@@ -20,7 +20,7 @@
 
 package org.cubewhy.qbychat.controller.v1
 
-import org.cubewhy.qbychat.annotations.rpc.RPCHandler
+import org.cubewhy.qbychat.annotations.rpc.RPCMapping
 import org.cubewhy.qbychat.annotations.rpc.RPCPermissionFlag
 import org.cubewhy.qbychat.entity.WebsocketResponse
 import org.cubewhy.qbychat.service.v1.SessionServiceV1
@@ -34,12 +34,12 @@ import org.springframework.web.reactive.socket.WebSocketSession
 class ClientControllerV1(
     private val sessionServiceV1: SessionServiceV1,
 ) {
-    @RPCHandler(RequestMethod.REGISTER_CLIENT_V1, permissions = RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY)
+    @RPCMapping(RequestMethod.REGISTER_CLIENT_V1, permissions = RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY)
     suspend fun registerClient(session: WebSocketSession, payload: RegisterClientRequest): WebsocketResponse {
         return sessionServiceV1.registerClient(session, payload)
     }
 
-    @RPCHandler(RequestMethod.RESUME_CLIENT_V1, permissions = RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY)
+    @RPCMapping(RequestMethod.RESUME_CLIENT_V1, permissions = RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY)
     suspend fun resumeClient(session: WebSocketSession, payload: ResumeClientRequest): WebsocketResponse {
         return sessionServiceV1.resumeClient(session, payload)
     }

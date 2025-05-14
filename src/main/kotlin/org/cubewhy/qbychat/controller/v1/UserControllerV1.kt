@@ -20,7 +20,7 @@
 
 package org.cubewhy.qbychat.controller.v1
 
-import org.cubewhy.qbychat.annotations.rpc.RPCHandler
+import org.cubewhy.qbychat.annotations.rpc.RPCMapping
 import org.cubewhy.qbychat.annotations.rpc.RPCPermissionFlag
 import org.cubewhy.qbychat.service.v1.UserServiceV1
 import org.cubewhy.qbychat.websocket.protocol.v1.RequestMethod
@@ -31,7 +31,7 @@ import org.springframework.web.reactive.socket.WebSocketSession
 
 @Controller
 class UserControllerV1(private val userServiceV1: UserServiceV1) {
-    @RPCHandler(RequestMethod.REGISTER_ACCOUNT_V1, permissions = RPCPermissionFlag.ALLOW_UNAUTHORIZED_ONLY)
+    @RPCMapping(RequestMethod.REGISTER_ACCOUNT_V1, permissions = RPCPermissionFlag.ALLOW_UNAUTHORIZED_ONLY)
     suspend fun registerAccount(payload: RegisterAccountRequest, session: WebSocketSession): RegisterAccountResponse {
         return userServiceV1.registerAccount(payload, session)
     }

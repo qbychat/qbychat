@@ -42,7 +42,7 @@ import kotlin.reflect.jvm.jvmErasure
 
 data class RPCMethodDefinition(
     val bean: Any,
-    val annotation: RPCHandler,
+    val annotation: RPCMapping,
     val method: Method?,
     val kFunction: KFunction<*>?
 )
@@ -73,14 +73,14 @@ class RPCHandlerRegistry : ApplicationContextAware {
             val jClass = kClass.java
 
             val functions = if (isKotlinClass(kClass)) {
-                kClass.declaredFunctions.filter { it.findAnnotation<RPCHandler>() != null }.map { function ->
-                    val annotation = function.findAnnotation<RPCHandler>()!!
+                kClass.declaredFunctions.filter { it.findAnnotation<RPCMapping>() != null }.map { function ->
+                    val annotation = function.findAnnotation<RPCMapping>()!!
                     Triple(annotation.method, annotation, function to null)
                 }
             } else {
                 jClass.declaredMethods.mapNotNull { method ->
                     val annotation =
-                        AnnotationUtils.findAnnotation(method, RPCHandler::class.java) ?: return@mapNotNull null
+                        AnnotationUtils.findAnnotation(method, RPCMapping::class.java) ?: return@mapNotNull null
                     Triple(annotation.method, annotation, null to method)
                 }
             }

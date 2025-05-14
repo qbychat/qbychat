@@ -26,7 +26,7 @@ import org.cubewhy.qbychat.websocket.protocol.v1.RequestMethod
 @MustBeDocumented
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class RPCHandler(
+annotation class RPCMapping(
     val method: RequestMethod,
     val roles: Array<Role> = [],
     val permissions: RPCPermissionFlag = RPCPermissionFlag.ALLOW_AUTHORIZED_ONLY // allow authorized users to access endpoints
