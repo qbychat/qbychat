@@ -23,7 +23,7 @@ package org.cubewhy.qbychat.entity
 import java.io.Serializable
 import java.time.Instant
 
-data class UserWebsocketSession(
+data class WebsocketSessionMetadata(
     var userId: String,
     var websocketId: String,
     var clientId: String,

@@ -33,7 +33,7 @@ import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.avro.FederationMessage
 import org.cubewhy.qbychat.entity.Session
 import org.cubewhy.qbychat.entity.User
-import org.cubewhy.qbychat.entity.UserWebsocketSession
+import org.cubewhy.qbychat.entity.WebsocketSessionMetadata
 import org.cubewhy.qbychat.entity.config.InstanceProperties
 import org.cubewhy.qbychat.handler.rpc.WebSocketRPCHandler
 import org.cubewhy.qbychat.repository.SessionRepository
@@ -52,7 +52,7 @@ import java.time.Instant
 
 @Service
 class SessionManagerImpl(
-    private val userWebsocketSessionReactiveRedisTemplate: ReactiveRedisTemplate<String, UserWebsocketSession>,
+    private val websocketSessionMetadataReactiveRedisTemplate: ReactiveRedisTemplate<String, WebsocketSessionMetadata>,
     private val sessionRepository: SessionRepository,
     private val streamBridge: StreamBridge,
     private val userRepository: UserRepository,
@@ -84,19 +84,19 @@ class SessionManagerImpl(
     private fun clearGhostSessions() {
         CoroutineScope(Dispatchers.Default).launch {
             val ghostSessions =
-                userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
+                websocketSessionMetadataReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
                     .filter { it.instanceId == instanceProperties.id || it.instanceId == null }.collectList()
                     .awaitLast()
             ghostSessions.forEach { ghostSession ->
                 logger.info { "Remove ghost session ${ghostSession.websocketId}" }
-                userWebsocketSessionReactiveRedisTemplate.opsForSet()
+                websocketSessionMetadataReactiveRedisTemplate.opsForSet()
                     .removeAndAwait(Const.USER_WEBSOCKET_SESSION_STORE, ghostSession)
             }
         }
     }
 
     override suspend fun isClientOnline(clientId: String): Boolean {
-        return userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
+        return websocketSessionMetadataReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
             .any { it.clientId == clientId }.awaitFirstOrNull() ?: false
     }
 
@@ -106,12 +106,12 @@ class SessionManagerImpl(
             return
         }
         logger.info { "Saving session for ${user.username} at connection ${websocketSession.id}" }
-        val wsSessionObject = UserWebsocketSession(
+        val wsSessionObject = WebsocketSessionMetadata(
             websocketId = websocketSession.id,
             userId = user.id!!,
             clientId = websocketSession.clientId!!
         )
-        userWebsocketSessionReactiveRedisTemplate.opsForSet().add(Const.USER_WEBSOCKET_SESSION_STORE, wsSessionObject)
+        websocketSessionMetadataReactiveRedisTemplate.opsForSet().add(Const.USER_WEBSOCKET_SESSION_STORE, wsSessionObject)
             .awaitFirst()
     }
 
@@ -120,7 +120,7 @@ class SessionManagerImpl(
     }
 
     override suspend fun isOnline(userId: String) =
-        userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
+        websocketSessionMetadataReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
             .any { it.userId == userId }.awaitFirstOrNull() ?: false
 
     override suspend fun isSessionValid(sessionId: String): Boolean {
@@ -155,12 +155,12 @@ class SessionManagerImpl(
         }.awaitLast()
     }
 
-    override suspend fun findSessions(user: User): List<UserWebsocketSession> =
-        userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
+    override suspend fun findSessions(user: User): List<WebsocketSessionMetadata> =
+        websocketSessionMetadataReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
             .filter { it.userId == user.id }.collectList().awaitLast()
 
     override suspend fun getUser(session: WebSocketSession): User? {
-        return userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
+        return websocketSessionMetadataReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
             .filter { it.websocketId == session.id }.flatMap {
                 // find user
                 userRepository.findById(it.userId)
@@ -168,7 +168,7 @@ class SessionManagerImpl(
     }
 
     override suspend fun isAuthorized(session: WebSocketSession): Boolean {
-        return userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
+        return websocketSessionMetadataReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
             .any { it.websocketId == session.id }.awaitLast()
     }
 
@@ -182,10 +182,10 @@ class SessionManagerImpl(
     }
 
     override suspend fun removeWebsocketSession(websocketSession: WebSocketSession) {
-        userWebsocketSessionReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
+        websocketSessionMetadataReactiveRedisTemplate.opsForSet().scan(Const.USER_WEBSOCKET_SESSION_STORE)
             .filter { it.websocketId == websocketSession.id }.flatMap { session ->
                 // remove session
-                userWebsocketSessionReactiveRedisTemplate.opsForSet()
+                websocketSessionMetadataReactiveRedisTemplate.opsForSet()
                     .remove(Const.USER_WEBSOCKET_SESSION_STORE, session)
             }.awaitFirstOrNull()
     }

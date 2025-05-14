@@ -23,7 +23,7 @@ package org.cubewhy.qbychat.service
 import com.google.protobuf.GeneratedMessage
 import org.cubewhy.qbychat.entity.Session
 import org.cubewhy.qbychat.entity.User
-import org.cubewhy.qbychat.entity.UserWebsocketSession
+import org.cubewhy.qbychat.entity.WebsocketSessionMetadata
 import org.springframework.web.reactive.socket.WebSocketSession
 
 interface SessionManager {
@@ -34,9 +34,9 @@ interface SessionManager {
      * and returns a list of WebSocket sessions associated with the user.
      *
      * @param user The user whose sessions are to be retrieved
-     * @return A list of [UserWebsocketSession] objects associated with the given user
+     * @return A list of [WebsocketSessionMetadata] objects associated with the given user
      */
-    suspend fun findSessions(user: User): List<UserWebsocketSession>
+    suspend fun findSessions(user: User): List<WebsocketSessionMetadata>
 
     /**
      * Retrieves the user associated with a given WebSocket session.
