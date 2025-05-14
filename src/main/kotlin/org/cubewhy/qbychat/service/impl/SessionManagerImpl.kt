@@ -41,7 +41,7 @@ import org.cubewhy.qbychat.repository.UserRepository
 import org.cubewhy.qbychat.service.SessionManager
 import org.cubewhy.qbychat.util.Const
 import org.cubewhy.qbychat.util.clientId
-import org.cubewhy.qbychat.util.protobufEventOf
+import org.cubewhy.qbychat.util.protobuf.protobufEventOf
 import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.core.removeAndAwait
@@ -174,8 +174,10 @@ class SessionManagerImpl(
 
     override suspend fun createSession(user: User, session: WebSocketSession): Session {
         val session1 = Session(
-            userId = user.id!!, clientId = session.clientId!!
+            userId = user.id!!,
+            clientId = session.clientId!!
         )
+        logger.info { "Session with user ${user.username} created (client: ${session.clientId})" }
         return sessionRepository.save(session1).awaitFirst()
     }
 

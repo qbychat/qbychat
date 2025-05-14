@@ -22,6 +22,7 @@ package org.cubewhy.qbychat.util
 
 import com.google.protobuf.GeneratedMessage
 import org.cubewhy.qbychat.entity.WebsocketResponse
+import org.cubewhy.qbychat.util.protobuf.protobufEventOf
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono

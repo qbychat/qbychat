@@ -18,7 +18,7 @@
  *
  */
 
-package org.cubewhy.qbychat.util
+package org.cubewhy.qbychat.util.protobuf
 
 import com.google.protobuf.Any
 import com.google.protobuf.GeneratedMessage
@@ -42,3 +42,4 @@ fun protobufEventOf(event: GeneratedMessage, userId: String?): ClientboundMessag
         userId?.let { this.userId = it }
         this.event = Any.pack(event)
     }.build()
+
