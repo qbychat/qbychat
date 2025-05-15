@@ -111,7 +111,8 @@ class SessionServiceV1Impl(
 
         return websocketResponseOf(ResumeClientResponse.newBuilder().apply {
             this.addAllAccountIds(accounts)
-            this.currentAccountId = client.mainAccountId
+            client.mainAccountId?.let { this.currentAccountId = it }
+
         }.build())
     }
 }
