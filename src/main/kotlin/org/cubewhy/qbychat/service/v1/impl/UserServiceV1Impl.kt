@@ -65,6 +65,6 @@ class UserServiceV1Impl(
         logger.info { "Created user ${user.username}." }
         // add user to session
         sessionManager.createSession(user, session)
-        return RegisterAccountResponsesV1.success()
+        return RegisterAccountResponsesV1.success(user.id!!)
     }
 }

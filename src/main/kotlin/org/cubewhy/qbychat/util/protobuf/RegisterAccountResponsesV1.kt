@@ -27,10 +27,11 @@ object RegisterAccountResponsesV1 {
 
     fun badUsername(): RegisterAccountResponse = build(RegisterAccountResponse.Status.BAD_USERNAME)
 
-    fun success(): RegisterAccountResponse = build(RegisterAccountResponse.Status.SUCCESS)
+    fun success(accountId: String): RegisterAccountResponse = build(RegisterAccountResponse.Status.SUCCESS, accountId)
 
-    private fun build(status: RegisterAccountResponse.Status): RegisterAccountResponse =
-        RegisterAccountResponse.newBuilder()
-            .setStatus(status)
-            .build()
+    private fun build(status: RegisterAccountResponse.Status, accountId: String? = null): RegisterAccountResponse =
+        RegisterAccountResponse.newBuilder().apply {
+            this.status = status
+            accountId?.let { this.accountId = it }
+        }.build()
 }
