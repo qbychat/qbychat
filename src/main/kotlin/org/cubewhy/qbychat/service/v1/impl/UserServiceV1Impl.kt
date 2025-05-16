@@ -47,7 +47,7 @@ class UserServiceV1Impl(
 
     override suspend fun registerAccount(request: RegisterAccountRequest, session: WebSocketSession): RegisterAccountResponse {
         // check if username available
-        if (!userRepository.existsByUsernameIgnoreCase(request.username).awaitFirst()) {
+        if (userRepository.existsByUsernameIgnoreCase(request.username).awaitFirst()) {
             return RegisterAccountResponsesV1.usernameExists()
         }
         if (!usernameRegex.matches(request.username)) {
