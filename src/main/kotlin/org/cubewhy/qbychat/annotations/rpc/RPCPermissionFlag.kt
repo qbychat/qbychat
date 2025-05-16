@@ -25,5 +25,6 @@ enum class RPCPermissionFlag {
     ALLOW_UNAUTHORIZED_ONLY, // Only allows requests from registered clients who are not logged in
     ALLOW_AUTHORIZED_ONLY, //  Only allows access from authenticated users
 
+    ALLOW_EXPECT_ANONYMOUS, // Allow unauthorized and authorized users to access the rpc, but blocks anonymous clients
     ALLOW_ALL // No permission check (open access)
 }

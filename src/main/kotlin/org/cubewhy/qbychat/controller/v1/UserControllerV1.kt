@@ -31,7 +31,7 @@ import org.springframework.web.reactive.socket.WebSocketSession
 
 @Controller
 class UserControllerV1(private val userServiceV1: UserServiceV1) {
-    @RPCMapping(RequestMethod.REGISTER_ACCOUNT_V1, permissions = RPCPermissionFlag.ALLOW_UNAUTHORIZED_ONLY)
+    @RPCMapping(RequestMethod.REGISTER_ACCOUNT_V1, permissions = RPCPermissionFlag.ALLOW_EXPECT_ANONYMOUS)
     suspend fun registerAccount(payload: RegisterAccountRequest, session: WebSocketSession): RegisterAccountResponse {
         return userServiceV1.registerAccount(payload, session)
     }

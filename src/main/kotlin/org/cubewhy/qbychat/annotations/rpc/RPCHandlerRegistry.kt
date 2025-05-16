@@ -218,6 +218,13 @@ class RPCHandlerRegistry : ApplicationContextAware {
             }
         }
 
+        if (RPCPermissionFlag.ALLOW_EXPECT_ANONYMOUS == def.annotation.permissions) {
+            // Ensure that the client is registered
+            if (context.session.clientId == null) {
+                throw WebsocketUnauthorized("Client must be registered.")
+            }
+        }
+
         // Check if the permission allows all users (no permission check)
         if (RPCPermissionFlag.ALLOW_ALL == def.annotation.permissions) {
             // No checks required, open access
