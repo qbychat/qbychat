@@ -109,7 +109,7 @@ class SessionServiceV1Impl(
         // find accounts
         val accounts = sessionRepository.findAllByClientId(clientId).map { it.userId }.collectList().awaitFirst()
         // find main session
-        val mainSession = sessionRepository.findById(client.mainSessionId!!).awaitFirstOrNull()
+        val mainSession = client.mainSessionId.takeIf { it != null }?.let {  sessionRepository.findById(it).awaitFirstOrNull() }
 
         return websocketResponseOf(ResumeClientResponse.newBuilder().apply {
             this.addAllAccountIds(accounts)
