@@ -30,7 +30,7 @@ data class Session(
     val userId: String,
 
     val clientId: String,
-    val trustedManually: Boolean,
+    val trustedManually: Boolean = false,
 ) : AuditingEntity() {
     val trusted: Boolean
         get() = Instant.now().isAfter(this.createdAt.plus(4, ChronoUnit.HOURS)) || this.trustedManually
