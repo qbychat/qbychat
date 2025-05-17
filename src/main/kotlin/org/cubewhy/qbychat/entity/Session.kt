@@ -21,6 +21,8 @@
 package org.cubewhy.qbychat.entity
 
 import org.springframework.data.mongodb.core.mapping.Document
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @Document
 data class Session(
@@ -28,4 +30,8 @@ data class Session(
     val userId: String,
 
     val clientId: String,
-) : AuditingEntity()
+    val trustedManually: Boolean,
+) : AuditingEntity() {
+    val trusted: Boolean
+        get() = Instant.now().isAfter(this.createdAt.plus(4, ChronoUnit.HOURS)) || this.trustedManually
+}
