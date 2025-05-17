@@ -18,9 +18,9 @@
  *
  */
 
-package org.cubewhy.qbychat.entity.vo
+package org.cubewhy.qbychat.entity.response
 
-data class AuthorizeVO(
+data class AuthorizeResponse(
     val username: String,
     val token: String,
     val expire: Long,

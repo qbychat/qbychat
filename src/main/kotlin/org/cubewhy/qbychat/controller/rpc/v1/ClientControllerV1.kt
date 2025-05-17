@@ -18,7 +18,7 @@
  *
  */
 
-package org.cubewhy.qbychat.controller.v1
+package org.cubewhy.qbychat.controller.rpc.v1
 
 import org.cubewhy.qbychat.annotations.rpc.RPCMapping
 import org.cubewhy.qbychat.annotations.rpc.RPCPermissionFlag

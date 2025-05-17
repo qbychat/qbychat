@@ -20,7 +20,7 @@
 
 package org.cubewhy.qbychat.config
 
-import org.cubewhy.qbychat.entity.vo.AuthorizeVO
+import org.cubewhy.qbychat.entity.response.AuthorizeResponse
 import org.cubewhy.qbychat.filter.JwtFilter
 import org.cubewhy.qbychat.service.UserService
 import org.cubewhy.qbychat.util.JwtUtil
@@ -105,7 +105,7 @@ class SecurityConfig(
                 val jwt = jwtUtil.createJwt(user)
                 // parse jwt
                 val parsedJwt = jwtUtil.resolveJwt(jwt)!!
-                AuthorizeVO(user.username, jwt, parsedJwt.expiresAt.time, user.roles.map { it.name }).toMono()
+                AuthorizeResponse(user.username, jwt, parsedJwt.expiresAt.time, user.roles.map { it.name }).toMono()
             }.flatMap { vo ->
                 webFilterExchange.exchange.responseSuccess(vo)
             }

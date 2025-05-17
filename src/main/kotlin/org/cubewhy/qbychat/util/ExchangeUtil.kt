@@ -32,6 +32,21 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
+
+//fun ServerWebExchange.getNettyChannel(): Channel {
+//    return (this.request as Connection).channel()
+//}
+
+fun ServerWebExchange.extractBaseUri(): String {
+    val request = this.request
+    val scheme = request.uri.scheme  // http or https
+    val host = request.uri.host ?: throw IllegalStateException("Missing Host header")
+    val port = request.uri.port.takeIf { it != -1 } ?: if (scheme == "http") 80 else 443
+
+    return "$scheme://${host}:${port}"
+}
+
+
 fun <T> ServerWebExchange.responseSuccess(data: T?): Mono<Void> {
     this.response.statusCode = HttpStatus.OK
     this.response.headers.contentType = MediaType.APPLICATION_JSON
