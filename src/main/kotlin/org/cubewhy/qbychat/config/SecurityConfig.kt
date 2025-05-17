@@ -85,9 +85,6 @@ class SecurityConfig(
             csrf {
                 disable()
             }
-            cors {
-                disable()
-            }
             httpBasic { }
         }
     }
