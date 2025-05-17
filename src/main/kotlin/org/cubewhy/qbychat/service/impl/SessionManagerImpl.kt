@@ -36,6 +36,7 @@ import org.cubewhy.qbychat.entity.User
 import org.cubewhy.qbychat.entity.WebsocketSessionMetadata
 import org.cubewhy.qbychat.entity.config.InstanceProperties
 import org.cubewhy.qbychat.handler.rpc.WebSocketRPCHandler
+import org.cubewhy.qbychat.repository.ClientRepository
 import org.cubewhy.qbychat.repository.SessionRepository
 import org.cubewhy.qbychat.repository.UserRepository
 import org.cubewhy.qbychat.service.SessionManager
@@ -57,6 +58,7 @@ class SessionManagerImpl(
     private val streamBridge: StreamBridge,
     private val userRepository: UserRepository,
     private val instanceProperties: InstanceProperties,
+    private val clientRepository: ClientRepository,
 ) : SessionManager {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -178,6 +180,12 @@ class SessionManagerImpl(
             clientId = session.clientId!!
         )
         logger.info { "Session with user ${user.username} created (client: ${session.clientId})" }
+        // get client
+        val client = clientRepository.findById(session.clientId!!).awaitFirst()
+        if (client.mainSessionId == null) {
+            client.mainSessionId = session1.id
+        }
+        clientRepository.save(client).awaitFirst()
         return sessionRepository.save(session1).awaitFirst()
     }
 
