@@ -37,7 +37,7 @@ data class WebsocketResponse(
 
     fun buildRPCResponse() = RPCResponse.newBuilder().apply {
         this.ticket = this@WebsocketResponse.ticket!!.toByteString()
-        this.payload = this@WebsocketResponse.payload?.toByteString()
+        this@WebsocketResponse.payload?.let { this.payload = it.toByteString() }
         this.status = this@WebsocketResponse.status
         this@WebsocketResponse.message?.let { this.message = it }
     }.build()!!
