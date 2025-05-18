@@ -18,20 +18,11 @@
  *
  */
 
-package org.cubewhy.qbychat
+package org.cubewhy.qbychat.config.properties
 
-import org.cubewhy.qbychat.config.properties.InstanceProperties
-import org.cubewhy.qbychat.config.properties.QbyChatProperties
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.runApplication
-import org.springframework.data.mongodb.config.EnableReactiveMongoAuditing
+import org.springframework.boot.context.properties.ConfigurationProperties
 
-@SpringBootApplication
-@EnableReactiveMongoAuditing
-@EnableConfigurationProperties(QbyChatProperties::class, InstanceProperties::class)
-class QbyChatApplication
-
-fun main(args: Array<String>) {
-    runApplication<QbyChatApplication>(*args)
-}
+@ConfigurationProperties(prefix = "instance")
+data class InstanceProperties(
+    var id: String
+)

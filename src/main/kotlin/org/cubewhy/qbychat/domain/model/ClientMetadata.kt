@@ -18,28 +18,30 @@
  *
  */
 
-package org.cubewhy.qbychat.config
+package org.cubewhy.qbychat.domain.model
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import org.cubewhy.qbychat.application.service.SessionManager
-import org.cubewhy.qbychat.avro.FederationMessage
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import java.util.function.Consumer
+import org.cubewhy.qbychat.common.v1.Platform as PbPlatform
 
-
-@Configuration
-class KafkaStreamConfig(
-    private val scope: CoroutineScope,
+data class ClientMetadata(
+    val name: String,
+    val version: String,
+    val platform: Platform,
 ) {
 
-    @Bean
-    fun qbychatWebsocketPayloadConsumer(sessionManager: SessionManager): Consumer<FederationMessage> {
-        return Consumer { message ->
-            scope.launch {
-                sessionManager.processWithSessionLocally(message.userId) { session ->
-                    session.sendWithEncryption(message.payload.array())
+    enum class Platform {
+        WINDOWS, LINUX, MACOS, ANDROID, IOS, BROWSER, UNKNOWN;
+
+        companion object {
+            fun fromProtobuf(proto: PbPlatform): ClientMetadata.Platform {
+                return when (proto) {
+                    PbPlatform.ANDROID -> ANDROID
+                    PbPlatform.IOS -> IOS
+                    PbPlatform.WINDOWS -> WINDOWS
+                    PbPlatform.LINUX -> LINUX
+                    PbPlatform.OSX -> MACOS
+                    PbPlatform.BROWSER -> BROWSER
+
+                    else -> UNKNOWN
                 }
             }
         }

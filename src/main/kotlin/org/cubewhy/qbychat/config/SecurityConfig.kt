@@ -20,12 +20,12 @@
 
 package org.cubewhy.qbychat.config
 
-import org.cubewhy.qbychat.entity.response.AuthorizeResponse
+import org.cubewhy.qbychat.application.service.UserService
 import org.cubewhy.qbychat.filter.JwtFilter
-import org.cubewhy.qbychat.service.UserService
-import org.cubewhy.qbychat.util.JwtUtil
-import org.cubewhy.qbychat.util.responseFailure
-import org.cubewhy.qbychat.util.responseSuccess
+import org.cubewhy.qbychat.interfaces.controller.response.AuthorizeResponse
+import org.cubewhy.qbychat.shared.util.JwtUtil
+import org.cubewhy.qbychat.shared.util.responseFailure
+import org.cubewhy.qbychat.shared.util.responseSuccess
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders

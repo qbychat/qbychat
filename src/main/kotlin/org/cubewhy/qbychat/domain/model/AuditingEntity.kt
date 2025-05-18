@@ -18,20 +18,19 @@
  *
  */
 
-package org.cubewhy.qbychat
+package org.cubewhy.qbychat.domain.model
 
-import org.cubewhy.qbychat.config.properties.InstanceProperties
-import org.cubewhy.qbychat.config.properties.QbyChatProperties
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.runApplication
-import org.springframework.data.mongodb.config.EnableReactiveMongoAuditing
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.mongodb.core.mapping.Field
+import java.time.Instant
 
-@SpringBootApplication
-@EnableReactiveMongoAuditing
-@EnableConfigurationProperties(QbyChatProperties::class, InstanceProperties::class)
-class QbyChatApplication
+open class AuditingEntity {
+    @CreatedDate
+    @Field("created_at")
+    var createdAt: Instant = Instant.now()
 
-fun main(args: Array<String>) {
-    runApplication<QbyChatApplication>(*args)
+    @LastModifiedDate
+    @Field("updated_at")
+    var updatedAt: Instant = Instant.now()
 }

@@ -21,7 +21,7 @@
 package org.cubewhy.qbychat.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.cubewhy.qbychat.entity.WebsocketSessionMetadata
+import org.cubewhy.qbychat.domain.model.SessionMetadata
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
@@ -36,10 +36,10 @@ class RedisConfig {
     fun userSessionReactiveRedisTemplate(
         objectMapper: ObjectMapper,
         factory: ReactiveRedisConnectionFactory
-    ): ReactiveRedisTemplate<String, WebsocketSessionMetadata> {
-        val serializer = Jackson2JsonRedisSerializer(objectMapper, WebsocketSessionMetadata::class.java)
+    ): ReactiveRedisTemplate<String, SessionMetadata> {
+        val serializer = Jackson2JsonRedisSerializer(objectMapper, SessionMetadata::class.java)
         val context =
-            RedisSerializationContext.newSerializationContext<String, WebsocketSessionMetadata>(StringRedisSerializer())
+            RedisSerializationContext.newSerializationContext<String, SessionMetadata>(StringRedisSerializer())
                 .value(serializer)
                 .build()
         return ReactiveRedisTemplate(factory, context)

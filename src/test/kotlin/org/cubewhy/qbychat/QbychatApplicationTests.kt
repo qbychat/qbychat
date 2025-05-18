@@ -21,7 +21,7 @@
 package org.cubewhy.qbychat
 
 import org.bouncycastle.crypto.InvalidCipherTextException
-import org.cubewhy.qbychat.util.CipherUtil
+import org.cubewhy.qbychat.shared.util.CipherUtil
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

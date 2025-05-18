@@ -18,20 +18,16 @@
  *
  */
 
-package org.cubewhy.qbychat
+package org.cubewhy.qbychat.shared.annotations.rpc
 
-import org.cubewhy.qbychat.config.properties.InstanceProperties
-import org.cubewhy.qbychat.config.properties.QbyChatProperties
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.runApplication
-import org.springframework.data.mongodb.config.EnableReactiveMongoAuditing
+import org.cubewhy.qbychat.domain.model.Role
+import org.cubewhy.qbychat.websocket.protocol.v1.RequestMethod
 
-@SpringBootApplication
-@EnableReactiveMongoAuditing
-@EnableConfigurationProperties(QbyChatProperties::class, InstanceProperties::class)
-class QbyChatApplication
-
-fun main(args: Array<String>) {
-    runApplication<QbyChatApplication>(*args)
-}
+@MustBeDocumented
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class RPCMapping(
+    val method: RequestMethod,
+    val roles: Array<Role> = [],
+    val permissions: RPCPermissionFlag = RPCPermissionFlag.ALLOW_AUTHORIZED_ONLY // allow authorized users to access endpoints
+)

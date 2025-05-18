@@ -18,20 +18,13 @@
  *
  */
 
-package org.cubewhy.qbychat
+package org.cubewhy.qbychat.shared.annotations.rpc
 
-import org.cubewhy.qbychat.config.properties.InstanceProperties
-import org.cubewhy.qbychat.config.properties.QbyChatProperties
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.runApplication
-import org.springframework.data.mongodb.config.EnableReactiveMongoAuditing
+enum class RPCPermissionFlag {
+    ALLOW_ANONYMOUS_ONLY, // Only allows requests from unregistered clients
+    ALLOW_UNAUTHORIZED_ONLY, // Only allows requests from registered clients who are not logged in
+    ALLOW_AUTHORIZED_ONLY, //  Only allows access from authenticated users
 
-@SpringBootApplication
-@EnableReactiveMongoAuditing
-@EnableConfigurationProperties(QbyChatProperties::class, InstanceProperties::class)
-class QbyChatApplication
-
-fun main(args: Array<String>) {
-    runApplication<QbyChatApplication>(*args)
+    ALLOW_EXPECT_ANONYMOUS, // Allow unauthorized and authorized users to access the rpc, but blocks anonymous clients
+    ALLOW_ALL // No permission check (open access)
 }

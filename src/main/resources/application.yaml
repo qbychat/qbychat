@@ -29,6 +29,10 @@ instance:
   id: ${HOSTNAME:qbychat}
 
 qbychat:
+  federation:
+    enabled: true
+    domain: localhost
+    allowInsecure: false
   websocket:
     path: /ws
     requireEncryption: true

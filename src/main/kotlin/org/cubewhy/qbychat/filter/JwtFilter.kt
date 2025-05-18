@@ -23,10 +23,10 @@ package org.cubewhy.qbychat.filter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
-import org.cubewhy.qbychat.service.UserService
-import org.cubewhy.qbychat.util.JwtUtil
-import org.cubewhy.qbychat.util.isValid
-import org.cubewhy.qbychat.util.responseFailure
+import org.cubewhy.qbychat.application.service.UserService
+import org.cubewhy.qbychat.shared.util.JwtUtil
+import org.cubewhy.qbychat.shared.util.isValid
+import org.cubewhy.qbychat.shared.util.responseFailure
 import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication

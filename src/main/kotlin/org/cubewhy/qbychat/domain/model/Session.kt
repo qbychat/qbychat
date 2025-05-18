@@ -18,20 +18,20 @@
  *
  */
 
-package org.cubewhy.qbychat
+package org.cubewhy.qbychat.domain.model
 
-import org.cubewhy.qbychat.config.properties.InstanceProperties
-import org.cubewhy.qbychat.config.properties.QbyChatProperties
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.runApplication
-import org.springframework.data.mongodb.config.EnableReactiveMongoAuditing
+import org.springframework.data.mongodb.core.mapping.Document
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
-@SpringBootApplication
-@EnableReactiveMongoAuditing
-@EnableConfigurationProperties(QbyChatProperties::class, InstanceProperties::class)
-class QbyChatApplication
+@Document
+data class Session(
+    val id: String? = null,
+    val userId: String,
 
-fun main(args: Array<String>) {
-    runApplication<QbyChatApplication>(*args)
+    val clientId: String,
+    val trustedManually: Boolean = false,
+) : AuditingEntity() {
+    val trusted: Boolean
+        get() = Instant.now().isAfter(this.createdAt.plus(4, ChronoUnit.HOURS)) || this.trustedManually
 }

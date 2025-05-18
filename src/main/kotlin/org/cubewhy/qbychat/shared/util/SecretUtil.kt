@@ -18,20 +18,14 @@
  *
  */
 
-package org.cubewhy.qbychat
+package org.cubewhy.qbychat.shared.util
 
-import org.cubewhy.qbychat.config.properties.InstanceProperties
-import org.cubewhy.qbychat.config.properties.QbyChatProperties
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.runApplication
-import org.springframework.data.mongodb.config.EnableReactiveMongoAuditing
+import java.security.SecureRandom
+import java.util.*
 
-@SpringBootApplication
-@EnableReactiveMongoAuditing
-@EnableConfigurationProperties(QbyChatProperties::class, InstanceProperties::class)
-class QbyChatApplication
-
-fun main(args: Array<String>) {
-    runApplication<QbyChatApplication>(*args)
+fun generateSecureSecret(byteLength: Int = 32): String {
+    val random = SecureRandom()
+    val bytes = ByteArray(byteLength)
+    random.nextBytes(bytes)
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
 }
