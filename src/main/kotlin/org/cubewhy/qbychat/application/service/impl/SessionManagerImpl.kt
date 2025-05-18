@@ -38,7 +38,6 @@ import org.cubewhy.qbychat.domain.repository.ClientRepository
 import org.cubewhy.qbychat.domain.repository.SessionRepository
 import org.cubewhy.qbychat.domain.repository.UserRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
-import org.cubewhy.qbychat.interfaces.websocket.WebSocketRPCHandler
 import org.cubewhy.qbychat.shared.util.Const
 import org.cubewhy.qbychat.shared.util.protobuf.protobufEventOf
 import org.springframework.cloud.stream.function.StreamBridge
@@ -47,6 +46,7 @@ import org.springframework.data.redis.core.removeAndAwait
 import org.springframework.stereotype.Service
 import reactor.kotlin.core.publisher.toFlux
 import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class SessionManagerImpl(
@@ -59,6 +59,7 @@ class SessionManagerImpl(
 ) : SessionManager {
     companion object {
         private val logger = KotlinLogging.logger {}
+        val sessions: ConcurrentHashMap<String, ClientConnection<*>> = ConcurrentHashMap()
     }
 
     /**
@@ -92,6 +93,14 @@ class SessionManagerImpl(
                     .removeAndAwait(Const.SESSION_STORE, ghostSession)
             }
         }
+    }
+
+    override fun addLocalSession(connection: ClientConnection<*>) {
+        sessions[connection.id] = connection
+    }
+
+    override fun removeLocalSession(id: String) {
+        sessions.remove(id)
     }
 
     override suspend fun isClientOnline(clientId: String): Boolean {
@@ -139,7 +148,10 @@ class SessionManagerImpl(
         }
     }
 
-    override suspend fun processWithSessionLocally(userId: String, func: suspend (connection: ClientConnection<*>) -> Unit) {
+    override suspend fun processWithSessionLocally(
+        userId: String,
+        func: suspend (connection: ClientConnection<*>) -> Unit
+    ) {
         // check is online
         // avoid query the db if the user is offline
         if (!isOnline(userId)) return
@@ -148,7 +160,7 @@ class SessionManagerImpl(
         // find all available sessions
         this.findAllSessionMetadata(user).toFlux().mapNotNull {
             // find on local session map
-            WebSocketRPCHandler.sessions[it.sessionId]
+            sessions[it.sessionId]
         }.flatMap { session ->
             mono { func.invoke(session!!) }
         }.awaitLast()

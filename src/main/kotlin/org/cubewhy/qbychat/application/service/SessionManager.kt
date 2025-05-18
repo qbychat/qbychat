@@ -25,6 +25,9 @@ import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 
 interface SessionManager {
+    fun addLocalSession(connection: ClientConnection<*>)
+    fun removeLocalSession(id: String)
+
     /**
      * Retrieves a list of active WebSocket sessions for a given user.
      *

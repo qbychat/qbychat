@@ -41,7 +41,6 @@ import reactor.core.publisher.Mono
 import reactor.core.publisher.SignalType
 import reactor.netty.channel.AbortedException
 import java.io.InputStream
-import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class WebSocketRPCHandler(
@@ -51,9 +50,6 @@ class WebSocketRPCHandler(
 ) : WebSocketHandler {
     companion object {
         private val logger = KotlinLogging.logger {}
-
-        // TODO move this to sessionManager
-        val sessions: ConcurrentHashMap<String, WebsocketConnection> = ConcurrentHashMap()
     }
 
     override fun handle(session: WebSocketSession): Mono<Void> {
@@ -61,7 +57,7 @@ class WebSocketRPCHandler(
         val connection = WebsocketConnection(session)
 
         return session.receive()
-            .doFirst { sessions[session.id] = connection }
+            .doFirst { sessionManager.addLocalSession(connection) }
             .concatMap { message ->
                 val payloadDataBuffer = message.payload
                 val inputStream = payloadDataBuffer.asInputStream(true)
@@ -157,7 +153,7 @@ class WebSocketRPCHandler(
     }
 
     private fun handleSessionCleanup(signalType: SignalType, connection: WebsocketConnection) {
-        sessions.remove(connection.id)
+        sessionManager.removeLocalSession(connection.id)
         scope.launch {
             packetService.processDisconnect(signalType, connection)
         }
