@@ -1,0 +1,21 @@
+version: v2
+clean: true
+
+managed:
+  enabled: false
+  override:
+    - file_option: java_package_prefix
+      value: org.cubewhy.qbychat
+    - file_option: java_multiple_files
+      # noinspection YAMLSchemaValidation
+      value: true
+  disable:
+    - module: buf.build/googleapis/googleapis
+
+plugins:
+  - remote: buf.build/protocolbuffers/java:v31.0
+    out: out
+
+inputs:
+  - git_repo: https://github.com/qbychat/qbychat-proto.git
+    branch: main

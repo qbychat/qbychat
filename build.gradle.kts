@@ -1,9 +1,13 @@
+import build.buf.gradle.GENERATED_DIR
+import build.buf.gradle.BUF_BUILD_DIR
+
 plugins {
+    java
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "1.9.25"
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.google.protobuf") version "0.9.4"
+    id("build.buf") version "0.10.2"
 
     id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
 }
@@ -20,8 +24,16 @@ java {
     }
 }
 
+sourceSets["main"].java { srcDir("${layout.buildDirectory.get().asFile}/$BUF_BUILD_DIR/$GENERATED_DIR/out") }
+
 avro {
     outputCharacterEncoding = "UTF-8"
+}
+
+buf {
+    generate {
+        includeImports = true
+    }
 }
 
 repositories {
@@ -30,15 +42,14 @@ repositories {
 }
 
 dependencies {
-    protobuf(files("proto"))
-
     implementation("org.bouncycastle:bcpg-jdk18on:1.80")
     implementation("org.bouncycastle:bcprov-jdk18on:1.80")
     implementation("cn.hutool:hutool-crypto:5.8.37")
     implementation("com.auth0:java-jwt:4.4.0")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
-    implementation("com.google.protobuf:protobuf-kotlin:4.30.0-RC1")
-    implementation("com.google.protobuf:protobuf-java-util:4.30.0-RC1")
+    implementation("com.google.protobuf:protobuf-kotlin:4.31.0")
+    implementation("com.google.protobuf:protobuf-java:4.31.0")
+    implementation("com.google.protobuf:protobuf-java-util:4.31.0")
     implementation("io.confluent:kafka-streams-avro-serde:7.8.0")
     implementation("io.confluent:kafka-schema-registry-client:7.8.0")
     implementation("org.apache.avro:avro:1.12.0")
@@ -78,12 +89,6 @@ dependencyManagement {
     }
 }
 
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:4.30.0-RC1"
-    }
-}
-
 tasks.register<Exec>("npmInstall") {
     workingDir = file(frontendDir)
     commandLine = listOf("pnpm", "install")
@@ -120,6 +125,7 @@ tasks.register<Copy>("copyFrontendToBuild") {
 tasks.named("processResources") {
     dependsOn("copyFrontendToBuild")
 }
+
 
 tasks.withType<Test> {
     useJUnitPlatform()
