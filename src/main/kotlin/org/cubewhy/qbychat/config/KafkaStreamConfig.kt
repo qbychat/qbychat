@@ -23,7 +23,7 @@ package org.cubewhy.qbychat.config
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.cubewhy.qbychat.application.service.SessionManager
-import org.cubewhy.qbychat.avro.FederationMessage
+import org.cubewhy.qbychat.avro.InstanceMessage
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.util.function.Consumer
@@ -35,7 +35,7 @@ class KafkaStreamConfig(
 ) {
 
     @Bean
-    fun qbychatWebsocketPayloadConsumer(sessionManager: SessionManager): Consumer<FederationMessage> {
+    fun qbychatWebsocketPayloadConsumer(sessionManager: SessionManager): Consumer<InstanceMessage> {
         return Consumer { message ->
             scope.launch {
                 sessionManager.processWithSessionLocally(message.userId) { session ->

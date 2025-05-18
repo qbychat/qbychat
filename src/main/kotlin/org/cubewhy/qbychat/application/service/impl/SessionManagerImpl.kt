@@ -29,7 +29,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactor.mono
 import org.cubewhy.qbychat.application.service.SessionManager
-import org.cubewhy.qbychat.avro.FederationMessage
+import org.cubewhy.qbychat.avro.InstanceMessage
 import org.cubewhy.qbychat.config.properties.InstanceProperties
 import org.cubewhy.qbychat.domain.model.Session
 import org.cubewhy.qbychat.domain.model.SessionMetadata
@@ -137,7 +137,7 @@ class SessionManagerImpl(
 
     override fun pushEvent(userId: String, event: GeneratedMessage) {
         // convert to avro
-        val payload = FederationMessage.newBuilder().apply {
+        val payload = InstanceMessage.newBuilder().apply {
             this.userId = userId
             this.payload = protobufEventOf(event, userId).toByteString().asReadOnlyByteBuffer()
             this.timestamp = Instant.now().epochSecond

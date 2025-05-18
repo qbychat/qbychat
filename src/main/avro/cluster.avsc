@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "FederationMessage",
+  "name": "InstanceMessage",
   "namespace": "org.cubewhy.qbychat.avro",
   "fields": [
     {
