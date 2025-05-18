@@ -18,19 +18,19 @@
 
 package org.cubewhy.qbychat.interfaces.controller.rpc.v1
 
-import org.cubewhy.qbychat.application.service.v1.UserServiceV1
+import org.cubewhy.qbychat.application.service.v1.AuthServiceV1
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.shared.annotations.rpc.RPCMapping
 import org.cubewhy.qbychat.shared.annotations.rpc.RPCPermissionFlag
+import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginRequest
+import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginResponse
 import org.cubewhy.qbychat.websocket.protocol.v1.RPCRequestMethod
-import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountRequest
-import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountResponse
 import org.springframework.stereotype.Controller
 
 @Controller
-class UserControllerV1(private val userServiceV1: UserServiceV1) {
-    @RPCMapping(RPCRequestMethod.REGISTER_ACCOUNT_V1, permissions = RPCPermissionFlag.ALLOW_EXPECT_ANONYMOUS)
-    suspend fun registerAccount(payload: RegisterAccountRequest, connection: ClientConnection<*>): RegisterAccountResponse {
-        return userServiceV1.registerAccount(payload, connection)
+class AuthControllerV1(private val authServiceV1: AuthServiceV1) {
+    @RPCMapping(RPCRequestMethod.USERNAME_PASSWORD_LOGIN_V1, permissions = RPCPermissionFlag.ALLOW_UNAUTHORIZED_ONLY)
+    suspend fun usernamePasswordLogin(connection: ClientConnection<*>, request: UsernamePasswordLoginRequest): UsernamePasswordLoginResponse {
+        return authServiceV1.usernamePasswordLogin(connection, request)
     }
 }

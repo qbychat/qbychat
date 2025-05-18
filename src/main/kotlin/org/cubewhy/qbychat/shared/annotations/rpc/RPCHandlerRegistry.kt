@@ -23,7 +23,7 @@ import org.cubewhy.qbychat.exception.WebsocketForbidden
 import org.cubewhy.qbychat.exception.WebsocketNotFound
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
 import org.cubewhy.qbychat.shared.util.isKotlinClass
-import org.cubewhy.qbychat.websocket.protocol.v1.RequestMethod
+import org.cubewhy.qbychat.websocket.protocol.v1.RPCRequestMethod
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -55,7 +55,7 @@ class RPCHandlerRegistry : ApplicationContextAware {
 
     private lateinit var argumentResolvers: List<RPCArgumentResolver>
     private lateinit var applicationContext: ApplicationContext
-    private val handlers: MutableMap<RequestMethod, RPCMethodDefinition> = mutableMapOf()
+    private val handlers: MutableMap<RPCRequestMethod, RPCMethodDefinition> = mutableMapOf()
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         this.applicationContext = applicationContext
@@ -105,7 +105,7 @@ class RPCHandlerRegistry : ApplicationContextAware {
         }
     }
 
-    suspend fun invokeHandler(method: RequestMethod, context: RPCContext): Any? {
+    suspend fun invokeHandler(method: RPCRequestMethod, context: RPCContext): Any? {
         val def = handlers[method] ?: throw WebsocketNotFound("No RPC handler for method: $method")
         // check permission
         this.checkPermissions(def, context)

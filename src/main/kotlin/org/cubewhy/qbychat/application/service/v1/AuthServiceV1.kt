@@ -16,16 +16,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.cubewhy.qbychat.shared.annotations.rpc
+package org.cubewhy.qbychat.application.service.v1
 
-import org.cubewhy.qbychat.domain.model.Role
-import org.cubewhy.qbychat.websocket.protocol.v1.RPCRequestMethod
+import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginRequest
+import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginResponse
 
-@MustBeDocumented
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class RPCMapping(
-    val method: RPCRequestMethod,
-    val roles: Array<Role> = [],
-    val permissions: RPCPermissionFlag = RPCPermissionFlag.ALLOW_AUTHORIZED_ONLY // allow authorized users to access endpoints
-)
+interface AuthServiceV1 {
+    suspend fun usernamePasswordLogin(
+        connection: ClientConnection<*>,
+        request: UsernamePasswordLoginRequest
+    ): UsernamePasswordLoginResponse
+}

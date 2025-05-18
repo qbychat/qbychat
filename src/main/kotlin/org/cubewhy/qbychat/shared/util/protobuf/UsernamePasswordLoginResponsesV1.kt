@@ -16,16 +16,19 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.cubewhy.qbychat.shared.annotations.rpc
+package org.cubewhy.qbychat.shared.util.protobuf
 
-import org.cubewhy.qbychat.domain.model.Role
-import org.cubewhy.qbychat.websocket.protocol.v1.RPCRequestMethod
+import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginResponse
 
-@MustBeDocumented
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class RPCMapping(
-    val method: RPCRequestMethod,
-    val roles: Array<Role> = [],
-    val permissions: RPCPermissionFlag = RPCPermissionFlag.ALLOW_AUTHORIZED_ONLY // allow authorized users to access endpoints
-)
+object UsernamePasswordLoginResponsesV1 {
+    fun badUsernameOrPassword(): UsernamePasswordLoginResponse =
+        build(UsernamePasswordLoginResponse.Status.BAD_USERNAME_OR_PASSWORD)
+
+    fun success(accountId: String): UsernamePasswordLoginResponse = build(UsernamePasswordLoginResponse.Status.SUCCESS, accountId)
+
+    private fun build(status: UsernamePasswordLoginResponse.Status, accountId: String? = null) =
+        UsernamePasswordLoginResponse.newBuilder().apply {
+            this.status = status
+            accountId?.let { this.accountId = it }
+        }.build()
+}
