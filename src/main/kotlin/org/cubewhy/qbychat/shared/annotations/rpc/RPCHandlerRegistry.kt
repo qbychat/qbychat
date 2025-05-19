@@ -109,10 +109,12 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
                 val reflectionHints = generationContext.runtimeHints.reflection()
 
                 // Register the bean class itself
-                reflectionHints.registerType(beanClass,
+                reflectionHints.registerType(
+                    beanClass,
                     MemberCategory.INVOKE_DECLARED_METHODS,
                     MemberCategory.INVOKE_PUBLIC_METHODS,
-                    MemberCategory.DECLARED_FIELDS)
+                    MemberCategory.DECLARED_FIELDS
+                )
 
                 // Process both Java and Kotlin methods
                 val isKotlin = try {
@@ -132,9 +134,11 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
 
                                 // Register parameter types for reflection
                                 function.parameters.forEach { param ->
-                                    reflectionHints.registerType(param.type.jvmErasure.java,
+                                    reflectionHints.registerType(
+                                        param.type.jvmErasure.java,
                                         MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-                                        MemberCategory.INVOKE_PUBLIC_METHODS)
+                                        MemberCategory.INVOKE_PUBLIC_METHODS
+                                    )
                                 }
                             }
                         }
@@ -153,9 +157,11 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
 
                             // Register parameter types for reflection
                             method.parameterTypes.forEach { paramType ->
-                                reflectionHints.registerType(paramType,
+                                reflectionHints.registerType(
+                                    paramType,
                                     MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-                                    MemberCategory.INVOKE_PUBLIC_METHODS)
+                                    MemberCategory.INVOKE_PUBLIC_METHODS
+                                )
                             }
                         }
                     }
@@ -199,10 +205,10 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
      * Register a RPC handler
      */
     private fun registerHandler(bean: Any, annotation: RPCMapping, kFunction: KFunction<*>?, method: Method?) {
-        if (method == null) return
         val rpcMethod = annotation.method
 
         if (handlers.containsKey(rpcMethod)) {
+            if (handlers[rpcMethod]?.method == null) return
             throw IllegalStateException("Duplicate RPC handler for method $rpcMethod: already registered by ${handlers[rpcMethod]?.method?.declaringClass?.name}")
         }
 
@@ -213,7 +219,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
             method = method
         )
 
-        val handlerName = kFunction?.name ?: method.name
+        val handlerName = kFunction?.name ?: method?.name
         val className = bean.javaClass.name
         val handlerType = if (kFunction != null) "Kotlin" else "Java"
 
