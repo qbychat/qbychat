@@ -21,7 +21,6 @@ package org.cubewhy.qbychat.infrastructure.transport
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.web.reactive.socket.CloseStatus
 import org.springframework.web.reactive.socket.WebSocketSession
-import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 
 class WebsocketConnection(override val nativeConnection: WebSocketSession) : ClientConnection<WebSocketSession>() {
@@ -31,16 +30,17 @@ class WebsocketConnection(override val nativeConnection: WebSocketSession) : Cli
     override val isOpen: Boolean
         get() = this.nativeConnection.isOpen
 
-    override suspend fun send(message: ByteArray) {
+    override suspend fun sendPlaintext(message: ByteArray) {
         this.nativeConnection.send(this.nativeConnection.binaryMessage { it.wrap(message) }.toMono())
             .awaitFirstOrNull()
     }
 
-    override suspend fun send(messages: List<ByteArray>) {
-        this.nativeConnection.send(messages.map { message -> this.nativeConnection.binaryMessage { it.wrap(message) } }
-            .toFlux())
-            .awaitFirstOrNull()
-    }
+//    override suspend fun sendBulk(messages: List<ByteArray>) {
+//        // todo should be encrypted
+//        this.nativeConnection.send(messages.map { message -> this.nativeConnection.binaryMessage { it.wrap(message) } }
+//            .toFlux())
+//            .awaitFirstOrNull()
+//    }
 
 
     override suspend fun close(code: Int, reason: String?) {

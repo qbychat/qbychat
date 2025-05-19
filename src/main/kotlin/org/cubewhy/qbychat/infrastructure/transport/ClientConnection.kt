@@ -53,7 +53,7 @@ abstract class ClientConnection<T> {
      *
      * @param message the message payload as a byte array
      */
-    abstract suspend fun send(message: ByteArray)
+    abstract suspend fun sendPlaintext(message: ByteArray)
 
     /**
      * Sends multiple binary messages over the connection.
@@ -61,8 +61,8 @@ abstract class ClientConnection<T> {
      *
      * @param messages a list of message payloads as byte arrays
      */
-    open suspend fun send(messages: List<ByteArray>) {
-        messages.forEach { message -> this.send(message) }
+    open suspend fun sendBulk(messages: List<ByteArray>) {
+        messages.forEach { message -> this.sendWithEncryption(message) }
     }
 
     /**
@@ -85,7 +85,7 @@ abstract class ClientConnection<T> {
         // encrypt & send
         if (this.metadata.chachaKey == null) {
             // send unencrypted
-            this.send(payload)
+            this.sendPlaintext(payload)
         } else {
             val encryptedPayload = CipherUtil.encryptMessage(
                 this.metadata.chachaKey!!,
@@ -93,7 +93,7 @@ abstract class ClientConnection<T> {
                 this.metadata.encrpytionSessionId!!,
                 this.metadata.s2cPacketCounter.incrementAndGet()
             ).toByteArray()
-            this.send(encryptedPayload)
+            this.sendPlaintext(encryptedPayload)
         }
     }
 
@@ -120,14 +120,14 @@ abstract class ClientConnection<T> {
         }
         if (response.events.isEmpty()) {
             // no events
-            return this.send(clientboundMessage)
+            return this.sendWithEncryption(clientboundMessage)
         }
         val messages = mutableListOf<ByteArray>()
         messages.add(clientboundMessage)
         // build events
         messages.addAll(response.events.filter { !it.shared }.map { it.buildProtobufMessage(response.userId).toByteArray() })
         // send bulk
-        this.send(messages)
+        this.sendBulk(messages)
     }
 
     /**

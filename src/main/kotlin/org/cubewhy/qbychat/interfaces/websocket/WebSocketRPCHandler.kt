@@ -87,7 +87,7 @@ class WebSocketRPCHandler(
         return mono {
             packetService.processHandshake(handshakePacket, connection)
         }.flatMap { clientboundHandshake ->
-            mono { connection.send(clientboundHandshake.toByteArray()) }.then()
+            mono { connection.sendPlaintext(clientboundHandshake.toByteArray()) }.then()
         }
     }
 

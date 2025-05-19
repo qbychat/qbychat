@@ -103,6 +103,7 @@ class PacketServiceImpl(
         val user = message.userId.takeIf { it != null }?.let {
             userRepository.findById(message.userId).awaitFirstOrNull()
         }
+        logger.debug { "Received packet ${connection.id} -> ${message.request.method}" }
         if (user != null) {
             if (!sessionManager.isOnSession(connection, user)) {
                 return errorWebsocketResponseOf(RPCResponse.Status.UNAUTHORIZED, "Unauthorized")
