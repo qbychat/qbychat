@@ -176,10 +176,10 @@ class SessionManagerImpl(
     }
 
     override suspend fun createSession(user: User, connection: ClientConnection<*>): Session {
-        val session1 = Session(
+        val session1 = sessionRepository.save(Session(
             userId = user.id!!,
             clientId = connection.metadata.clientId!!
-        )
+        )).awaitFirst()
         logger.info { "Session with user ${user.username} created (client: ${connection.metadata.clientId})" }
         // get client
         val client = clientRepository.findById(connection.metadata.clientId!!).awaitFirst()
