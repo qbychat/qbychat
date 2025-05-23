@@ -19,32 +19,26 @@ services:
       - '6379:6379'
     restart: no
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    container_name: qbychat-zookeeper
-    restart: no
-    ports:
-      - '2181:2181'
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.9.1
     container_name: qbychat-kafka
     hostname: kafka
-    depends_on:
-      - zookeeper
     restart: no
     ports:
       - '9092:9092'
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      CLUSTER_ID: 1
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_METADATA_LOG_DIR: /tmp/kraft-combined-logs
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
   schema-registry:
     image: confluentinc/cp-schema-registry:latest
@@ -59,20 +53,6 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
-
-#  kafka-ui:
-#    container_name: qbychat-kafka-ui
-#    image: provectuslabs/kafka-ui:latest
-#    ports:
-#      - "8086:8080"
-#    depends_on:
-#      - kafka
-#    restart: no
-#    environment:
-#      KAFKA_CLUSTERS_NAME: local
-#      KAFKA_CLUSTERS_BOOTSTRAPSERVERS: kafka:29092
-#      KAFKA_CLUSTERS_SCHEMAREGISTRY: http://schema-registry:8081
-#      DYNAMIC_CONFIG_ENABLED: 'true'
 
 #  minio:
 #    image: minio/minio:latest
