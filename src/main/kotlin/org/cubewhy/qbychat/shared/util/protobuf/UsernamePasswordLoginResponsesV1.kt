@@ -22,9 +22,9 @@ import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginResponse
 
 object UsernamePasswordLoginResponsesV1 {
     fun badUsernameOrPassword(): UsernamePasswordLoginResponse =
-        build(UsernamePasswordLoginResponse.Status.BAD_USERNAME_OR_PASSWORD)
+        build(UsernamePasswordLoginResponse.Status.STATUS_BAD_USERNAME_OR_PASSWORD)
 
-    fun success(accountId: String): UsernamePasswordLoginResponse = build(UsernamePasswordLoginResponse.Status.SUCCESS, accountId)
+    fun success(accountId: String): UsernamePasswordLoginResponse = build(UsernamePasswordLoginResponse.Status.STATUS_SUCCESS, accountId)
 
     private fun build(status: UsernamePasswordLoginResponse.Status, accountId: String? = null) =
         UsernamePasswordLoginResponse.newBuilder().apply {

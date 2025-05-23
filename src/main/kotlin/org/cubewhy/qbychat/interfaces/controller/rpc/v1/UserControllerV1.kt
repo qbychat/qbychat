@@ -29,7 +29,7 @@ import org.springframework.stereotype.Controller
 
 @Controller
 class UserControllerV1(private val userServiceV1: UserServiceV1) {
-    @RPCMapping(RPCRequestMethod.REGISTER_ACCOUNT_V1, permissions = RPCPermissionFlag.ALLOW_EXPECT_ANONYMOUS)
+    @RPCMapping(RPCRequestMethod.RPC_REQUEST_METHOD_REGISTER_ACCOUNT_V1, permissions = RPCPermissionFlag.ALLOW_EXPECT_ANONYMOUS)
     suspend fun registerAccount(
         payload: RegisterAccountRequest,
         connection: ClientConnection<*>

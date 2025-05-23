@@ -128,7 +128,7 @@ class WebSocketRPCHandler(
             } catch (e: Exception) {
                 websocketResponseOf(
                     serverboundMessage.request.ticket.toByteArray(),
-                    RPCResponse.Status.INTERNAL_ERROR,
+                    RPCResponse.Status.STATUS_INTERNAL_ERROR,
                     e.message ?: "Internal Error"
                 )
             }).apply { this.ticket = serverboundMessage.request.ticket.toByteArray() }

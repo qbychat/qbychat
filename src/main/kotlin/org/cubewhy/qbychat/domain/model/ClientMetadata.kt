@@ -34,12 +34,12 @@ data class ClientMetadata(
         companion object {
             fun fromProtobuf(proto: PbPlatform): ClientMetadata.Platform {
                 return when (proto) {
-                    PbPlatform.ANDROID -> ANDROID
-                    PbPlatform.IOS -> IOS
-                    PbPlatform.WINDOWS -> WINDOWS
-                    PbPlatform.LINUX -> LINUX
-                    PbPlatform.OSX -> MACOS
-                    PbPlatform.BROWSER -> BROWSER
+                    PbPlatform.PLATFORM_ANDROID -> ANDROID
+                    PbPlatform.PLATFORM_IOS -> IOS
+                    PbPlatform.PLATFORM_WINDOWS -> WINDOWS
+                    PbPlatform.PLATFORM_LINUX -> LINUX
+                    PbPlatform.PLATFORM_OSX -> MACOS
+                    PbPlatform.PLATFORM_BROWSER -> BROWSER
 
                     else -> UNKNOWN
                 }

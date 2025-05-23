@@ -32,12 +32,12 @@ import org.springframework.stereotype.Controller
 class ClientControllerV1(
     private val sessionServiceV1: SessionServiceV1,
 ) {
-    @RPCMapping(RPCRequestMethod.REGISTER_CLIENT_V1, permissions = RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY)
+    @RPCMapping(RPCRequestMethod.RPC_REQUEST_METHOD_REGISTER_CLIENT_V1, permissions = RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY)
     suspend fun registerClient(connection: ClientConnection<*>, payload: RegisterClientRequest): WebsocketResponse {
         return sessionServiceV1.registerClient(connection, payload)
     }
 
-    @RPCMapping(RPCRequestMethod.RESUME_CLIENT_V1, permissions = RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY)
+    @RPCMapping(RPCRequestMethod.RPC_REQUEST_METHOD_RESUME_CLIENT_V1, permissions = RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY)
     suspend fun resumeClient(connection: ClientConnection<*>, payload: ResumeClientRequest): WebsocketResponse {
         return sessionServiceV1.resumeClient(connection, payload)
     }

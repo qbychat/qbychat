@@ -23,11 +23,11 @@ package org.cubewhy.qbychat.shared.util.protobuf
 import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountResponse
 
 object RegisterAccountResponsesV1 {
-    fun usernameExists(): RegisterAccountResponse = build(RegisterAccountResponse.Status.USERNAME_EXISTS)
+    fun usernameExists(): RegisterAccountResponse = build(RegisterAccountResponse.Status.STATUS_USERNAME_EXISTS)
 
-    fun badUsername(): RegisterAccountResponse = build(RegisterAccountResponse.Status.BAD_USERNAME)
+    fun badUsername(): RegisterAccountResponse = build(RegisterAccountResponse.Status.STATUS_BAD_USERNAME)
 
-    fun success(accountId: String): RegisterAccountResponse = build(RegisterAccountResponse.Status.SUCCESS, accountId)
+    fun success(accountId: String): RegisterAccountResponse = build(RegisterAccountResponse.Status.STATUS_SUCCESS, accountId)
 
     private fun build(status: RegisterAccountResponse.Status, accountId: String? = null): RegisterAccountResponse =
         RegisterAccountResponse.newBuilder().apply {

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Controller
 
 @Controller
 class AuthControllerV1(private val authServiceV1: AuthServiceV1) {
-    @RPCMapping(RPCRequestMethod.USERNAME_PASSWORD_LOGIN_V1, permissions = RPCPermissionFlag.ALLOW_UNAUTHORIZED_ONLY)
+    @RPCMapping(RPCRequestMethod.RPC_REQUEST_METHOD_USERNAME_PASSWORD_LOGIN_V1, permissions = RPCPermissionFlag.ALLOW_UNAUTHORIZED_ONLY)
     suspend fun usernamePasswordLogin(connection: ClientConnection<*>, request: UsernamePasswordLoginRequest): UsernamePasswordLoginResponse {
         return authServiceV1.usernamePasswordLogin(connection, request)
     }

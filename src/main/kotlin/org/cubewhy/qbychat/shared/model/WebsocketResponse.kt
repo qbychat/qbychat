@@ -26,7 +26,7 @@ import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
 
 data class WebsocketResponse(
     val payload: ByteArray?,
-    val status: RPCResponse.Status = RPCResponse.Status.SUCCESS,
+    val status: RPCResponse.Status = RPCResponse.Status.STATUS_SUCCESS,
     val message: String? = null,
     var events: List<WebsocketEvent> = emptyList(),
 ) {
@@ -89,7 +89,7 @@ fun eventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, tr
 
 fun websocketResponseOf(
     payload: ByteArray?,
-    status: RPCResponse.Status = RPCResponse.Status.SUCCESS,
+    status: RPCResponse.Status = RPCResponse.Status.STATUS_SUCCESS,
     message: String? = null,
     events: List<WebsocketEvent> = listOf()
 ): WebsocketResponse {
@@ -100,7 +100,7 @@ fun websocketResponseOf(
     payload: GeneratedMessage,
     events: List<WebsocketEvent> = listOf()
 ): WebsocketResponse {
-    return WebsocketResponse(payload.toByteArray(), RPCResponse.Status.SUCCESS, null, events = events)
+    return WebsocketResponse(payload.toByteArray(), RPCResponse.Status.STATUS_SUCCESS, null, events = events)
 }
 
 fun errorWebsocketResponseOf(

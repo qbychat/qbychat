@@ -27,8 +27,8 @@ enum class Role {
 
     fun toProtobufType(): ProtoRole {
         return when (this) {
-            USER -> ProtoRole.USER
-            ADMIN -> ProtoRole.ADMIN
+            USER -> ProtoRole.ROLE_USER
+            ADMIN -> ProtoRole.ROLE_ADMIN
         }
     }
 }
