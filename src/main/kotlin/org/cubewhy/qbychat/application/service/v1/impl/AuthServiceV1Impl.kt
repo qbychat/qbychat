@@ -18,9 +18,11 @@
 
 package org.cubewhy.qbychat.application.service.v1.impl
 
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.cubewhy.qbychat.application.service.SessionManager
 import org.cubewhy.qbychat.application.service.v1.AuthServiceV1
+import org.cubewhy.qbychat.domain.repository.SessionRepository
 import org.cubewhy.qbychat.domain.repository.UserRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.shared.util.protobuf.UsernamePasswordLoginResponsesV1
@@ -33,7 +35,8 @@ import org.springframework.stereotype.Service
 class AuthServiceV1Impl(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val sessionRepository: SessionRepository
 ) : AuthServiceV1 {
     override suspend fun usernamePasswordLogin(
         connection: ClientConnection<*>,
@@ -42,6 +45,11 @@ class AuthServiceV1Impl(
         // find user
         val user = userRepository.findByUsernameIgnoreCase(request.username).awaitFirstOrNull()
         if (user == null) return UsernamePasswordLoginResponsesV1.badUsernameOrPassword()
+
+        if (sessionRepository.existsByUserIdAndClientId(user.id!!, connection.metadata.clientId!!).awaitFirst()) {
+            return UsernamePasswordLoginResponsesV1.alreadyLoggedIn()
+        }
+
         // verify password
         if (!passwordEncoder.matches(
                 request.password,
@@ -51,6 +59,6 @@ class AuthServiceV1Impl(
 
         // put user to session
         sessionManager.persistSession(user, connection)
-        return UsernamePasswordLoginResponsesV1.success(user.id!!)
+        return UsernamePasswordLoginResponsesV1.success(user.id)
     }
 }

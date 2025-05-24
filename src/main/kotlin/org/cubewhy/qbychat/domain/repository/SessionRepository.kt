@@ -22,8 +22,11 @@ import org.cubewhy.qbychat.domain.model.Session
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @Repository
 interface SessionRepository : ReactiveMongoRepository<Session, String> {
     fun findAllByClientId(clientId: String): Flux<Session>
+
+    fun existsByUserIdAndClientId(userId: String, clientId: String): Mono<Boolean>
 }

@@ -28,6 +28,8 @@ object UsernamePasswordLoginResponsesV1 {
     fun success(accountId: String): UsernamePasswordLoginResponse =
         build(UsernamePasswordLoginResponse.Status.STATUS_SUCCESS, accountId)
 
+    fun alreadyLoggedIn() = build(UsernamePasswordLoginResponse.Status.STATUS_ALREADY_LOGGED_IN)
+
     private fun build(status: UsernamePasswordLoginResponse.Status, accountId: String? = null) =
         usernamePasswordLoginResponse {
             this.status = status
