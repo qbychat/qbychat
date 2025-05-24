@@ -108,10 +108,10 @@ class SessionManagerImpl(
 
     override suspend fun saveSession(connection: ClientConnection<*>, userId: String) {
         if (this.isOnSession(connection, userId)) {
-            logger.warn { "Skipping save session of user ${userId} on connection ${connection.id} (already exists)" }
+            logger.warn { "Skipping save session of user $userId on connection ${connection.id} (already exists)" }
             return
         }
-        logger.debug { "Saving session for ${userId} at connection ${connection.id}" }
+        logger.debug { "Saving session for $userId at connection ${connection.id}" }
         val sessionObject = SessionMetadata(
             sessionId = connection.id,
             userId = userId,
@@ -182,6 +182,7 @@ class SessionManagerImpl(
             client.mainSessionId = session1.id
         }
         clientRepository.save(client).awaitFirst()
+        this.saveSession(connection, user.id) // add to Redis session store
         return sessionRepository.save(session1).awaitFirst()
     }
 
