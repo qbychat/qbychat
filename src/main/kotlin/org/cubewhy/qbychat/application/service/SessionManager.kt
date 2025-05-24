@@ -34,10 +34,10 @@ interface SessionManager {
      * This function scans the Redis set containing active sessions, filters them by the user's ID,
      * and returns a list of WebSocket sessions associated with the user.
      *
-     * @param user The user whose sessions are to be retrieved
+     * @param userId The user whose sessions are to be retrieved
      * @return A list of [SessionMetadata] objects associated with the given user
      */
-    suspend fun findAllSessionMetadata(user: User): List<SessionMetadata>
+    suspend fun findAllSessionMetadata(userId: String): List<SessionMetadata>
 
     /**
      * Checks if the given WebSocket session is authorized (i.e., has a corresponding user session).
@@ -48,7 +48,7 @@ interface SessionManager {
      * @return `true` if the session is authorized (exists in Redis), otherwise `false`
      */
     suspend fun isAuthorized(connection: ClientConnection<*>): Boolean
-    suspend fun saveSession(connection: ClientConnection<*>, user: User)
+    suspend fun saveSession(connection: ClientConnection<*>, userId: String)
 
     /**
      * Removes a WebSocket session from the active sessions store.
@@ -60,7 +60,7 @@ interface SessionManager {
      */
     suspend fun removeSession(connection: ClientConnection<*>)
 
-    suspend fun isOnSession(connection: ClientConnection<*>, user: User): Boolean
+    suspend fun isOnSession(connection: ClientConnection<*>, userId: String): Boolean
 
     /**
      * Creates a new session for a given user and WebSocket session.
@@ -72,7 +72,7 @@ interface SessionManager {
      * @param connection The session that is being created
      * @return The created [Session] object
      */
-    suspend fun createSession(user: User, connection: ClientConnection<*>): Session
+    suspend fun persistSession(user: User, connection: ClientConnection<*>): Session
     suspend fun isSessionValid(sessionId: String): Boolean
     suspend fun isOnline(userId: String): Boolean
 

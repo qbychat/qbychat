@@ -108,23 +108,23 @@ class SessionManagerImpl(
             .any { it.clientId == clientId }.awaitFirstOrNull() ?: false
     }
 
-    override suspend fun saveSession(connection: ClientConnection<*>, user: User) {
-        if (this.isOnSession(connection, user)) {
-            logger.warn { "Skipping save session of user ${user.username} on connection ${connection.id} (already exists)" }
+    override suspend fun saveSession(connection: ClientConnection<*>, userId: String) {
+        if (this.isOnSession(connection, userId)) {
+            logger.warn { "Skipping save session of user ${userId} on connection ${connection.id} (already exists)" }
             return
         }
-        logger.info { "Saving session for ${user.username} at connection ${connection.id}" }
-        val wsSessionObject = SessionMetadata(
+        logger.debug { "Saving session for ${userId} at connection ${connection.id}" }
+        val sessionObject = SessionMetadata(
             sessionId = connection.id,
-            userId = user.id!!,
+            userId = userId,
             clientId = connection.metadata.clientId!!
         )
-        sessionMetadataReactiveRedisTemplate.opsForSet().add(Const.SESSION_STORE, wsSessionObject)
+        sessionMetadataReactiveRedisTemplate.opsForSet().add(Const.SESSION_STORE, sessionObject)
             .awaitFirst()
     }
 
-    override suspend fun isOnSession(connection: ClientConnection<*>, user: User): Boolean {
-        return findAllSessionMetadata(user).any { it.sessionId == connection.id }
+    override suspend fun isOnSession(connection: ClientConnection<*>, userId: String): Boolean {
+        return findAllSessionMetadata(userId).any { it.sessionId == connection.id }
     }
 
     override suspend fun isOnline(userId: String) =
@@ -152,13 +152,8 @@ class SessionManagerImpl(
         userId: String,
         func: suspend (connection: ClientConnection<*>) -> Unit
     ) {
-        // check is online
-        // avoid query the db if the user is offline
-        if (!isOnline(userId)) return
-        // find the user
-        val user = userRepository.findById(userId).awaitFirst()
         // find all available sessions
-        this.findAllSessionMetadata(user).toFlux().mapNotNull {
+        this.findAllSessionMetadata(userId).toFlux().mapNotNull {
             // find on local session map
             sessions[it.sessionId]
         }.flatMap { session ->
@@ -166,16 +161,16 @@ class SessionManagerImpl(
         }.awaitLast()
     }
 
-    override suspend fun findAllSessionMetadata(user: User): List<SessionMetadata> =
+    override suspend fun findAllSessionMetadata(userId: String): List<SessionMetadata> =
         sessionMetadataReactiveRedisTemplate.opsForSet().scan(Const.SESSION_STORE)
-            .filter { it.userId == user.id }.collectList().awaitLast()
+            .filter { it.userId == userId }.collectList().awaitLast()
 
     override suspend fun isAuthorized(connection: ClientConnection<*>): Boolean {
         return sessionMetadataReactiveRedisTemplate.opsForSet().scan(Const.SESSION_STORE)
             .any { it.sessionId == connection.id }.awaitLast()
     }
 
-    override suspend fun createSession(user: User, connection: ClientConnection<*>): Session {
+    override suspend fun persistSession(user: User, connection: ClientConnection<*>): Session {
         val session1 = sessionRepository.save(
             Session(
                 userId = user.id!!,

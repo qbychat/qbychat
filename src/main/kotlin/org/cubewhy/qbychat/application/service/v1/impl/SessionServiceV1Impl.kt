@@ -105,10 +105,16 @@ class SessionServiceV1Impl(
         connection.metadata.clientId = client.id!!
 
         // find accounts
-        val accounts = sessionRepository.findAllByClientId(clientId).map { it.userId }.collectList().awaitFirst()
+        val sessions = sessionRepository.findAllByClientId(clientId)
+        val accounts = sessions.map { it.userId }.collectList().awaitFirst()
         // find main session
         val mainSession =
             client.mainSessionId.takeIf { it != null }?.let { sessionRepository.findById(it).awaitFirstOrNull() }
+
+        // register sessions
+        accounts.forEach { account ->
+            sessionManager.saveSession(connection, userId = account)
+        }
 
         return websocketResponseOf(resumeClientResponse {
             accountIds.addAll(accounts)

@@ -105,7 +105,7 @@ class PacketServiceImpl(
         }
         logger.debug { "Received packet ${connection.id} -> ${message.request.method}" }
         if (user != null) {
-            if (!sessionManager.isOnSession(connection, user)) {
+            if (!sessionManager.isOnSession(connection, user.id!!)) {
                 return errorWebsocketResponseOf(RpcResponse.Status.STATUS_UNAUTHORIZED, "Unauthorized")
             }
         }
