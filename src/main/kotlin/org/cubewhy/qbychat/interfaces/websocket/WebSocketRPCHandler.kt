@@ -31,7 +31,7 @@ import org.cubewhy.qbychat.shared.model.websocketResponseOf
 import org.cubewhy.qbychat.shared.util.CipherUtil
 import org.cubewhy.qbychat.shared.util.SlidingWindow
 import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
-import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
+import org.cubewhy.qbychat.websocket.protocol.v1.RpcResponse
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundHandshake
 import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
 import org.springframework.stereotype.Component
@@ -128,7 +128,7 @@ class WebSocketRPCHandler(
             } catch (e: Exception) {
                 websocketResponseOf(
                     serverboundMessage.request.ticket.toByteArray(),
-                    RPCResponse.Status.STATUS_INTERNAL_ERROR,
+                    RpcResponse.Status.STATUS_INTERNAL_ERROR,
                     e.message ?: "Internal Error"
                 )
             }).apply { this.ticket = serverboundMessage.request.ticket.toByteArray() }

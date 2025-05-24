@@ -26,8 +26,7 @@ import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.domain.repository.UserRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.shared.util.protobuf.RegisterAccountResponsesV1
-import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountRequest
-import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountResponse
+import org.cubewhy.qbychat.websocket.user.v1.*
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -43,7 +42,21 @@ class UserServiceV1Impl(
 
     private val usernameRegex = "^[a-zA-Z0-9]{5,16}$".toRegex()
 
-    override suspend fun registerAccount(request: RegisterAccountRequest, connection: ClientConnection<*>): RegisterAccountResponse {
+    override suspend fun sync(request: SyncRequest, user: User): SyncResponse {
+        return syncResponse {
+            publicInfo = publicUserInfo {
+                username = user.username
+                nickname = user.nickname
+                bio = user.bio
+            }
+        }
+    }
+
+
+    override suspend fun registerAccount(
+        request: RegisterAccountRequest,
+        connection: ClientConnection<*>
+    ): RegisterAccountResponse {
         // check if username available
         if (userRepository.existsByUsernameIgnoreCase(request.username).awaitFirst()) {
             return RegisterAccountResponsesV1.usernameExists()

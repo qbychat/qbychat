@@ -26,7 +26,11 @@ import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
 import reactor.core.publisher.SignalType
 
 interface PacketService {
-    suspend fun processHandshake(handshake: ServerboundHandshake, connection: ClientConnection<*>): ClientboundHandshake?
+    suspend fun processHandshake(
+        handshake: ServerboundHandshake,
+        connection: ClientConnection<*>
+    ): ClientboundHandshake?
+
     suspend fun process(
         message: ServerboundMessage,
         connection: ClientConnection<*>

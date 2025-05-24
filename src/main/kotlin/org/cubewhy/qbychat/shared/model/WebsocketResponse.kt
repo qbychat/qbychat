@@ -21,12 +21,13 @@ package org.cubewhy.qbychat.shared.model
 import com.google.protobuf.GeneratedMessage
 import com.google.protobuf.kotlin.toByteString
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
-import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
-import org.cubewhy.qbychat.websocket.protocol.v1.RPCResponse
+import org.cubewhy.qbychat.websocket.protocol.v1.RpcResponse
+import org.cubewhy.qbychat.websocket.protocol.v1.clientboundMessage
+import org.cubewhy.qbychat.websocket.protocol.v1.rpcResponse
 
 data class WebsocketResponse(
     val payload: ByteArray?,
-    val status: RPCResponse.Status = RPCResponse.Status.STATUS_SUCCESS,
+    val status: RpcResponse.Status = RpcResponse.Status.STATUS_SUCCESS,
     val message: String? = null,
     var events: List<WebsocketEvent> = emptyList(),
 ) {
@@ -34,12 +35,12 @@ data class WebsocketResponse(
     var userId: String? = null
     var ticket: ByteArray? = null
 
-    fun buildRPCResponse() = RPCResponse.newBuilder().apply {
-        this.ticket = this@WebsocketResponse.ticket!!.toByteString()
-        this@WebsocketResponse.payload?.let { this.payload = it.toByteString() }
-        this.status = this@WebsocketResponse.status
-        this@WebsocketResponse.message?.let { this.message = it }
-    }.build()!!
+    fun buildRPCResponse() = rpcResponse {
+        ticket = this@WebsocketResponse.ticket!!.toByteString()
+        this@WebsocketResponse.payload?.let { payload = it.toByteString() }
+        status = this@WebsocketResponse.status
+        this@WebsocketResponse.message?.let { message = it }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -76,10 +77,10 @@ data class WebsocketEvent(
     val eventMessage: GeneratedMessage,
     val shared: Boolean // should this event shared over sessions that logged in the same account?
 ) {
-    fun buildProtobufMessage(userId: String?) = ClientboundMessage.newBuilder().apply {
+    fun buildProtobufMessage(userId: String?) = clientboundMessage {
         userId?.let { this.userId = it }
         this.event = com.google.protobuf.Any.pack(eventMessage)
-    }.build()!!
+    }
 }
 
 fun sharedEventOf(vararg events: GeneratedMessage) = events.map { WebsocketEvent(it, true) }
@@ -89,7 +90,7 @@ fun eventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, tr
 
 fun websocketResponseOf(
     payload: ByteArray?,
-    status: RPCResponse.Status = RPCResponse.Status.STATUS_SUCCESS,
+    status: RpcResponse.Status = RpcResponse.Status.STATUS_SUCCESS,
     message: String? = null,
     events: List<WebsocketEvent> = listOf()
 ): WebsocketResponse {
@@ -100,10 +101,10 @@ fun websocketResponseOf(
     payload: GeneratedMessage,
     events: List<WebsocketEvent> = listOf()
 ): WebsocketResponse {
-    return WebsocketResponse(payload.toByteArray(), RPCResponse.Status.STATUS_SUCCESS, null, events = events)
+    return WebsocketResponse(payload.toByteArray(), RpcResponse.Status.STATUS_SUCCESS, null, events = events)
 }
 
 fun errorWebsocketResponseOf(
-    status: RPCResponse.Status,
+    status: RpcResponse.Status,
     message: String?
 ) = websocketResponseOf(null, status, message)

@@ -32,6 +32,7 @@ import org.bouncycastle.crypto.modes.ChaCha20Poly1305
 import org.bouncycastle.crypto.params.AEADParameters
 import org.bouncycastle.crypto.params.KeyParameter
 import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
+import org.cubewhy.qbychat.websocket.protocol.v1.encryptedMessage
 import java.nio.ByteBuffer
 import java.security.SecureRandom
 
@@ -102,12 +103,12 @@ object CipherUtil {
         cipher.doFinal(cipherText, len)
 
         // Return the encrypted message
-        return EncryptedMessage.newBuilder().apply {
+        return encryptedMessage {
             this.sessionId = sessionId
             this.sequenceNumber = sequenceNumber
             this.nonce = ByteString.copyFrom(nonce)
             this.ciphertext = ByteString.copyFrom(cipherText)
-        }.build()
+        }
     }
 
     fun decryptMessage(

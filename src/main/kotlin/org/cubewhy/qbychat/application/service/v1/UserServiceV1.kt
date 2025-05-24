@@ -18,10 +18,17 @@
 
 package org.cubewhy.qbychat.application.service.v1
 
+import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountRequest
 import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountResponse
+import org.cubewhy.qbychat.websocket.user.v1.SyncRequest
+import org.cubewhy.qbychat.websocket.user.v1.SyncResponse
 
 interface UserServiceV1 {
-    suspend fun registerAccount(request: RegisterAccountRequest, connection: ClientConnection<*>): RegisterAccountResponse
+    suspend fun sync(request: SyncRequest, user: User): SyncResponse
+    suspend fun registerAccount(
+        request: RegisterAccountRequest,
+        connection: ClientConnection<*>
+    ): RegisterAccountResponse
 }

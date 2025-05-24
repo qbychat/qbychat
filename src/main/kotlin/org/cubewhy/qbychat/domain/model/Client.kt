@@ -28,4 +28,4 @@ data class Client(
     val metadata: ClientMetadata,
     val authToken: String,
     var mainSessionId: String? = null,
-): AuditingEntity()
+) : AuditingEntity()

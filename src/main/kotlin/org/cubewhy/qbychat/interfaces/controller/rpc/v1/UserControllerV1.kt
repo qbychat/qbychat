@@ -19,17 +19,29 @@
 package org.cubewhy.qbychat.interfaces.controller.rpc.v1
 
 import org.cubewhy.qbychat.application.service.v1.UserServiceV1
+import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.shared.annotations.rpc.RPCMapping
 import org.cubewhy.qbychat.shared.annotations.rpc.RPCPermissionFlag
-import org.cubewhy.qbychat.websocket.protocol.v1.RPCRequestMethod
+import org.cubewhy.qbychat.shared.model.WebsocketResponse
+import org.cubewhy.qbychat.shared.model.websocketResponseOf
+import org.cubewhy.qbychat.websocket.protocol.v1.RpcRequestMethod
 import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountRequest
 import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountResponse
+import org.cubewhy.qbychat.websocket.user.v1.SyncRequest
 import org.springframework.stereotype.Controller
 
 @Controller
 class UserControllerV1(private val userServiceV1: UserServiceV1) {
-    @RPCMapping(RPCRequestMethod.RPC_REQUEST_METHOD_REGISTER_ACCOUNT_V1, permissions = RPCPermissionFlag.ALLOW_EXPECT_ANONYMOUS)
+    @RPCMapping(RpcRequestMethod.RPC_REQUEST_METHOD_USER_SYNC_V1)
+    suspend fun sync(request: SyncRequest, user: User): WebsocketResponse {
+        return websocketResponseOf(userServiceV1.sync(request, user))
+    }
+
+    @RPCMapping(
+        RpcRequestMethod.RPC_REQUEST_METHOD_REGISTER_ACCOUNT_V1,
+        permissions = RPCPermissionFlag.ALLOW_EXPECT_ANONYMOUS
+    )
     suspend fun registerAccount(
         payload: RegisterAccountRequest,
         connection: ClientConnection<*>

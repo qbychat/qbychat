@@ -34,9 +34,9 @@ import org.cubewhy.qbychat.shared.model.WebsocketResponse
 import org.cubewhy.qbychat.shared.model.websocketResponseOf
 import org.cubewhy.qbychat.shared.util.generateSecureSecret
 import org.cubewhy.qbychat.websocket.session.v1.RegisterClientRequest
-import org.cubewhy.qbychat.websocket.session.v1.RegisterClientResponse
 import org.cubewhy.qbychat.websocket.session.v1.ResumeClientRequest
-import org.cubewhy.qbychat.websocket.session.v1.ResumeClientResponse
+import org.cubewhy.qbychat.websocket.session.v1.registerClientResponse
+import org.cubewhy.qbychat.websocket.session.v1.resumeClientResponse
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -69,9 +69,9 @@ class SessionServiceV1Impl(
         connection.metadata.clientId = client.id
 
         val finalToken = "${client.id}:$authToken"
-        return websocketResponseOf(RegisterClientResponse.newBuilder().apply {
+        return websocketResponseOf(registerClientResponse {
             this.token = finalToken
-        }.build())
+        })
     }
 
     override suspend fun resumeClient(
@@ -110,10 +110,10 @@ class SessionServiceV1Impl(
         val mainSession =
             client.mainSessionId.takeIf { it != null }?.let { sessionRepository.findById(it).awaitFirstOrNull() }
 
-        return websocketResponseOf(ResumeClientResponse.newBuilder().apply {
-            this.addAllAccountIds(accounts)
+        return websocketResponseOf(resumeClientResponse {
+            accountIds.addAll(accounts)
             mainSession?.let { this.currentAccountId = it.userId }
 
-        }.build())
+        })
     }
 }

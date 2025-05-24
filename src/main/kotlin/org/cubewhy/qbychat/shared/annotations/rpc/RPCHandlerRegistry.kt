@@ -23,7 +23,7 @@ import org.cubewhy.qbychat.domain.model.Role
 import org.cubewhy.qbychat.exception.WebsocketForbidden
 import org.cubewhy.qbychat.exception.WebsocketNotFound
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
-import org.cubewhy.qbychat.websocket.protocol.v1.RPCRequestMethod
+import org.cubewhy.qbychat.websocket.protocol.v1.RpcRequestMethod
 import org.springframework.aot.hint.ExecutableMode
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.RuntimeHints
@@ -60,7 +60,7 @@ class RPCHandlerRegistryRuntimeHints : RuntimeHintsRegistrar {
         hints.reflection().registerType(RPCMapping::class.java, MemberCategory.DECLARED_FIELDS)
 
         hints.reflection().registerType(RPCContext::class.java, *MemberCategory.entries.toTypedArray())
-        hints.reflection().registerType(RPCRequestMethod::class.java, *MemberCategory.entries.toTypedArray())
+        hints.reflection().registerType(RpcRequestMethod::class.java, *MemberCategory.entries.toTypedArray())
         hints.reflection().registerType(RPCPermissionFlag::class.java, *MemberCategory.entries.toTypedArray())
         hints.reflection().registerType(Role::class.java, *MemberCategory.entries.toTypedArray())
 
@@ -88,7 +88,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
 
     private lateinit var argumentResolvers: List<RPCArgumentResolver>
     private lateinit var applicationContext: ApplicationContext
-    private val handlers: MutableMap<RPCRequestMethod, RPCMethodDefinition> = mutableMapOf()
+    private val handlers: MutableMap<RpcRequestMethod, RPCMethodDefinition> = mutableMapOf()
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         this.applicationContext = applicationContext
@@ -236,7 +236,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
     /**
      * Invoke RPC handler
      */
-    suspend fun invokeHandler(method: RPCRequestMethod, context: RPCContext): Any? {
+    suspend fun invokeHandler(method: RpcRequestMethod, context: RPCContext): Any? {
         val def = handlers[method] ?: throw WebsocketNotFound("No RPC handler for method: $method")
 
         // Check permission

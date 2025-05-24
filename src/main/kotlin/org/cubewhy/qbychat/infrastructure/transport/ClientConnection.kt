@@ -22,7 +22,7 @@ import com.google.protobuf.GeneratedMessage
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
 import org.cubewhy.qbychat.shared.util.CipherUtil
 import org.cubewhy.qbychat.shared.util.protobuf.protobufEventOf
-import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
+import org.cubewhy.qbychat.websocket.protocol.v1.clientboundMessage
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -112,11 +112,11 @@ abstract class ClientConnection<T> {
             return
         }
         // build response
-        val clientboundMessage = response.buildRPCResponse().let { pbResponse ->
-            ClientboundMessage.newBuilder().apply {
-                response.userId?.let { this.userId = it }
-                this.response = pbResponse
-            }.build().toByteArray()
+        val clientboundMessage = response.buildRPCResponse().let { rpcResponse ->
+            clientboundMessage {
+                response.userId?.let { userId = it }
+                this.response = rpcResponse
+            }.toByteArray()
         }
         if (response.events.isEmpty()) {
             // no events
@@ -125,7 +125,8 @@ abstract class ClientConnection<T> {
         val messages = mutableListOf<ByteArray>()
         messages.add(clientboundMessage)
         // build events
-        messages.addAll(response.events.filter { !it.shared }.map { it.buildProtobufMessage(response.userId).toByteArray() })
+        messages.addAll(response.events.filter { !it.shared }
+            .map { it.buildProtobufMessage(response.userId).toByteArray() })
         // send bulk
         this.sendBulk(messages)
     }

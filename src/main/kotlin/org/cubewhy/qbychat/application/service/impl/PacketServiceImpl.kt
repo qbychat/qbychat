@@ -90,10 +90,10 @@ class PacketServiceImpl(
         // generate session id (random long)
         connection.metadata.encrpytionSessionId = SecureRandom().nextLong()
         // build handshake response
-        val serverEncryptionInfo = ServerEncryptionInfo.newBuilder().apply {
-            this.publicKey = (keypair.public as X25519PublicKeyParameters).encoded.toByteString()
-            this.sessionId = connection.metadata.encrpytionSessionId!!
-        }.build()
+        val serverEncryptionInfo = serverEncryptionInfo {
+            publicKey = (keypair.public as X25519PublicKeyParameters).encoded.toByteString()
+            sessionId = connection.metadata.encrpytionSessionId!!
+        }
         return ClientboundHandshake.newBuilder().apply {
             this.encryptionInfo = serverEncryptionInfo
         }.build()
@@ -106,7 +106,7 @@ class PacketServiceImpl(
         logger.debug { "Received packet ${connection.id} -> ${message.request.method}" }
         if (user != null) {
             if (!sessionManager.isOnSession(connection, user)) {
-                return errorWebsocketResponseOf(RPCResponse.Status.STATUS_UNAUTHORIZED, "Unauthorized")
+                return errorWebsocketResponseOf(RpcResponse.Status.STATUS_UNAUTHORIZED, "Unauthorized")
             }
         }
         return try {
@@ -131,41 +131,41 @@ class PacketServiceImpl(
                 }
 
                 null -> {
-                    errorWebsocketResponseOf(RPCResponse.Status.STATUS_INTERNAL_ERROR, "The handler responded \"null\"")
+                    errorWebsocketResponseOf(RpcResponse.Status.STATUS_INTERNAL_ERROR, "The handler responded \"null\"")
                 }
 
                 else -> {
                     // bad handler
                     errorWebsocketResponseOf(
-                        RPCResponse.Status.STATUS_INTERNAL_ERROR,
+                        RpcResponse.Status.STATUS_INTERNAL_ERROR,
                         "The handler doesn't response a correct type (need WebsocketResponse or GeneratedMessage)"
                     )
                 }
             }
         } catch (e: WebsocketUnauthorized) {
             errorWebsocketResponseOf(
-                RPCResponse.Status.STATUS_UNAUTHORIZED,
+                RpcResponse.Status.STATUS_UNAUTHORIZED,
                 e.message
             )
         } catch (e: WebsocketForbidden) {
             errorWebsocketResponseOf(
-                RPCResponse.Status.STATUS_FORBIDDEN,
+                RpcResponse.Status.STATUS_FORBIDDEN,
                 e.message
             )
         } catch (e: WebsocketNotFound) {
             errorWebsocketResponseOf(
-                RPCResponse.Status.STATUS_NOT_FOUND,
+                RpcResponse.Status.STATUS_NOT_FOUND,
                 e.message
             )
         } catch (e: WebsocketBadRequest) {
             errorWebsocketResponseOf(
-                RPCResponse.Status.STATUS_BAD_REQUEST,
+                RpcResponse.Status.STATUS_BAD_REQUEST,
                 e.message
             )
         } catch (e: RuntimeException) {
             logger.error(e) { "Failed to handle packet" }
             errorWebsocketResponseOf(
-                RPCResponse.Status.STATUS_INTERNAL_ERROR,
+                RpcResponse.Status.STATUS_INTERNAL_ERROR,
                 "Internal Server Error"
             )
         }

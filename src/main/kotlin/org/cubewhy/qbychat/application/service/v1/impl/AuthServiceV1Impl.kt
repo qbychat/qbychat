@@ -43,7 +43,11 @@ class AuthServiceV1Impl(
         val user = userRepository.findByUsernameIgnoreCase(request.username).awaitFirstOrNull()
         if (user == null) return UsernamePasswordLoginResponsesV1.badUsernameOrPassword()
         // verify password
-        if (!passwordEncoder.matches(request.password, user.password)) return UsernamePasswordLoginResponsesV1.badUsernameOrPassword()
+        if (!passwordEncoder.matches(
+                request.password,
+                user.password
+            )
+        ) return UsernamePasswordLoginResponsesV1.badUsernameOrPassword()
 
         // put user to session
         sessionManager.createSession(user, connection)

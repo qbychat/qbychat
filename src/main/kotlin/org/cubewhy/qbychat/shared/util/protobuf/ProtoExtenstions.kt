@@ -20,22 +20,21 @@
 
 package org.cubewhy.qbychat.shared.util.protobuf
 
+import com.google.protobuf.*
 import com.google.protobuf.Any
-import com.google.protobuf.GeneratedMessage
-import com.google.protobuf.Timestamp
 import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
 import java.time.Instant
 import java.util.*
 
-fun Date.toProtobufType(): Timestamp = Timestamp.newBuilder().apply {
+fun Date.toProtobufType(): Timestamp = timestamp {
     this.seconds = this@toProtobufType.time
     this.nanos = 0
-}.build()
+}
 
-fun Instant.toProtobufType(): Timestamp = Timestamp.newBuilder().apply {
+fun Instant.toProtobufType(): Timestamp = timestamp {
     this.seconds = this@toProtobufType.epochSecond
     this.nanos = this@toProtobufType.nano
-}.build()
+}
 
 fun protobufEventOf(event: GeneratedMessage, userId: String?): ClientboundMessage =
     ClientboundMessage.newBuilder().apply {
@@ -43,3 +42,18 @@ fun protobufEventOf(event: GeneratedMessage, userId: String?): ClientboundMessag
         this.event = Any.pack(event)
     }.build()
 
+inline fun <T : GeneratedMessage, B : GeneratedMessage.Builder<B>> newMessageBuilder(
+    builder: () -> B,
+    block: B.() -> Unit
+): T {
+    val builderInstance = builder()
+    builderInstance.block()
+    @Suppress("UNCHECKED_CAST")
+    return builderInstance.build() as T
+}
+
+inline fun <T : Message, B : GeneratedMessage.Builder<B>> B.buildWith(block: B.() -> Unit): T {
+    this.apply(block)
+    @Suppress("UNCHECKED_CAST")
+    return this.build() as T
+}
