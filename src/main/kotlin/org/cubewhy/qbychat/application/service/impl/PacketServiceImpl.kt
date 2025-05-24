@@ -32,8 +32,8 @@ import org.cubewhy.qbychat.exception.WebsocketForbidden
 import org.cubewhy.qbychat.exception.WebsocketNotFound
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
-import org.cubewhy.qbychat.shared.annotations.rpc.RPCContext
-import org.cubewhy.qbychat.shared.annotations.rpc.RPCHandlerRegistry
+import org.cubewhy.qbychat.shared.annotations.rpc.RpcContext
+import org.cubewhy.qbychat.shared.annotations.rpc.RpcHandlerRegistry
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
 import org.cubewhy.qbychat.shared.model.errorWebsocketResponseOf
 import org.cubewhy.qbychat.shared.model.websocketResponseOf
@@ -47,7 +47,7 @@ import java.security.SecureRandom
 class PacketServiceImpl(
     private val sessionManager: SessionManager,
     private val qbyChatProperties: QbyChatProperties,
-    private val rpcHandlerRegistry: RPCHandlerRegistry,
+    private val rpcHandlerRegistry: RpcHandlerRegistry,
     private val userRepository: UserRepository
 ) : PacketService {
 
@@ -111,7 +111,7 @@ class PacketServiceImpl(
         }
         return try {
             val response = rpcHandlerRegistry.invokeHandler(
-                message.request.method, RPCContext(
+                message.request.method, RpcContext(
                     user = user,
                     connection = connection,
                     payload = message.request.payload.toByteArray()

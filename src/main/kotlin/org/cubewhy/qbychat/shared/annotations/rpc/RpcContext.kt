@@ -21,7 +21,7 @@ package org.cubewhy.qbychat.shared.annotations.rpc
 import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 
-data class RPCContext(
+data class RpcContext(
     val user: User?,
     val connection: ClientConnection<*>,
     val payload: ByteArray?,
@@ -31,7 +31,7 @@ data class RPCContext(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as RPCContext
+        other as RpcContext
 
         if (user != other.user) return false
         if (connection != other.connection) return false

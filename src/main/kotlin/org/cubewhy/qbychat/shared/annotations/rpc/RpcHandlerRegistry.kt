@@ -47,21 +47,21 @@ import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.jvmErasure
 
-data class RPCMethodDefinition(
+data class RpcMethodDefinition(
     val bean: Any,
-    val annotation: RPCMapping,
+    val annotation: RpcMapping,
     val method: Method?,
     val kFunction: KFunction<*>?
 )
 
-class RPCHandlerRegistryRuntimeHints : RuntimeHintsRegistrar {
+class RpcHandlerRegistryRuntimeHints : RuntimeHintsRegistrar {
 
     override fun registerHints(hints: RuntimeHints, classLoader: ClassLoader?) {
-        hints.reflection().registerType(RPCMapping::class.java, MemberCategory.DECLARED_FIELDS)
+        hints.reflection().registerType(RpcMapping::class.java, MemberCategory.DECLARED_FIELDS)
 
-        hints.reflection().registerType(RPCContext::class.java, *MemberCategory.entries.toTypedArray())
+        hints.reflection().registerType(RpcContext::class.java, *MemberCategory.entries.toTypedArray())
         hints.reflection().registerType(RpcRequestMethod::class.java, *MemberCategory.entries.toTypedArray())
-        hints.reflection().registerType(RPCPermissionFlag::class.java, *MemberCategory.entries.toTypedArray())
+        hints.reflection().registerType(RpcPermissionFlag::class.java, *MemberCategory.entries.toTypedArray())
         hints.reflection().registerType(Role::class.java, *MemberCategory.entries.toTypedArray())
 
         hints.reflection().registerType(WebsocketNotFound::class.java, *MemberCategory.entries.toTypedArray())
@@ -79,20 +79,20 @@ class RPCHandlerRegistryRuntimeHints : RuntimeHintsRegistrar {
 }
 
 @Component
-@ImportRuntimeHints(RPCHandlerRegistryRuntimeHints::class)
-class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor,
+@ImportRuntimeHints(RpcHandlerRegistryRuntimeHints::class)
+class RpcHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor,
     ApplicationListener<ContextRefreshedEvent> {
     companion object {
         private val logger = KotlinLogging.logger {}
     }
 
-    private lateinit var argumentResolvers: List<RPCArgumentResolver>
+    private lateinit var argumentResolvers: List<RpcArgumentResolver>
     private lateinit var applicationContext: ApplicationContext
-    private val handlers: MutableMap<RpcRequestMethod, RPCMethodDefinition> = mutableMapOf()
+    private val handlers: MutableMap<RpcRequestMethod, RpcMethodDefinition> = mutableMapOf()
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         this.applicationContext = applicationContext
-        argumentResolvers = applicationContext.getBeansOfType(RPCArgumentResolver::class.java).values.toList()
+        argumentResolvers = applicationContext.getBeansOfType(RpcArgumentResolver::class.java).values.toList()
     }
 
     override fun onApplicationEvent(event: ContextRefreshedEvent) {
@@ -128,7 +128,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
                     try {
                         val kClass = beanClass.kotlin
                         kClass.declaredFunctions.forEach { function ->
-                            function.annotations.find { it is RPCMapping }?.let { _ ->
+                            function.annotations.find { it is RpcMapping }?.let { _ ->
                                 // Register the function for reflection
                                 reflectionHints.registerType(function.javaClass, *MemberCategory.entries.toTypedArray())
 
@@ -150,7 +150,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
                 } else {
                     // For Java classes, we process methods directly
                     ReflectionUtils.doWithMethods(beanClass) { method ->
-                        val annotation = AnnotationUtils.findAnnotation(method, RPCMapping::class.java)
+                        val annotation = AnnotationUtils.findAnnotation(method, RpcMapping::class.java)
                         if (annotation != null) {
                             // Register the method for reflection
                             reflectionHints.registerMethod(method, ExecutableMode.INVOKE)
@@ -172,7 +172,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
     }
 
     /**
-     * Scan and register all method that has @RPCMapping annotation
+     * Scan and register all method that has @RpcMapping annotation
      */
     private fun scanAndRegisterHandlers() {
         val beans = applicationContext.getBeansWithAnnotation(Component::class.java)
@@ -185,14 +185,14 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
             if (isKotlin) {
                 // process Kotlin class
                 kClass.declaredFunctions.forEach { function ->
-                    function.findAnnotation<RPCMapping>()?.let { annotation ->
+                    function.findAnnotation<RpcMapping>()?.let { annotation ->
                         registerHandler(bean, annotation, function, null)
                     }
                 }
             } else {
                 // process Java class
                 ReflectionUtils.doWithMethods(jClass) { method ->
-                    val annotation = AnnotationUtils.findAnnotation(method, RPCMapping::class.java)
+                    val annotation = AnnotationUtils.findAnnotation(method, RpcMapping::class.java)
                     if (annotation != null) {
                         registerHandler(bean, annotation, null, method)
                     }
@@ -204,7 +204,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
     /**
      * Register a RPC handler
      */
-    private fun registerHandler(bean: Any, annotation: RPCMapping, kFunction: KFunction<*>?, method: Method?) {
+    private fun registerHandler(bean: Any, annotation: RpcMapping, kFunction: KFunction<*>?, method: Method?) {
         val rpcMethod = annotation.method
 
         if (handlers.containsKey(rpcMethod)) {
@@ -212,7 +212,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
             throw IllegalStateException("Duplicate RPC handler for method $rpcMethod: already registered by ${handlers[rpcMethod]?.method?.declaringClass?.name}")
         }
 
-        handlers[rpcMethod] = RPCMethodDefinition(
+        handlers[rpcMethod] = RpcMethodDefinition(
             bean = bean,
             annotation = annotation,
             kFunction = kFunction,
@@ -236,7 +236,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
     /**
      * Invoke RPC handler
      */
-    suspend fun invokeHandler(method: RpcRequestMethod, context: RPCContext): Any? {
+    suspend fun invokeHandler(method: RpcRequestMethod, context: RpcContext): Any? {
         val def = handlers[method] ?: throw WebsocketNotFound("No RPC handler for method: $method")
 
         // Check permission
@@ -252,7 +252,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
     /**
      * Invoke Java method
      */
-    private fun invokeJavaMethod(def: RPCMethodDefinition, context: RPCContext): Any? {
+    private fun invokeJavaMethod(def: RpcMethodDefinition, context: RpcContext): Any? {
         val method = def.method!!
         val parameters = method.parameters
         val resolvedArgs = arrayOfNulls<Any?>(parameters.size)
@@ -290,7 +290,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
     /**
      * Invoke Kotlin function
      */
-    private suspend fun invokeKotlinFunction(def: RPCMethodDefinition, context: RPCContext): Any? {
+    private suspend fun invokeKotlinFunction(def: RpcMethodDefinition, context: RpcContext): Any? {
         val kFunction = def.kFunction!!
         val parameters = kFunction.parameters
         val resolvedArgs = mutableListOf<Any?>()
@@ -336,9 +336,9 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
     /**
      * Check permission
      */
-    private fun checkPermissions(def: RPCMethodDefinition, context: RPCContext) {
+    private fun checkPermissions(def: RpcMethodDefinition, context: RpcContext) {
         // Check if the permission allows anonymous (unregistered) clients
-        if (RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY == def.annotation.permissions) {
+        if (RpcPermissionFlag.ALLOW_ANONYMOUS_ONLY == def.annotation.permissions) {
             // Ensure that the client is unregistered
             if (context.connection.metadata.clientId != null) {
                 throw WebsocketUnauthorized("Client must not be registered.")
@@ -346,7 +346,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
         }
 
         // Check if the permission allows only unauthorized clients (registered but not logged in)
-        if (RPCPermissionFlag.ALLOW_UNAUTHORIZED_ONLY == def.annotation.permissions) {
+        if (RpcPermissionFlag.ALLOW_UNAUTHORIZED_ONLY == def.annotation.permissions) {
             // Ensure that the client is registered but the user is not logged in
             if (context.connection.metadata.clientId == null) {
                 throw WebsocketUnauthorized("Client must be registered.")
@@ -357,14 +357,14 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
         }
 
         // Check if the permission allows only authorized (logged in) users
-        if (RPCPermissionFlag.ALLOW_AUTHORIZED_ONLY == def.annotation.permissions) {
+        if (RpcPermissionFlag.ALLOW_AUTHORIZED_ONLY == def.annotation.permissions) {
             // Ensure that the user is logged in (authenticated)
             if (context.user == null) {
                 throw WebsocketUnauthorized("User must be logged in.")
             }
         }
 
-        if (RPCPermissionFlag.ALLOW_EXPECT_ANONYMOUS == def.annotation.permissions) {
+        if (RpcPermissionFlag.ALLOW_EXPECT_ANONYMOUS == def.annotation.permissions) {
             // Ensure that the client is registered
             if (context.connection.metadata.clientId == null) {
                 throw WebsocketUnauthorized("Client must be registered.")
@@ -372,7 +372,7 @@ class RPCHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
         }
 
         // Check if the permission allows all users (no permission check)
-        if (RPCPermissionFlag.ALLOW_ALL == def.annotation.permissions) {
+        if (RpcPermissionFlag.ALLOW_ALL == def.annotation.permissions) {
             // No checks required, open access
             return
         }

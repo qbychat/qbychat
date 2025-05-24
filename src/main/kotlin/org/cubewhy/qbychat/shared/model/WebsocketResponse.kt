@@ -35,7 +35,7 @@ data class WebsocketResponse(
     var userId: String? = null
     var ticket: ByteArray? = null
 
-    fun buildRPCResponse() = rpcResponse {
+    fun buildRpcResponse() = rpcResponse {
         ticket = this@WebsocketResponse.ticket!!.toByteString()
         this@WebsocketResponse.payload?.let { payload = it.toByteString() }
         status = this@WebsocketResponse.status

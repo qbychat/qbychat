@@ -20,8 +20,8 @@ package org.cubewhy.qbychat.interfaces.controller.rpc.v1
 
 import org.cubewhy.qbychat.application.service.v1.SessionServiceV1
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
-import org.cubewhy.qbychat.shared.annotations.rpc.RPCMapping
-import org.cubewhy.qbychat.shared.annotations.rpc.RPCPermissionFlag
+import org.cubewhy.qbychat.shared.annotations.rpc.RpcMapping
+import org.cubewhy.qbychat.shared.annotations.rpc.RpcPermissionFlag
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
 import org.cubewhy.qbychat.websocket.protocol.v1.RpcRequestMethod
 import org.cubewhy.qbychat.websocket.session.v1.RegisterClientRequest
@@ -32,17 +32,17 @@ import org.springframework.stereotype.Controller
 class ClientControllerV1(
     private val sessionServiceV1: SessionServiceV1,
 ) {
-    @RPCMapping(
-        RpcRequestMethod.RPC_REQUEST_METHOD_REGISTER_CLIENT_V1,
-        permissions = RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY
+    @RpcMapping(
+        method = RpcRequestMethod.RPC_REQUEST_METHOD_REGISTER_CLIENT_V1,
+        permissions = RpcPermissionFlag.ALLOW_ANONYMOUS_ONLY
     )
     suspend fun registerClient(connection: ClientConnection<*>, payload: RegisterClientRequest): WebsocketResponse {
         return sessionServiceV1.registerClient(connection, payload)
     }
 
-    @RPCMapping(
-        RpcRequestMethod.RPC_REQUEST_METHOD_RESUME_CLIENT_V1,
-        permissions = RPCPermissionFlag.ALLOW_ANONYMOUS_ONLY
+    @RpcMapping(
+        method = RpcRequestMethod.RPC_REQUEST_METHOD_RESUME_CLIENT_V1,
+        permissions = RpcPermissionFlag.ALLOW_ANONYMOUS_ONLY
     )
     suspend fun resumeClient(connection: ClientConnection<*>, payload: ResumeClientRequest): WebsocketResponse {
         return sessionServiceV1.resumeClient(connection, payload)

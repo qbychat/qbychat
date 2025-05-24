@@ -112,7 +112,7 @@ abstract class ClientConnection<T> {
             return
         }
         // build response
-        val clientboundMessage = response.buildRPCResponse().let { rpcResponse ->
+        val clientboundMessage = response.buildRpcResponse().let { rpcResponse ->
             clientboundMessage {
                 response.userId?.let { userId = it }
                 this.response = rpcResponse

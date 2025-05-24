@@ -20,8 +20,8 @@ package org.cubewhy.qbychat.interfaces.controller.rpc.v1
 
 import org.cubewhy.qbychat.application.service.v1.AuthServiceV1
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
-import org.cubewhy.qbychat.shared.annotations.rpc.RPCMapping
-import org.cubewhy.qbychat.shared.annotations.rpc.RPCPermissionFlag
+import org.cubewhy.qbychat.shared.annotations.rpc.RpcMapping
+import org.cubewhy.qbychat.shared.annotations.rpc.RpcPermissionFlag
 import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginRequest
 import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginResponse
 import org.cubewhy.qbychat.websocket.protocol.v1.RpcRequestMethod
@@ -29,9 +29,9 @@ import org.springframework.stereotype.Controller
 
 @Controller
 class AuthControllerV1(private val authServiceV1: AuthServiceV1) {
-    @RPCMapping(
-        RpcRequestMethod.RPC_REQUEST_METHOD_USERNAME_PASSWORD_LOGIN_V1,
-        permissions = RPCPermissionFlag.ALLOW_UNAUTHORIZED_ONLY
+    @RpcMapping(
+        method = RpcRequestMethod.RPC_REQUEST_METHOD_USERNAME_PASSWORD_LOGIN_V1,
+        permissions = RpcPermissionFlag.ALLOW_UNAUTHORIZED_ONLY
     )
     suspend fun usernamePasswordLogin(
         connection: ClientConnection<*>,

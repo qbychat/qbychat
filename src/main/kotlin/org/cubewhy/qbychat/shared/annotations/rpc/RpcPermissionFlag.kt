@@ -20,7 +20,7 @@
 
 package org.cubewhy.qbychat.shared.annotations.rpc
 
-enum class RPCPermissionFlag {
+enum class RpcPermissionFlag {
     ALLOW_ANONYMOUS_ONLY, // Only allows requests from unregistered clients
     ALLOW_UNAUTHORIZED_ONLY, // Only allows requests from registered clients who are not logged in
     ALLOW_AUTHORIZED_ONLY, //  Only allows access from authenticated users

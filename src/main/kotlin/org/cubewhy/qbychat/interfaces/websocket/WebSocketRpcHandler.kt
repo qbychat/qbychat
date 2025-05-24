@@ -43,7 +43,7 @@ import reactor.netty.channel.AbortedException
 import java.io.InputStream
 
 @Component
-class WebSocketRPCHandler(
+class WebSocketRpcHandler(
     private val packetService: PacketService,
     private val scope: CoroutineScope,
     private val sessionManager: SessionManager,

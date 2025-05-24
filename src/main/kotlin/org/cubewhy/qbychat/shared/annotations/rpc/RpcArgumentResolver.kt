@@ -29,16 +29,16 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 
-interface RPCArgumentResolver {
+interface RpcArgumentResolver {
     fun supportsKParameter(param: KParameter): Boolean
-    fun resolveKArgument(param: KParameter, context: RPCContext): Any?
+    fun resolveKArgument(param: KParameter, context: RpcContext): Any?
 
     fun supportsParameter(param: Parameter): Boolean
-    fun resolveArgument(param: Parameter, context: RPCContext): Any?
+    fun resolveArgument(param: Parameter, context: RpcContext): Any?
 }
 
 @Component
-class UserArgumentResolver : RPCArgumentResolver {
+class UserArgumentResolver : RpcArgumentResolver {
 
     override fun supportsParameter(param: Parameter): Boolean {
         return param.type == User::class.java
@@ -48,17 +48,17 @@ class UserArgumentResolver : RPCArgumentResolver {
         return param.type.classifier == User::class
     }
 
-    override fun resolveArgument(param: Parameter, context: RPCContext): Any? {
+    override fun resolveArgument(param: Parameter, context: RpcContext): Any? {
         return context.user ?: throw IllegalStateException("User not found in context")
     }
 
-    override fun resolveKArgument(param: KParameter, context: RPCContext): Any? {
+    override fun resolveKArgument(param: KParameter, context: RpcContext): Any? {
         return context.user ?: throw IllegalStateException("User not found in context")
     }
 }
 
 @Component
-class PayloadArgumentResolver : RPCArgumentResolver {
+class PayloadArgumentResolver : RpcArgumentResolver {
 
     object ProtobufParserCache {
         private val methodCache = ConcurrentHashMap<Class<*>, Method>()
@@ -81,12 +81,12 @@ class PayloadArgumentResolver : RPCArgumentResolver {
         return GeneratedMessage::class.java.isAssignableFrom(clazz)
     }
 
-    override fun resolveArgument(param: Parameter, context: RPCContext): Any? {
+    override fun resolveArgument(param: Parameter, context: RpcContext): Any? {
         val payload = context.payload ?: throw IllegalStateException("Payload is null")
         return ProtobufParserCache.parseFrom(param.type, payload)
     }
 
-    override fun resolveKArgument(param: KParameter, context: RPCContext): Any? {
+    override fun resolveKArgument(param: KParameter, context: RpcContext): Any? {
         val clazz = (param.type.classifier as? KClass<*>)?.java
             ?: throw IllegalStateException("Could not determine parameter class")
         val payload = context.payload ?: throw IllegalStateException("Payload is null")
@@ -95,7 +95,7 @@ class PayloadArgumentResolver : RPCArgumentResolver {
 }
 
 @Component
-class SessionArgumentResolver : RPCArgumentResolver {
+class SessionArgumentResolver : RpcArgumentResolver {
 
     override fun supportsParameter(param: Parameter): Boolean {
         return param.type == WebSocketSession::class.java
@@ -105,11 +105,11 @@ class SessionArgumentResolver : RPCArgumentResolver {
         return param.type.classifier == ClientConnection::class
     }
 
-    override fun resolveArgument(param: Parameter, context: RPCContext): Any? {
+    override fun resolveArgument(param: Parameter, context: RpcContext): Any? {
         return context.connection
     }
 
-    override fun resolveKArgument(param: KParameter, context: RPCContext): Any? {
+    override fun resolveKArgument(param: KParameter, context: RpcContext): Any? {
         return context.connection
     }
 }
