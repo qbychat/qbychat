@@ -36,7 +36,6 @@ import org.cubewhy.qbychat.domain.model.SessionMetadata
 import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.domain.repository.ClientRepository
 import org.cubewhy.qbychat.domain.repository.SessionRepository
-import org.cubewhy.qbychat.domain.repository.UserRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.shared.util.Const
 import org.cubewhy.qbychat.shared.util.protobuf.protobufEventOf
@@ -53,7 +52,6 @@ class SessionManagerImpl(
     private val sessionMetadataReactiveRedisTemplate: ReactiveRedisTemplate<String, SessionMetadata>,
     private val sessionRepository: SessionRepository,
     private val streamBridge: StreamBridge,
-    private val userRepository: UserRepository,
     private val instanceProperties: InstanceProperties,
     private val clientRepository: ClientRepository,
 ) : SessionManager {

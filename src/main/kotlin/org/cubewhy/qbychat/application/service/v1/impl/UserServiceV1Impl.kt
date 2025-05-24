@@ -26,6 +26,7 @@ import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.domain.repository.UserRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.shared.util.protobuf.RegisterAccountResponsesV1
+import org.cubewhy.qbychat.shared.util.protobuf.toProtobufType
 import org.cubewhy.qbychat.websocket.user.v1.*
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -48,6 +49,12 @@ class UserServiceV1Impl(
                 username = user.username
                 nickname = user.nickname
                 bio = user.bio
+            }
+
+            privateInfo = privateUserInfo {
+                userId = user.id!!
+                roles.addAll(user.roles.map { it.toProtobufType() })
+                createTime = user.createdAt.toProtobufType()
             }
         }
     }
