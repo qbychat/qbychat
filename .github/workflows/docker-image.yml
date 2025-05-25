@@ -2,6 +2,7 @@ name: Docker Image CI
 
 on:
   push:
+    branches: [ "main" ]
     tags:
       - 'v*'
   pull_request:
@@ -50,8 +51,20 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
 
+      - name: Setup cache mount dance
+        uses: reproducible-containers/buildkit-cache-dance@v3.1.2
+        with:
+          cache-map: |
+            {
+              "var-cache-apt": "/var/cache/apt",
+              "var-lib-apt": "/var/lib/apt",
+              "gradle-cache": "/tmp/gradle",
+              "pnpm-store": "/root/.local/share/pnpm/store"
+            }
+          skip-extraction: ${{ github.event_name == 'pull_request' }}
+
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
@@ -60,9 +73,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
-            type=registry,ref=${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:cache
+            type=gha
+#            type=registry,ref=${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:buildcache
           cache-to: |
-            type=registry,ref=${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:cache,mode=max
+            type=gha,mode=max
+#            type=registry,ref=${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:buildcache,mode=max
           build-args: |
             BUILDTIME=${{ github.event.head_commit.timestamp || github.event.pull_request.updated_at || github.run_id }}
             VERSION=${{ github.ref_name }}

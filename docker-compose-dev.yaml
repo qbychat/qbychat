@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: mongo:latest
+    image: mongo:8.0.9
     container_name: qbychat-mongo
     ports:
       - '27017:27017'
@@ -13,7 +13,7 @@ services:
     restart: no
 
   valkey:
-    image: valkey/valkey:latest
+    image: valkey/valkey:8.1.1
     container_name: qbychat-valkey
     ports:
       - '6379:6379'
