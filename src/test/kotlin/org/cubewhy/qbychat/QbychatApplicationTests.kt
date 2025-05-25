@@ -26,15 +26,14 @@ import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Profile
 import java.security.SecureRandom
 
 @SpringBootTest
+@Profile("test")
+@Import(TestcontainersConfiguration::class)
 class QbychatApplicationTests {
-
-    @Test
-    fun contextLoads() {
-    }
-
 
     @Test
     fun `ChaCha20 encryption and decryption should be reversible`() {

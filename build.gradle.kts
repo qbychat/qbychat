@@ -3,6 +3,7 @@ import build.buf.gradle.BUF_BUILD_DIR
 
 plugins {
     java
+//    jacoco
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "1.9.25"
     id("org.springframework.boot") version "3.4.2"
@@ -74,6 +75,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:mongodb")
+    testImplementation("org.testcontainers:kafka")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -126,6 +128,24 @@ tasks.named("processResources") {
     dependsOn("copyFrontendToBuild")
 }
 
+//tasks.named<JacocoReport>("jacocoTestReport") {
+//    reports {
+//        xml.required.set(true)
+//        html.required.set(true)
+//        csv.required.set(false)
+//    }
+//    finalizedBy(tasks.named("jacocoTestCoverageVerification"))
+//}
+//
+//tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+//    violationRules {
+//        rule {
+//            limit {
+//                minimum = BigDecimal("0.70")
+//            }
+//        }
+//    }
+//}
 
 tasks.withType<Test> {
     useJUnitPlatform()

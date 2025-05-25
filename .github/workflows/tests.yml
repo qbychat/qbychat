@@ -1,0 +1,180 @@
+name: Run Tests
+
+on:
+  push:
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  JAVA_VERSION: '21'
+  GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.welcome=never'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.12.1'
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+
+      - name: Setup cache mount dance for tests
+        uses: reproducible-containers/buildkit-cache-dance@v3.1.2
+        with:
+          cache-map: |
+            {
+              "gradle-cache": "/home/runner/.gradle",
+              "testcontainers-cache": "/home/runner/.testcontainers"
+            }
+          skip-extraction: false
+
+      - name: Start Docker daemon
+        run: |
+          sudo systemctl start docker
+          sudo chmod 666 /var/run/docker.sock
+
+      - name: Pre-pull Testcontainers images
+        run: |
+          docker pull mongo:8.0.9
+          docker pull valkey/valkey:8.1.1
+          docker pull apache/kafka:4.0.0
+          docker pull confluentinc/cp-schema-registry:latest
+          docker pull testcontainers/ryuk:0.8.1
+
+      - name: Run tests
+        run: |
+          ./gradlew clean test --info --stacktrace \
+            -Dspring.profiles.active=test \
+            -Dtestcontainers.reuse.enable=true \
+            -Djunit.jupiter.execution.parallel.enabled=true \
+            -Djunit.jupiter.execution.parallel.mode.default=concurrent
+        env:
+          # Testcontainers optionals
+          TESTCONTAINERS_REUSE_ENABLE: true
+          TESTCONTAINERS_RYUK_DISABLED: false
+          # Spring optionals
+          SPRING_PROFILES_ACTIVE: test
+          # Gradle optionals
+          GRADLE_OPTS: ${{ env.GRADLE_OPTS }}
+
+      - name: Generate test report
+        uses: dorny/test-reporter@v1.9.1
+        if: success() || failure()
+        with:
+          name: Gradle Tests
+          path: '**/build/test-results/test/TEST-*.xml'
+          reporter: java-junit
+          fail-on-error: true
+          max-annotations: 50
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            **/build/reports/tests/**
+            **/build/test-results/**
+          retention-days: 7
+
+#      - name: Upload coverage reports
+#        uses: actions/upload-artifact@v4
+#        if: always()
+#        with:
+#          name: coverage-reports
+#          path: |
+#            **/build/reports/jacoco/**
+#            **/build/jacocoHtml/**
+#          retention-days: 7
+#
+#      - name: Add coverage comment to PR
+#        if: github.event_name == 'pull_request'
+#        uses: madrapps/jacoco-report@v1.7.1
+#        continue-on-error: true
+#        with:
+#          paths: |
+#            ${{ github.workspace }}/**/build/reports/jacoco/test/jacocoTestReport.xml
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          min-coverage-overall: 70
+#          min-coverage-changed-files: 80
+#          title: 'Code Coverage Report'
+#          update-comment: true
+
+      - name: Cleanup Docker resources
+        if: always()
+        run: |
+          docker system prune -af --volumes || true
+          docker container prune -f || true
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.12.1'
+
+      - name: Setup cache mount dance for integration tests
+        uses: reproducible-containers/buildkit-cache-dance@v3.1.2
+        with:
+          cache-map: |
+            {
+              "gradle-cache": "/home/runner/.gradle",
+              "testcontainers-cache": "/home/runner/.testcontainers"
+            }
+
+      - name: Start Docker daemon
+        run: |
+          sudo systemctl start docker
+          sudo chmod 666 /var/run/docker.sock
+
+      - name: Run integration tests
+        run: |
+          ./gradlew integrationTest --info --stacktrace \
+            -Dspring.profiles.active=integration \
+            -Dtestcontainers.reuse.enable=true
+        env:
+          TESTCONTAINERS_REUSE_ENABLE: true
+          SPRING_PROFILES_ACTIVE: integration
+          GRADLE_OPTS: ${{ env.GRADLE_OPTS }}
+
+      - name: Upload integration test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: |
+            **/build/reports/tests/integrationTest/**
+            **/build/test-results/integrationTest/**
+          retention-days: 7
