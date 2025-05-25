@@ -4,8 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - "test/ci"
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "test/ci" ]
 
 env:
   REGISTRY: ghcr.io
