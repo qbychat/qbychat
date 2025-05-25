@@ -58,11 +58,11 @@ jobs:
           docker pull testcontainers/ryuk:0.8.1
 
       - name: Generate Protobuf classes
-        run: ./gradlew bufGenerate
+        run: ./gradlew clean bufGenerate
 
       - name: Run tests
         run: |
-          ./gradlew clean test -x npmInstall -x npmBuild -x copyFrontendToBuild --info --stacktrace \
+          ./gradlew test -x npmInstall -x npmBuild -x copyFrontendToBuild --info --stacktrace \
             -Dspring.profiles.active=test \
             -Dtestcontainers.reuse.enable=true \
             -Djunit.jupiter.execution.parallel.enabled=true \
