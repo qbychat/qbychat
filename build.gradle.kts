@@ -1,5 +1,6 @@
 import build.buf.gradle.GENERATED_DIR
 import build.buf.gradle.BUF_BUILD_DIR
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java

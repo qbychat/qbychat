@@ -71,8 +71,10 @@ RUN pnpm install
 
 WORKDIR /app
 
+RUN --mount=type=cache,target=/tmp/gradle gradle --no-daemon clean bufGenerate
+
 # Build the servlet
-RUN --mount=type=cache,target=/tmp/gradle gradle --no-daemon clean generateAvroJava bufGenerate bootJar --info -x test npmInstall
+RUN --mount=type=cache,target=/tmp/gradle gradle --no-daemon bootJar --info -x test npmInstall
 
 FROM amazoncorretto:21.0.7-alpine3.21
 
