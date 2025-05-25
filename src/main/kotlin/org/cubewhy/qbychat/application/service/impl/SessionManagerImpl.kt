@@ -20,7 +20,6 @@ package org.cubewhy.qbychat.application.service.impl
 
 import com.google.protobuf.GeneratedMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
-import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,7 +38,11 @@ import org.cubewhy.qbychat.domain.repository.SessionRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.shared.util.Const
 import org.cubewhy.qbychat.shared.util.protobuf.protobufEventOf
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.cloud.stream.function.StreamBridge
+import org.springframework.context.event.EventListener
+import org.springframework.core.env.Environment
+import org.springframework.core.env.Profiles
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.core.removeAndAwait
 import org.springframework.stereotype.Service
@@ -54,6 +57,7 @@ class SessionManagerImpl(
     private val streamBridge: StreamBridge,
     private val instanceProperties: InstanceProperties,
     private val clientRepository: ClientRepository,
+    private val environment: Environment,
 ) : SessionManager {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -78,8 +82,13 @@ class SessionManagerImpl(
      *
      * @throws Exception If there are any errors during the Redis operations
      */
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent::class)
     private fun clearGhostSessions() {
+        if (environment.acceptsProfiles(Profiles.of("test"))) {
+            logger.warn { "Skipped clear ghost sessions because test environment is detected" }
+            return // skip if running tests
+        }
+
         CoroutineScope(Dispatchers.Default).launch {
             val ghostSessions =
                 sessionMetadataReactiveRedisTemplate.opsForSet().scan(Const.SESSION_STORE)

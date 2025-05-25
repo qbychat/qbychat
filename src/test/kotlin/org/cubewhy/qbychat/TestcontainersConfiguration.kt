@@ -18,6 +18,7 @@
 
 package org.cubewhy.qbychat
 
+import com.redis.testcontainers.RedisContainer
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.context.annotation.Bean
@@ -36,21 +37,16 @@ class TestcontainersConfiguration {
     @Bean
     @ServiceConnection
     fun mongoDbContainer(): MongoDBContainer {
-        return MongoDBContainer(DockerImageName.parse("mongo"))
+        return MongoDBContainer(DockerImageName.parse("mongo:8.0.9"))
             .withNetwork(network)
             .withNetworkAliases("mongo")
-            .withEnv("MONGO_INITDB_ROOT_USERNAME", "test")
-            .withEnv("MONGO_INITDB_ROOT_PASSWORD", "test")
-            .withEnv("MONGO_INITDB_DATABASE", "qbychat-test")
-            .withCreateContainerCmdModifier {
-                it.hostConfig?.withMemory(512 * 1024 * 1024L)
-            }
+            .withExposedPorts(27017)
             .withReuse(true)
     }
 
     @Bean
     fun valkeyContainer(): GenericContainer<*> {
-        return GenericContainer(DockerImageName.parse("valkey/valkey:8.1.1"))
+        return RedisContainer(DockerImageName.parse("valkey/valkey:8.1.1"))
             .withNetwork(network)
             .withNetworkAliases("valkey")
             .withExposedPorts(6379)
@@ -63,6 +59,7 @@ class TestcontainersConfiguration {
         return KafkaContainer(DockerImageName.parse("apache/kafka:4.0.0"))
             .withNetwork(network)
             .withNetworkAliases("kafka")
+            .withExposedPorts(9092)
             .withReuse(true)
     }
 

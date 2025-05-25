@@ -4,9 +4,10 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://test:test@localhost:27017/qbychat-test?authSource=admin
+      uri: mongodb://localhost:27017/qbychat-test?authSource=admin
     redis:
-      url: redis://localhost:6379/1
+      host: disabled
+      port: 0
 
   security:
     jwt:

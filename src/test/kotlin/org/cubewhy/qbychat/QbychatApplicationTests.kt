@@ -27,11 +27,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.Profile
+import org.springframework.test.context.ActiveProfiles
 import java.security.SecureRandom
 
 @SpringBootTest
-@Profile("test")
+@ActiveProfiles("test")
 @Import(TestcontainersConfiguration::class)
 class QbychatApplicationTests {
 
