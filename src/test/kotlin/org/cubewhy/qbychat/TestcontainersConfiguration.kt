@@ -26,7 +26,6 @@ import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
-import java.time.Duration
 
 @TestConfiguration(proxyBeanMethods = false)
 class TestcontainersConfiguration {
@@ -43,7 +42,9 @@ class TestcontainersConfiguration {
             .withEnv("MONGO_INITDB_ROOT_USERNAME", "test")
             .withEnv("MONGO_INITDB_ROOT_PASSWORD", "test")
             .withEnv("MONGO_INITDB_DATABASE", "qbychat-test")
-            .withStartupTimeout(Duration.ofMinutes(2))
+            .withCreateContainerCmdModifier {
+                it.hostConfig?.withMemory(512 * 1024 * 1024L)
+            }
             .withReuse(true)
     }
 
