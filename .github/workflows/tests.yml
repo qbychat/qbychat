@@ -57,6 +57,9 @@ jobs:
           docker pull confluentinc/cp-schema-registry:latest
           docker pull testcontainers/ryuk:0.8.1
 
+      - name: Generate Protobuf classes
+        run: ./gradlew bufGenerate
+
       - name: Run tests
         run: |
           ./gradlew clean test -x npmInstall -x npmBuild -x copyFrontendToBuild --info --stacktrace \
