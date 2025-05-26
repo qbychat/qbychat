@@ -1,6 +1,10 @@
 spring:
   application:
     name: qbychat
+  docker:
+    compose:
+      enabled: true
+      file: compose.yml
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://root:password@localhost/qbychat?authSource=admin}

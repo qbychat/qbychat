@@ -78,6 +78,7 @@ dependencies {
     testImplementation("org.testcontainers:kafka")
     testImplementation("com.redis:testcontainers-redis")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
+    runtimeOnly("org.springframework.boot:spring-boot-docker-compose")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
