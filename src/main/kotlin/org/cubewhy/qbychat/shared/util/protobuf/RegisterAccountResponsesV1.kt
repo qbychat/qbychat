@@ -20,8 +20,8 @@
 
 package org.cubewhy.qbychat.shared.util.protobuf
 
-import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountResponse
-import org.cubewhy.qbychat.websocket.user.v1.registerAccountResponse
+import org.cubewhy.qbychat.rpc.user.v1.RegisterAccountResponse
+import org.cubewhy.qbychat.rpc.user.v1.registerAccountResponse
 
 object RegisterAccountResponsesV1 {
     fun usernameExists(): RegisterAccountResponse = build(RegisterAccountResponse.Status.STATUS_USERNAME_EXISTS)

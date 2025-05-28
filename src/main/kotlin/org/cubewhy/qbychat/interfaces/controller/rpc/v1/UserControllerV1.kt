@@ -21,14 +21,14 @@ package org.cubewhy.qbychat.interfaces.controller.rpc.v1
 import org.cubewhy.qbychat.application.service.v1.UserServiceV1
 import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.rpc.protocol.v1.RpcRequestMethod
+import org.cubewhy.qbychat.rpc.user.v1.RegisterAccountRequest
+import org.cubewhy.qbychat.rpc.user.v1.RegisterAccountResponse
+import org.cubewhy.qbychat.rpc.user.v1.SyncRequest
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcMapping
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcPermissionFlag
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
 import org.cubewhy.qbychat.shared.model.websocketResponseOf
-import org.cubewhy.qbychat.websocket.protocol.v1.RpcRequestMethod
-import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountRequest
-import org.cubewhy.qbychat.websocket.user.v1.RegisterAccountResponse
-import org.cubewhy.qbychat.websocket.user.v1.SyncRequest
 import org.springframework.stereotype.Controller
 
 @Controller

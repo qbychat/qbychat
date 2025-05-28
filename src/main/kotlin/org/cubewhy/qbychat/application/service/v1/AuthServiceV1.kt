@@ -19,8 +19,8 @@
 package org.cubewhy.qbychat.application.service.v1
 
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
-import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginRequest
-import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginResponse
+import org.cubewhy.qbychat.rpc.auth.v1.UsernamePasswordLoginRequest
+import org.cubewhy.qbychat.rpc.auth.v1.UsernamePasswordLoginResponse
 
 interface AuthServiceV1 {
     suspend fun usernamePasswordLogin(

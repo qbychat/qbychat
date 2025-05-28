@@ -1,5 +1,5 @@
-import build.buf.gradle.GENERATED_DIR
 import build.buf.gradle.BUF_BUILD_DIR
+import build.buf.gradle.GENERATED_DIR
 
 plugins {
     java
@@ -9,8 +9,6 @@ plugins {
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("build.buf") version "0.10.2"
-
-    id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
 }
 
 val frontendDir = "./dashboard"
@@ -26,10 +24,6 @@ java {
 }
 
 sourceSets["main"].java { srcDir("${layout.buildDirectory.get().asFile}/$BUF_BUILD_DIR/$GENERATED_DIR/out") }
-
-avro {
-    outputCharacterEncoding = "UTF-8"
-}
 
 buf {
     generate {
@@ -51,13 +45,9 @@ dependencies {
     implementation("com.google.protobuf:protobuf-kotlin:4.31.0")
     implementation("com.google.protobuf:protobuf-java:4.31.0")
     implementation("com.google.protobuf:protobuf-java-util:4.31.0")
-    implementation("io.confluent:kafka-streams-avro-serde:7.8.0")
-    implementation("io.confluent:kafka-schema-registry-client:7.8.0")
-    implementation("org.apache.avro:avro:1.12.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.springframework.cloud:spring-cloud-stream")
-    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka-reactive")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
@@ -67,7 +57,7 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    testImplementation("org.springframework.cloud:spring-cloud-stream-test-binder")
+    implementation("org.springframework.amqp:spring-rabbit-stream")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
@@ -75,7 +65,6 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:mongodb")
-    testImplementation("org.testcontainers:kafka")
     testImplementation("com.redis:testcontainers-redis")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
     runtimeOnly("org.springframework.boot:spring-boot-docker-compose")

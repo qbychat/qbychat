@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Bean
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.containers.Network
-import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 
 @TestConfiguration(proxyBeanMethods = false)
@@ -50,29 +49,6 @@ class TestcontainersConfiguration {
             .withNetwork(network)
             .withNetworkAliases("valkey")
             .withExposedPorts(6379)
-            .withReuse(true)
-    }
-
-    @Bean
-    @ServiceConnection
-    fun kafkaContainer(): KafkaContainer {
-        return KafkaContainer(DockerImageName.parse("apache/kafka:4.0.0"))
-            .withNetwork(network)
-            .withNetworkAliases("kafka")
-            .withExposedPorts(9092)
-            .withReuse(true)
-    }
-
-    @Bean
-    fun schemaRegistryContainer(kafkaContainer: KafkaContainer): GenericContainer<*> {
-        return GenericContainer(DockerImageName.parse("confluentinc/cp-schema-registry:latest"))
-            .withNetwork(network)
-            .withNetworkAliases("schema-registry")
-            .withExposedPorts(8081)
-            .withEnv("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
-            .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "kafka:29092")
-            .withEnv("SCHEMA_REGISTRY_LISTENERS", "http://0.0.0.0:8081")
-            .dependsOn(kafkaContainer)
             .withReuse(true)
     }
 }

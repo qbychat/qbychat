@@ -25,9 +25,10 @@ import org.cubewhy.qbychat.application.service.v1.UserServiceV1
 import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.domain.repository.UserRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.rpc.user.v1.*
 import org.cubewhy.qbychat.shared.util.protobuf.RegisterAccountResponsesV1
-import org.cubewhy.qbychat.shared.util.protobuf.toProtobufType
-import org.cubewhy.qbychat.websocket.user.v1.*
+import org.cubewhy.qbychat.shared.util.protobuf.toFederationId
+import org.cubewhy.qbychat.shared.util.protobuf.toProtobufTimestamp
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -46,15 +47,14 @@ class UserServiceV1Impl(
     override suspend fun sync(request: SyncRequest, user: User): SyncResponse {
         return syncResponse {
             publicInfo = publicUserInfo {
+                userId = user.id!!.toFederationId()
                 username = user.username
                 nickname = user.nickname
                 bio = user.bio
             }
 
             privateInfo = privateUserInfo {
-                userId = user.id!!
-                roles.addAll(user.roles.map { it.toProtobufType() })
-                createTime = user.createdAt.toProtobufType()
+                createTime = user.createdAt.toProtobufTimestamp()
             }
         }
     }

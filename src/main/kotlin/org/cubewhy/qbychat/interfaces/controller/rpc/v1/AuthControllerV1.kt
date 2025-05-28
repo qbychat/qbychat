@@ -20,11 +20,11 @@ package org.cubewhy.qbychat.interfaces.controller.rpc.v1
 
 import org.cubewhy.qbychat.application.service.v1.AuthServiceV1
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.rpc.auth.v1.UsernamePasswordLoginRequest
+import org.cubewhy.qbychat.rpc.auth.v1.UsernamePasswordLoginResponse
+import org.cubewhy.qbychat.rpc.protocol.v1.RpcRequestMethod
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcMapping
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcPermissionFlag
-import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginRequest
-import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginResponse
-import org.cubewhy.qbychat.websocket.protocol.v1.RpcRequestMethod
 import org.springframework.stereotype.Controller
 
 @Controller

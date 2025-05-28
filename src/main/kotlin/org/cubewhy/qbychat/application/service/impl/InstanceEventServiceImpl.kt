@@ -16,18 +16,26 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.cubewhy.qbychat.shared.annotations.rpc;
+package org.cubewhy.qbychat.application.service.impl
 
-import org.cubewhy.qbychat.domain.model.Role;
-import org.cubewhy.qbychat.rpc.protocol.v1.RpcRequestMethod;
+import org.cubewhy.qbychat.application.service.InstanceEventService
+import org.cubewhy.qbychat.rpc.protocol.v1.InstanceEvent
+import org.springframework.stereotype.Service
 
-import java.lang.annotation.*;
+@Service
+class InstanceEventServiceImpl : InstanceEventService {
+    override suspend fun shouldProcessEvent(event: InstanceEvent): Boolean {
+        return when (event.eventCase) {
+            InstanceEvent.EventCase.USER_EVENT -> {
+                // check
+                true
+            }
 
-@Documented
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface RpcMapping {
-    RpcRequestMethod method();
-    Role[] roles() default {};
-    RpcPermissionFlag permissions() default RpcPermissionFlag.ALLOW_AUTHORIZED_ONLY;
+            InstanceEvent.EventCase.EVENT_NOT_SET -> false
+        }
+    }
+
+    override suspend fun processEvent(event: InstanceEvent) {
+
+    }
 }

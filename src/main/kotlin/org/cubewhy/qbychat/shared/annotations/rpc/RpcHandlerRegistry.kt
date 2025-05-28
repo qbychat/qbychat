@@ -23,7 +23,7 @@ import org.cubewhy.qbychat.domain.model.Role
 import org.cubewhy.qbychat.exception.WebsocketForbidden
 import org.cubewhy.qbychat.exception.WebsocketNotFound
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
-import org.cubewhy.qbychat.websocket.protocol.v1.RpcRequestMethod
+import org.cubewhy.qbychat.rpc.protocol.v1.RpcRequestMethod
 import org.springframework.aot.hint.ExecutableMode
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.RuntimeHints

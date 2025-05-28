@@ -18,8 +18,8 @@
 
 package org.cubewhy.qbychat.shared.util.protobuf
 
-import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginResponse
-import org.cubewhy.qbychat.websocket.auth.v1.usernamePasswordLoginResponse
+import org.cubewhy.qbychat.rpc.auth.v1.UsernamePasswordLoginResponse
+import org.cubewhy.qbychat.rpc.auth.v1.usernamePasswordLoginResponse
 
 object UsernamePasswordLoginResponsesV1 {
     fun badUsernameOrPassword(): UsernamePasswordLoginResponse =
@@ -33,6 +33,6 @@ object UsernamePasswordLoginResponsesV1 {
     private fun build(status: UsernamePasswordLoginResponse.Status, accountId: String? = null) =
         usernamePasswordLoginResponse {
             this.status = status
-            accountId?.let { this.accountId = it }
+            accountId?.let { this.accountId = it.toLocalId() }
         }
 }

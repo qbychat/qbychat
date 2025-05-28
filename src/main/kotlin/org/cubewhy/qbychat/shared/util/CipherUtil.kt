@@ -31,8 +31,8 @@ import org.bouncycastle.crypto.macs.HMac
 import org.bouncycastle.crypto.modes.ChaCha20Poly1305
 import org.bouncycastle.crypto.params.AEADParameters
 import org.bouncycastle.crypto.params.KeyParameter
-import org.cubewhy.qbychat.websocket.protocol.v1.EncryptedMessage
-import org.cubewhy.qbychat.websocket.protocol.v1.encryptedMessage
+import org.cubewhy.qbychat.rpc.protocol.v1.EncryptedMessage
+import org.cubewhy.qbychat.rpc.protocol.v1.encryptedMessage
 import java.nio.ByteBuffer
 import java.security.SecureRandom
 

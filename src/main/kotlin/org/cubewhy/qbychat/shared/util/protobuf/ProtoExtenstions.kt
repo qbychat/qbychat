@@ -22,25 +22,32 @@ package org.cubewhy.qbychat.shared.util.protobuf
 
 import com.google.protobuf.*
 import com.google.protobuf.Any
-import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundMessage
+import org.cubewhy.qbychat.common.v1.id
+import org.cubewhy.qbychat.rpc.federation.v1.federationId
+import org.cubewhy.qbychat.rpc.protocol.v1.clientboundMessage
 import java.time.Instant
 import java.util.*
 
-fun Date.toProtobufType(): Timestamp = timestamp {
-    this.seconds = this@toProtobufType.time
+fun Date.toProtobufTimestamp(): Timestamp = timestamp {
+    this.seconds = this@toProtobufTimestamp.time
     this.nanos = 0
 }
 
-fun Instant.toProtobufType(): Timestamp = timestamp {
-    this.seconds = this@toProtobufType.epochSecond
-    this.nanos = this@toProtobufType.nano
+fun Instant.toProtobufTimestamp(): Timestamp = timestamp {
+    this.seconds = this@toProtobufTimestamp.epochSecond
+    this.nanos = this@toProtobufTimestamp.nano
 }
 
-fun protobufEventOf(event: GeneratedMessage, userId: String?): ClientboundMessage =
-    ClientboundMessage.newBuilder().apply {
-        userId?.let { this.userId = it }
-        this.event = Any.pack(event)
-    }.build()
+fun String.toLocalId() = id { stringId = this@toLocalId }
+fun String.toFederationId(domain: String? = null) = federationId {
+    domain?.let { this.domain = it }
+    localId = this@toFederationId.toLocalId()
+}
+
+fun protobufEventOf(event: GeneratedMessage, userId: String?) = clientboundMessage {
+    userId?.let { this.userId = it.toLocalId() }
+    this.event = Any.pack(event)
+}
 
 inline fun <T : GeneratedMessage, B : GeneratedMessage.Builder<B>> newMessageBuilder(
     builder: () -> B,

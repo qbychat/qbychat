@@ -20,12 +20,12 @@ package org.cubewhy.qbychat.interfaces.controller.rpc.v1
 
 import org.cubewhy.qbychat.application.service.v1.SessionServiceV1
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.rpc.protocol.v1.RpcRequestMethod
+import org.cubewhy.qbychat.rpc.session.v1.RegisterClientRequest
+import org.cubewhy.qbychat.rpc.session.v1.ResumeClientRequest
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcMapping
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcPermissionFlag
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
-import org.cubewhy.qbychat.websocket.protocol.v1.RpcRequestMethod
-import org.cubewhy.qbychat.websocket.session.v1.RegisterClientRequest
-import org.cubewhy.qbychat.websocket.session.v1.ResumeClientRequest
 import org.springframework.stereotype.Controller
 
 @Controller

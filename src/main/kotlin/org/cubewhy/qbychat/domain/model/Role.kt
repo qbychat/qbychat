@@ -20,15 +20,6 @@
 
 package org.cubewhy.qbychat.domain.model
 
-import org.cubewhy.qbychat.websocket.user.v1.Role as ProtoRole
-
 enum class Role {
     USER, ADMIN;
-
-    fun toProtobufType(): ProtoRole {
-        return when (this) {
-            USER -> ProtoRole.ROLE_USER
-            ADMIN -> ProtoRole.ROLE_ADMIN
-        }
-    }
 }

@@ -22,58 +22,29 @@ services:
       retries: 5
     restart: no
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.9.1
-    hostname: zookeeper
+  rabbitmq:
+    image: rabbitmq:4-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "5552:5552"
+      - "15672:15672"
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+    #      RABBITMQ_DEFAULT_VHOST: qbychat
+    configs:
+      - source: plugins
+        uid: "100"
+        gid: "101"
+        target: /etc/rabbitmq/enabled_plugins
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+      test: [ "CMD", "rabbitmqctl", "status" ]
       interval: 10s
       timeout: 5s
       retries: 5
-
-  kafka:
-    image: confluentinc/cp-kafka:7.9.1
-    hostname: kafka
-    restart: no
-    depends_on:
-      zookeeper:
-        condition: service_healthy
-    ports:
-      - '9092:9092'
-    healthcheck:
-      test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list" ]
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    environment:
-      CLUSTER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:29092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-
-  schema-registry:
-    image: confluentinc/cp-schema-registry:latest
-    hostname: schema-registry
-    depends_on:
-      kafka:
-        required: true
-        condition: service_healthy
-    restart: no
-    ports:
-      - "8081:8081"
-    environment:
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
 #  minio:
 #    image: minio/minio:latest
@@ -89,8 +60,14 @@ services:
 #      MINIO_ROOT_PASSWORD: password
 #    command: server /data --console-address ":9001"
 
+configs:
+  plugins:
+    content: "[rabbitmq_management, rabbitmq_stream]."
+
 volumes:
   mongo:
     driver: local
   minio:
+    driver: local
+  rabbitmq_data:
     driver: local

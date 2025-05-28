@@ -32,13 +32,13 @@ import org.cubewhy.qbychat.exception.WebsocketForbidden
 import org.cubewhy.qbychat.exception.WebsocketNotFound
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.rpc.protocol.v1.*
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcContext
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcHandlerRegistry
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
 import org.cubewhy.qbychat.shared.model.errorWebsocketResponseOf
 import org.cubewhy.qbychat.shared.model.websocketResponseOf
 import org.cubewhy.qbychat.shared.util.CipherUtil
-import org.cubewhy.qbychat.websocket.protocol.v1.*
 import org.springframework.stereotype.Service
 import reactor.core.publisher.SignalType
 import java.security.SecureRandom
@@ -101,7 +101,7 @@ class PacketServiceImpl(
 
     override suspend fun process(message: ServerboundMessage, connection: ClientConnection<*>): WebsocketResponse {
         val user = message.userId.takeIf { it != null }?.let {
-            userRepository.findById(message.userId).awaitFirstOrNull()
+            userRepository.findById(message.userId.stringId).awaitFirstOrNull()
         }
         logger.debug { "Received packet ${connection.id} -> ${message.request.method}" }
         if (user != null) {

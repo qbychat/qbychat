@@ -19,10 +19,11 @@
 package org.cubewhy.qbychat.infrastructure.transport
 
 import com.google.protobuf.GeneratedMessage
+import org.cubewhy.qbychat.rpc.protocol.v1.clientboundMessage
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
 import org.cubewhy.qbychat.shared.util.CipherUtil
 import org.cubewhy.qbychat.shared.util.protobuf.protobufEventOf
-import org.cubewhy.qbychat.websocket.protocol.v1.clientboundMessage
+import org.cubewhy.qbychat.shared.util.protobuf.toLocalId
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -114,7 +115,7 @@ abstract class ClientConnection<T> {
         // build response
         val clientboundMessage = response.buildRpcResponse().let { rpcResponse ->
             clientboundMessage {
-                response.userId?.let { userId = it }
+                response.userId?.let { userId = it.toLocalId() }
                 this.response = rpcResponse
             }.toByteArray()
         }
@@ -142,6 +143,13 @@ abstract class ClientConnection<T> {
      */
     suspend fun sendEvent(event: GeneratedMessage, userId: String?) {
         this.sendWithEncryption(protobufEventOf(event, userId).toByteArray())
+    }
+
+    suspend fun sendEvent(packedEvent: com.google.protobuf.Any, userId: String?) {
+        this.sendWithEncryption(clientboundMessage {
+            userId?.let { this.userId = it.toLocalId() }
+            event = packedEvent
+        }.toByteArray())
     }
 
     data class ConnectionMetadata(

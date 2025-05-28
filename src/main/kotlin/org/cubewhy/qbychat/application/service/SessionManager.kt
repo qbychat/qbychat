@@ -78,6 +78,6 @@ interface SessionManager {
 
     suspend fun isClientOnline(clientId: String): Boolean
 
-    fun pushEvent(userId: String, event: GeneratedMessage)
+    suspend fun pushEvent(userId: String, event: GeneratedMessage)
     suspend fun processWithSessionLocally(userId: String, func: suspend (ClientConnection<*>) -> Unit)
 }

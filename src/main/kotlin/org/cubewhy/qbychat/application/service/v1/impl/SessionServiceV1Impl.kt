@@ -30,13 +30,13 @@ import org.cubewhy.qbychat.exception.WebsocketBadRequest
 import org.cubewhy.qbychat.exception.WebsocketForbidden
 import org.cubewhy.qbychat.exception.WebsocketUnauthorized
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.rpc.session.v1.RegisterClientRequest
+import org.cubewhy.qbychat.rpc.session.v1.ResumeClientRequest
+import org.cubewhy.qbychat.rpc.session.v1.registerClientResponse
+import org.cubewhy.qbychat.rpc.session.v1.resumeClientResponse
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
 import org.cubewhy.qbychat.shared.model.websocketResponseOf
 import org.cubewhy.qbychat.shared.util.generateSecureSecret
-import org.cubewhy.qbychat.websocket.session.v1.RegisterClientRequest
-import org.cubewhy.qbychat.websocket.session.v1.ResumeClientRequest
-import org.cubewhy.qbychat.websocket.session.v1.registerClientResponse
-import org.cubewhy.qbychat.websocket.session.v1.resumeClientResponse
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 

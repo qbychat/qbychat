@@ -25,9 +25,9 @@ import org.cubewhy.qbychat.application.service.v1.AuthServiceV1
 import org.cubewhy.qbychat.domain.repository.SessionRepository
 import org.cubewhy.qbychat.domain.repository.UserRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.rpc.auth.v1.UsernamePasswordLoginRequest
+import org.cubewhy.qbychat.rpc.auth.v1.UsernamePasswordLoginResponse
 import org.cubewhy.qbychat.shared.util.protobuf.UsernamePasswordLoginResponsesV1
-import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginRequest
-import org.cubewhy.qbychat.websocket.auth.v1.UsernamePasswordLoginResponse
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 

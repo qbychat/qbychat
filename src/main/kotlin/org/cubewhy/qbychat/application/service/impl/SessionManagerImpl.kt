@@ -27,8 +27,8 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactor.mono
+import org.cubewhy.qbychat.application.service.MessageProducerService
 import org.cubewhy.qbychat.application.service.SessionManager
-import org.cubewhy.qbychat.avro.InstanceMessage
 import org.cubewhy.qbychat.config.properties.InstanceProperties
 import org.cubewhy.qbychat.domain.model.Session
 import org.cubewhy.qbychat.domain.model.SessionMetadata
@@ -36,10 +36,12 @@ import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.domain.repository.ClientRepository
 import org.cubewhy.qbychat.domain.repository.SessionRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.rpc.protocol.v1.InstanceEvent
+import org.cubewhy.qbychat.rpc.protocol.v1.userEvent
 import org.cubewhy.qbychat.shared.util.Const
-import org.cubewhy.qbychat.shared.util.protobuf.protobufEventOf
+import org.cubewhy.qbychat.shared.util.protobuf.toLocalId
+import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.context.event.EventListener
 import org.springframework.core.env.Environment
 import org.springframework.core.env.Profiles
@@ -47,17 +49,16 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.core.removeAndAwait
 import org.springframework.stereotype.Service
 import reactor.kotlin.core.publisher.toFlux
-import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class SessionManagerImpl(
     private val sessionMetadataReactiveRedisTemplate: ReactiveRedisTemplate<String, SessionMetadata>,
     private val sessionRepository: SessionRepository,
-    private val streamBridge: StreamBridge,
     private val instanceProperties: InstanceProperties,
     private val clientRepository: ClientRepository,
     private val environment: Environment,
+    private val messageProducerService: MessageProducerService
 ) : SessionManager {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -142,16 +143,11 @@ class SessionManagerImpl(
         return sessionRepository.existsById(sessionId).awaitFirst()
     }
 
-    override fun pushEvent(userId: String, event: GeneratedMessage) {
-        // convert to avro
-        val payload = InstanceMessage.newBuilder().apply {
-            this.userId = userId
-            this.payload = protobufEventOf(event, userId).toByteString().asReadOnlyByteBuffer()
-            this.timestamp = Instant.now().epochSecond
-        }
-        // send to broker
-        if (!streamBridge.send("qbychat-1", payload)) {
-            logger.error { "Failed to push event to user $${userId}" }
+    override suspend fun pushEvent(userId: String, event: GeneratedMessage) {
+        messageProducerService.sendEvent(userId.toLocalId()) {
+            userEvent = userEvent {
+                this.event = com.google.protobuf.Any.pack(event)
+            }
         }
     }
 
@@ -202,5 +198,21 @@ class SessionManagerImpl(
                 sessionMetadataReactiveRedisTemplate.opsForSet()
                     .remove(Const.SESSION_STORE, session)
             }.awaitFirstOrNull()
+    }
+
+    @RabbitListener(queues = ["stream.qc.queue1"])
+    private suspend fun listen(data: ByteArray) {
+        val event = InstanceEvent.parseFrom(data)
+        val userId = event.userId.stringId
+        when (event.eventCase) {
+            InstanceEvent.EventCase.USER_EVENT -> {
+                // TODO move this logic to service layer
+                this.processWithSessionLocally(userId) { connection ->
+                    connection.sendEvent(event.userEvent.event, userId)
+                }
+            }
+
+            else -> null // do nothing
+        }
     }
 }

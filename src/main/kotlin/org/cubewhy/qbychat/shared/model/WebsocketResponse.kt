@@ -20,10 +20,11 @@ package org.cubewhy.qbychat.shared.model
 
 import com.google.protobuf.GeneratedMessage
 import com.google.protobuf.kotlin.toByteString
-import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
-import org.cubewhy.qbychat.websocket.protocol.v1.RpcResponse
-import org.cubewhy.qbychat.websocket.protocol.v1.clientboundMessage
-import org.cubewhy.qbychat.websocket.protocol.v1.rpcResponse
+import org.cubewhy.qbychat.rpc.protocol.v1.ClientboundHandshake
+import org.cubewhy.qbychat.rpc.protocol.v1.RpcResponse
+import org.cubewhy.qbychat.rpc.protocol.v1.clientboundMessage
+import org.cubewhy.qbychat.rpc.protocol.v1.rpcResponse
+import org.cubewhy.qbychat.shared.util.protobuf.toLocalId
 
 data class WebsocketResponse(
     val payload: ByteArray?,
@@ -78,7 +79,7 @@ data class WebsocketEvent(
     val shared: Boolean // should this event shared over sessions that logged in the same account?
 ) {
     fun buildProtobufMessage(userId: String?) = clientboundMessage {
-        userId?.let { this.userId = it }
+        userId?.let { this.userId = it.toLocalId() }
         this.event = com.google.protobuf.Any.pack(eventMessage)
     }
 }

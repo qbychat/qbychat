@@ -2,10 +2,10 @@ version: v2
 clean: true
 
 managed:
-  enabled: false
+  enabled: true
   override:
     - file_option: java_package_prefix
-      value: org.cubewhy.qbychat
+      value: org.cubewhy
     - file_option: java_multiple_files
       # noinspection YAMLSchemaValidation
       value: true

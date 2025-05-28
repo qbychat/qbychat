@@ -19,10 +19,10 @@
 package org.cubewhy.qbychat.application.service
 
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.rpc.protocol.v1.ClientboundHandshake
+import org.cubewhy.qbychat.rpc.protocol.v1.ServerboundHandshake
+import org.cubewhy.qbychat.rpc.protocol.v1.ServerboundMessage
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
-import org.cubewhy.qbychat.websocket.protocol.v1.ClientboundHandshake
-import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundHandshake
-import org.cubewhy.qbychat.websocket.protocol.v1.ServerboundMessage
 import reactor.core.publisher.SignalType
 
 interface PacketService {

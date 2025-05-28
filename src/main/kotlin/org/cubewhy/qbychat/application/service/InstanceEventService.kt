@@ -16,18 +16,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.cubewhy.qbychat.shared.annotations.rpc;
+package org.cubewhy.qbychat.application.service
 
-import org.cubewhy.qbychat.domain.model.Role;
-import org.cubewhy.qbychat.rpc.protocol.v1.RpcRequestMethod;
+import org.cubewhy.qbychat.rpc.protocol.v1.InstanceEvent
 
-import java.lang.annotation.*;
-
-@Documented
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface RpcMapping {
-    RpcRequestMethod method();
-    Role[] roles() default {};
-    RpcPermissionFlag permissions() default RpcPermissionFlag.ALLOW_AUTHORIZED_ONLY;
+interface InstanceEventService {
+    suspend fun shouldProcessEvent(event: InstanceEvent): Boolean
+    suspend fun processEvent(event: InstanceEvent)
 }

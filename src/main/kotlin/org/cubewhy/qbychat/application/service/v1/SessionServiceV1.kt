@@ -20,9 +20,9 @@ package org.cubewhy.qbychat.application.service.v1
 
 import org.cubewhy.qbychat.exception.WebsocketBadRequest
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
+import org.cubewhy.qbychat.rpc.session.v1.RegisterClientRequest
+import org.cubewhy.qbychat.rpc.session.v1.ResumeClientRequest
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
-import org.cubewhy.qbychat.websocket.session.v1.RegisterClientRequest
-import org.cubewhy.qbychat.websocket.session.v1.ResumeClientRequest
 
 interface SessionServiceV1 {
     /**
@@ -32,7 +32,7 @@ interface SessionServiceV1 {
      * - Can only be registered once;
      * - If the client is already registered, it returns an error;
      *
-     * @param session The current WebSocket session
+     * @param connection The current WebSocket session
      * @param payload The client registration request payload
      * @return The response after successful registration
      * @throws WebsocketBadRequest If the client has already been registered
