@@ -25,7 +25,9 @@ import org.springframework.context.annotation.Bean
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.containers.Network
+import org.testcontainers.containers.RabbitMQContainer
 import org.testcontainers.utility.DockerImageName
+import org.testcontainers.utility.MountableFile
 
 @TestConfiguration(proxyBeanMethods = false)
 class TestcontainersConfiguration {
@@ -49,6 +51,19 @@ class TestcontainersConfiguration {
             .withNetwork(network)
             .withNetworkAliases("valkey")
             .withExposedPorts(6379)
+            .withReuse(true)
+    }
+
+    @Bean
+    fun rabbitmqContainer(): RabbitMQContainer {
+        return RabbitMQContainer(DockerImageName.parse("rabbitmq:4-management"))
+            .withNetwork(network)
+            .withNetworkAliases("rabbitmq")
+            .withExposedPorts(5672, 5552)
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("rabbitmq/enabled_plugins"),
+                "/etc/rabbitmq/enabled_plugins"
+            )
             .withReuse(true)
     }
 }

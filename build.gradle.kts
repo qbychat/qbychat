@@ -65,6 +65,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:mongodb")
+    testImplementation("org.testcontainers:rabbitmq")
     testImplementation("com.redis:testcontainers-redis")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
     runtimeOnly("org.springframework.boot:spring-boot-docker-compose")
