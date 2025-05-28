@@ -60,6 +60,8 @@ class TestcontainersConfiguration {
             .withNetwork(network)
             .withNetworkAliases("rabbitmq")
             .withExposedPorts(5672, 5552)
+            .withEnv("RABBITMQ_DEFAULT_USER", "admin")
+            .withEnv("RABBITMQ_DEFAULT_PASS", "password")
             .withCopyFileToContainer(
                 MountableFile.forClasspathResource("rabbitmq/enabled_plugins"),
                 "/etc/rabbitmq/enabled_plugins"
