@@ -18,7 +18,7 @@
 
 package org.cubewhy.qbychat.application.service.v1
 
-import org.cubewhy.qbychat.exception.WebsocketBadRequest
+import org.cubewhy.qbychat.exception.RpcBadRequest
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.rpc.session.v1.RegisterClientRequest
 import org.cubewhy.qbychat.rpc.session.v1.ResumeClientRequest
@@ -35,7 +35,7 @@ interface SessionServiceV1 {
      * @param connection The current WebSocket session
      * @param payload The client registration request payload
      * @return The response after successful registration
-     * @throws WebsocketBadRequest If the client has already been registered
+     * @throws RpcBadRequest If the client has already been registered
      */
     suspend fun registerClient(connection: ClientConnection<*>, payload: RegisterClientRequest): WebsocketResponse
     suspend fun resumeClient(connection: ClientConnection<*>, payload: ResumeClientRequest): WebsocketResponse

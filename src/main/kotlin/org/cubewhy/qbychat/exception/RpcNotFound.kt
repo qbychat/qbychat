@@ -20,4 +20,4 @@
 
 package org.cubewhy.qbychat.exception
 
-class WebsocketNotFound(message: String = "Not found") : RuntimeException(message)
+class RpcNotFound(message: String = "Not found") : RuntimeException(message)

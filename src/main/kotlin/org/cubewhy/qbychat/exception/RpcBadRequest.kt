@@ -20,4 +20,4 @@
 
 package org.cubewhy.qbychat.exception
 
-class WebsocketUnauthorized(message: String = "Unauthorized") : RuntimeException(message)
+class RpcBadRequest(message: String = "Bad Request") : RuntimeException(message)

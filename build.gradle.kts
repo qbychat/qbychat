@@ -6,9 +6,10 @@ plugins {
 //    jacoco
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "1.9.25"
-    id("org.springframework.boot") version "3.4.2"
+    id("org.springframework.boot") version "3.5.0"
     id("io.spring.dependency-management") version "1.1.7"
     id("build.buf") version "0.10.2"
+    id("org.graalvm.buildtools.native") version "0.10.6"
 }
 
 val frontendDir = "./dashboard"
@@ -45,6 +46,7 @@ dependencies {
     implementation("com.google.protobuf:protobuf-kotlin:4.31.0")
     implementation("com.google.protobuf:protobuf-java:4.31.0")
     implementation("com.google.protobuf:protobuf-java-util:4.31.0")
+
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.springframework.cloud:spring-cloud-stream")
@@ -68,7 +70,8 @@ dependencies {
     testImplementation("org.testcontainers:rabbitmq")
     testImplementation("com.redis:testcontainers-redis")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
-    runtimeOnly("org.springframework.boot:spring-boot-docker-compose")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -26,9 +26,9 @@ import org.cubewhy.qbychat.domain.model.Client
 import org.cubewhy.qbychat.domain.model.ClientMetadata
 import org.cubewhy.qbychat.domain.repository.ClientRepository
 import org.cubewhy.qbychat.domain.repository.SessionRepository
-import org.cubewhy.qbychat.exception.WebsocketBadRequest
-import org.cubewhy.qbychat.exception.WebsocketForbidden
-import org.cubewhy.qbychat.exception.WebsocketUnauthorized
+import org.cubewhy.qbychat.exception.RpcBadRequest
+import org.cubewhy.qbychat.exception.RpcForbidden
+import org.cubewhy.qbychat.exception.RpcUnauthorized
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.rpc.session.v1.RegisterClientRequest
 import org.cubewhy.qbychat.rpc.session.v1.ResumeClientRequest
@@ -82,24 +82,24 @@ class SessionServiceV1Impl(
         // Check if the token format is correct (e.g., "clientId:authToken")
         val tokenParts = token.split(":")
         if (tokenParts.size != 2) {
-            throw WebsocketBadRequest("Invalid token format. Expected 'clientId:authToken'.")
+            throw RpcBadRequest("Invalid token format. Expected 'clientId:authToken'.")
         }
 
         val clientId = tokenParts[0]
         val providedAuthToken = tokenParts[1]
 
         if (sessionManager.isClientOnline(clientId)) {
-            throw WebsocketForbidden("This client is current online, you cannot login using the same token.")
+            throw RpcForbidden("This client is current online, you cannot login using the same token.")
         }
 
         // Retrieve the client from the repository using clientId
         val client = clientRepository.findById(clientId).awaitFirstOrNull()
-            ?: throw WebsocketUnauthorized("Client not found or token is invalid.")
+            ?: throw RpcUnauthorized("Client not found or token is invalid.")
 
         // Verify the provided token against the stored token (passwordEncoder will handle encoding checks)
         val isTokenValid = passwordEncoder.matches(providedAuthToken, client.authToken)
         if (!isTokenValid) {
-            throw WebsocketUnauthorized("Invalid token.")
+            throw RpcUnauthorized("Invalid token.")
         }
 
         connection.metadata.clientId = client.id!!

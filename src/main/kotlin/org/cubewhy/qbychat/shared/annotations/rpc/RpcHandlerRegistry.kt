@@ -20,9 +20,9 @@ package org.cubewhy.qbychat.shared.annotations.rpc
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cubewhy.qbychat.domain.model.Role
-import org.cubewhy.qbychat.exception.WebsocketForbidden
-import org.cubewhy.qbychat.exception.WebsocketNotFound
-import org.cubewhy.qbychat.exception.WebsocketUnauthorized
+import org.cubewhy.qbychat.exception.RpcForbidden
+import org.cubewhy.qbychat.exception.RpcNotFound
+import org.cubewhy.qbychat.exception.RpcUnauthorized
 import org.cubewhy.qbychat.rpc.protocol.v1.RpcRequestMethod
 import org.springframework.aot.hint.ExecutableMode
 import org.springframework.aot.hint.MemberCategory
@@ -64,9 +64,9 @@ class RpcHandlerRegistryRuntimeHints : RuntimeHintsRegistrar {
         hints.reflection().registerType(RpcPermissionFlag::class.java, *MemberCategory.entries.toTypedArray())
         hints.reflection().registerType(Role::class.java, *MemberCategory.entries.toTypedArray())
 
-        hints.reflection().registerType(WebsocketNotFound::class.java, *MemberCategory.entries.toTypedArray())
-        hints.reflection().registerType(WebsocketUnauthorized::class.java, *MemberCategory.entries.toTypedArray())
-        hints.reflection().registerType(WebsocketForbidden::class.java, *MemberCategory.entries.toTypedArray())
+        hints.reflection().registerType(RpcNotFound::class.java, *MemberCategory.entries.toTypedArray())
+        hints.reflection().registerType(RpcUnauthorized::class.java, *MemberCategory.entries.toTypedArray())
+        hints.reflection().registerType(RpcForbidden::class.java, *MemberCategory.entries.toTypedArray())
 
         hints.reflection().registerType(KFunction::class.java, *MemberCategory.entries.toTypedArray())
         hints.reflection().registerType(KParameter::class.java, *MemberCategory.entries.toTypedArray())
@@ -237,7 +237,7 @@ class RpcHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
      * Invoke RPC handler
      */
     suspend fun invokeHandler(method: RpcRequestMethod, context: RpcContext): Any? {
-        val def = handlers[method] ?: throw WebsocketNotFound("No RPC handler for method: $method")
+        val def = handlers[method] ?: throw RpcNotFound("No RPC handler for method: $method")
 
         // Check permission
         checkPermissions(def, context)
@@ -341,7 +341,7 @@ class RpcHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
         if (RpcPermissionFlag.ALLOW_ANONYMOUS_ONLY == def.annotation.permissions) {
             // Ensure that the client is unregistered
             if (context.connection.metadata.clientId != null) {
-                throw WebsocketUnauthorized("Client must not be registered.")
+                throw RpcUnauthorized("Client must not be registered.")
             }
         }
 
@@ -349,10 +349,10 @@ class RpcHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
         if (RpcPermissionFlag.ALLOW_UNAUTHORIZED_ONLY == def.annotation.permissions) {
             // Ensure that the client is registered but the user is not logged in
             if (context.connection.metadata.clientId == null) {
-                throw WebsocketUnauthorized("Client must be registered.")
+                throw RpcUnauthorized("Client must be registered.")
             }
             if (context.user != null) {
-                throw WebsocketUnauthorized("User must not be logged in.")
+                throw RpcUnauthorized("User must not be logged in.")
             }
         }
 
@@ -360,14 +360,14 @@ class RpcHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
         if (RpcPermissionFlag.ALLOW_AUTHORIZED_ONLY == def.annotation.permissions) {
             // Ensure that the user is logged in (authenticated)
             if (context.user == null) {
-                throw WebsocketUnauthorized("User must be logged in.")
+                throw RpcUnauthorized("User must be logged in.")
             }
         }
 
         if (RpcPermissionFlag.ALLOW_EXPECT_ANONYMOUS == def.annotation.permissions) {
             // Ensure that the client is registered
             if (context.connection.metadata.clientId == null) {
-                throw WebsocketUnauthorized("Client must be registered.")
+                throw RpcUnauthorized("Client must be registered.")
             }
         }
 
@@ -380,7 +380,7 @@ class RpcHandlerRegistry : ApplicationContextAware, BeanRegistrationAotProcessor
         // Additional permission checks (if needed) can be added here
         // For example: Check if user roles are allowed for the method, etc.
         if (def.annotation.roles.isNotEmpty() && context.user != null && context.user.roles.none { it in def.annotation.roles }) {
-            throw WebsocketForbidden("User does not have required roles.")
+            throw RpcForbidden("User does not have required roles.")
         }
     }
 }

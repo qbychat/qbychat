@@ -21,14 +21,13 @@ package org.cubewhy.qbychat.application.service.v1.impl
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactive.awaitFirst
 import org.cubewhy.qbychat.application.service.SessionManager
+import org.cubewhy.qbychat.application.service.mapper.UserMapper
 import org.cubewhy.qbychat.application.service.v1.UserServiceV1
 import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.domain.repository.UserRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.rpc.user.v1.*
 import org.cubewhy.qbychat.shared.util.protobuf.RegisterAccountResponsesV1
-import org.cubewhy.qbychat.shared.util.protobuf.toFederationId
-import org.cubewhy.qbychat.shared.util.protobuf.toProtobufTimestamp
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -36,7 +35,8 @@ import org.springframework.stereotype.Service
 class UserServiceV1Impl(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val userMapper: UserMapper
 ) : UserServiceV1 {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -46,16 +46,8 @@ class UserServiceV1Impl(
 
     override suspend fun sync(request: SyncRequest, user: User): SyncResponse {
         return syncResponse {
-            publicInfo = publicUserInfo {
-                userId = user.id!!.toFederationId()
-                username = user.username
-                nickname = user.nickname
-                bio = user.bio
-            }
-
-            privateInfo = privateUserInfo {
-                createTime = user.createdAt.toProtobufTimestamp()
-            }
+            publicInfo = userMapper.mapToPublicUserInfoV1(user)
+            privateInfo = userMapper.mapToPrivateUserInfoV1(user)
         }
     }
 

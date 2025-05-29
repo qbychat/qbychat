@@ -27,10 +27,10 @@ import org.cubewhy.qbychat.application.service.PacketService
 import org.cubewhy.qbychat.application.service.SessionManager
 import org.cubewhy.qbychat.config.properties.QbyChatProperties
 import org.cubewhy.qbychat.domain.repository.UserRepository
-import org.cubewhy.qbychat.exception.WebsocketBadRequest
-import org.cubewhy.qbychat.exception.WebsocketForbidden
-import org.cubewhy.qbychat.exception.WebsocketNotFound
-import org.cubewhy.qbychat.exception.WebsocketUnauthorized
+import org.cubewhy.qbychat.exception.RpcBadRequest
+import org.cubewhy.qbychat.exception.RpcForbidden
+import org.cubewhy.qbychat.exception.RpcNotFound
+import org.cubewhy.qbychat.exception.RpcUnauthorized
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.rpc.protocol.v1.*
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcContext
@@ -142,22 +142,22 @@ class PacketServiceImpl(
                     )
                 }
             }
-        } catch (e: WebsocketUnauthorized) {
+        } catch (e: RpcUnauthorized) {
             errorWebsocketResponseOf(
                 RpcResponse.Status.STATUS_UNAUTHORIZED,
                 e.message
             )
-        } catch (e: WebsocketForbidden) {
+        } catch (e: RpcForbidden) {
             errorWebsocketResponseOf(
                 RpcResponse.Status.STATUS_FORBIDDEN,
                 e.message
             )
-        } catch (e: WebsocketNotFound) {
+        } catch (e: RpcNotFound) {
             errorWebsocketResponseOf(
                 RpcResponse.Status.STATUS_NOT_FOUND,
                 e.message
             )
-        } catch (e: WebsocketBadRequest) {
+        } catch (e: RpcBadRequest) {
             errorWebsocketResponseOf(
                 RpcResponse.Status.STATUS_BAD_REQUEST,
                 e.message
