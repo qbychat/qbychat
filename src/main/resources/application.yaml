@@ -5,8 +5,6 @@ spring:
     compose:
       enabled: true
       file: compose.yml
-  main:
-    lazy-initialization: true
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://root:password@localhost/qbychat?authSource=admin}

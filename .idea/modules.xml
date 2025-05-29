@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/qbychat.integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/qbychat.integrationTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/qbychat.main.iml" filepath="$PROJECT_DIR$/.idea/modules/qbychat.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/qbychat.native-test.iml" filepath="$PROJECT_DIR$/.idea/modules/qbychat.native-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/qbychat.quarkus-generated-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/qbychat.quarkus-generated-sources.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/qbychat.quarkus-test-generated-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/qbychat.quarkus-test-generated-sources.iml" />
     </modules>
   </component>
 </project>

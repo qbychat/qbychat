@@ -24,7 +24,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
-    restart: always
+    restart: no
     ports:
       - "5672:5672"
       - "5552:5552"
