@@ -37,6 +37,7 @@ import org.cubewhy.qbychat.rpc.session.v1.resumeClientResponse
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
 import org.cubewhy.qbychat.shared.model.websocketResponseOf
 import org.cubewhy.qbychat.shared.util.generateSecureSecret
+import org.cubewhy.qbychat.shared.util.protobuf.toLocalId
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -117,8 +118,8 @@ class SessionServiceV1Impl(
         }
 
         return websocketResponseOf(resumeClientResponse {
-            accountIds.addAll(accounts)
-            mainSession?.let { this.currentAccountId = it.userId }
+            accountIds.addAll(accounts.map { it.toLocalId() })
+            mainSession?.let { this.mainAccountId = it.userId.toLocalId() }
 
         })
     }
