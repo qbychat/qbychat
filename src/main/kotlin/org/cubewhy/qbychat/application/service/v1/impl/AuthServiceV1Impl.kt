@@ -58,7 +58,7 @@ class AuthServiceV1Impl(
         ) return UsernamePasswordLoginResponsesV1.badUsernameOrPassword()
 
         // put user to session
-        sessionManager.persistSession(user, connection)
+        sessionManager.persistSession(user, connection, updateMainSession = true)
         return UsernamePasswordLoginResponsesV1.success(user.id)
     }
 }

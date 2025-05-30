@@ -72,7 +72,7 @@ interface SessionManager {
      * @param connection The session that is being created
      * @return The created [Session] object
      */
-    suspend fun persistSession(user: User, connection: ClientConnection<*>): Session
+    suspend fun persistSession(user: User, connection: ClientConnection<*>, updateMainSession: Boolean = false): Session
     suspend fun isSessionValid(sessionId: String): Boolean
     suspend fun isOnline(userId: String): Boolean
 

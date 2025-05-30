@@ -173,7 +173,11 @@ class SessionManagerImpl(
             .any { it.sessionId == connection.id }.awaitLast()
     }
 
-    override suspend fun persistSession(user: User, connection: ClientConnection<*>): Session {
+    override suspend fun persistSession(
+        user: User,
+        connection: ClientConnection<*>,
+        updateMainSession: Boolean
+    ): Session {
         val session1 = sessionRepository.save(
             Session(
                 userId = user.id!!,
@@ -183,8 +187,9 @@ class SessionManagerImpl(
         logger.info { "Session with user ${user.username} created (client: ${connection.metadata.clientId})" }
         // get client
         val client = clientRepository.findById(connection.metadata.clientId!!).awaitFirst()
-        if (client.mainSessionId == null) {
+        if (client.mainSessionId == null || updateMainSession) {
             client.mainSessionId = session1.id
+            // TODO push event to client to notify main session change
         }
         clientRepository.save(client).awaitFirst()
         this.saveSession(connection, user.id) // add to Redis session store

@@ -76,7 +76,7 @@ class UserServiceV1Impl(
         ).awaitFirst()
         logger.info { "Created user ${user.username}." }
         // add user to session
-        sessionManager.persistSession(user, connection)
+        sessionManager.persistSession(user, connection, updateMainSession = true)
         return RegisterAccountResponsesV1.success(user.id!!)
     }
 
