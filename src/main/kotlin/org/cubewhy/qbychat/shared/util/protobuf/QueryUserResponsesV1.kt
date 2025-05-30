@@ -16,13 +16,23 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.cubewhy.qbychat.application.service.mapper
+package org.cubewhy.qbychat.shared.util.protobuf
 
-import org.cubewhy.qbychat.domain.model.User
-import org.cubewhy.qbychat.rpc.user.v1.PrivateUserProfile as PrivateUserProfileV1
-import org.cubewhy.qbychat.rpc.user.v1.PublicUserProfile as PublicUserProfileV1
+import org.cubewhy.qbychat.rpc.user.v1.PublicUserProfile
+import org.cubewhy.qbychat.rpc.user.v1.QueryUserResponse
+import org.cubewhy.qbychat.rpc.user.v1.queryUserResponse
 
-interface UserMapper {
-    fun mapToPublicUserProfileV1(user: User): PublicUserProfileV1
-    fun mapToPrivateUserProfileV1(user: User): PrivateUserProfileV1
+object QueryUserResponsesV1 {
+    fun userNotFound(): QueryUserResponse {
+        return queryUserResponse {
+            status = QueryUserResponse.Status.STATUS_USER_NOT_FOUND
+        }
+    }
+
+    fun success(profile: PublicUserProfile): QueryUserResponse {
+        return queryUserResponse {
+            status = QueryUserResponse.Status.STATUS_SUCCESS
+            userProfile = profile
+        }
+    }
 }

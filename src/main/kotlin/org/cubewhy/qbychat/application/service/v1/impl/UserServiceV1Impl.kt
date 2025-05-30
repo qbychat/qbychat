@@ -20,6 +20,7 @@ package org.cubewhy.qbychat.application.service.v1.impl
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.cubewhy.qbychat.application.service.SessionManager
 import org.cubewhy.qbychat.application.service.mapper.UserMapper
 import org.cubewhy.qbychat.application.service.v1.UserServiceV1
@@ -27,6 +28,7 @@ import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.domain.repository.UserRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.rpc.user.v1.*
+import org.cubewhy.qbychat.shared.util.protobuf.QueryUserResponsesV1
 import org.cubewhy.qbychat.shared.util.protobuf.RegisterAccountResponsesV1
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -46,8 +48,8 @@ class UserServiceV1Impl(
 
     override suspend fun sync(request: SyncRequest, user: User): SyncResponse {
         return syncResponse {
-            publicInfo = userMapper.mapToPublicUserInfoV1(user)
-            privateInfo = userMapper.mapToPrivateUserInfoV1(user)
+            publicInfo = userMapper.mapToPublicUserProfileV1(user)
+            privateInfo = userMapper.mapToPrivateUserProfileV1(user)
         }
     }
 
@@ -76,5 +78,15 @@ class UserServiceV1Impl(
         // add user to session
         sessionManager.persistSession(user, connection)
         return RegisterAccountResponsesV1.success(user.id!!)
+    }
+
+    override suspend fun queryUser(request: QueryUserRequest): QueryUserResponse {
+        // TODO federation query
+        // find user
+        val targetUser = userRepository.findById(request.userId.localId.stringId).awaitFirstOrNull()
+            ?: return QueryUserResponsesV1.userNotFound()
+
+        val publicUserProfile = userMapper.mapToPublicUserProfileV1(targetUser)
+        return QueryUserResponsesV1.success(publicUserProfile)
     }
 }

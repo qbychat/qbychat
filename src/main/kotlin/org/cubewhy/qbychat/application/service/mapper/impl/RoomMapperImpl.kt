@@ -50,7 +50,7 @@ class RoomMapperImpl(
                         .awaitFirst()
 
                     privateRoom = privateRoom {
-                        peerUser = userMapper.mapToPublicUserInfoV1(peer)
+                        peerUser = userMapper.mapToPublicUserProfileV1(peer)
                     }
                 }
 

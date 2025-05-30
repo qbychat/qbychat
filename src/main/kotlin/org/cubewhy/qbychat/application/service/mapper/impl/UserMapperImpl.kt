@@ -20,18 +20,18 @@ package org.cubewhy.qbychat.application.service.mapper.impl
 
 import org.cubewhy.qbychat.application.service.mapper.UserMapper
 import org.cubewhy.qbychat.domain.model.User
-import org.cubewhy.qbychat.rpc.user.v1.PrivateUserInfo
-import org.cubewhy.qbychat.rpc.user.v1.PublicUserInfo
-import org.cubewhy.qbychat.rpc.user.v1.privateUserInfo
-import org.cubewhy.qbychat.rpc.user.v1.publicUserInfo
+import org.cubewhy.qbychat.rpc.user.v1.privateUserProfile
+import org.cubewhy.qbychat.rpc.user.v1.publicUserProfile
 import org.cubewhy.qbychat.shared.util.protobuf.toFederationId
 import org.cubewhy.qbychat.shared.util.protobuf.toProtobufTimestamp
 import org.springframework.stereotype.Service
+import org.cubewhy.qbychat.rpc.user.v1.PrivateUserProfile as PrivateUserProfileV1
+import org.cubewhy.qbychat.rpc.user.v1.PublicUserProfile as PublicUserProfileV1
 
 @Service
 class UserMapperImpl : UserMapper {
-    override fun mapToPublicUserInfoV1(user: User): PublicUserInfo {
-        return publicUserInfo {
+    override fun mapToPublicUserProfileV1(user: User): PublicUserProfileV1 {
+        return publicUserProfile {
             userId = user.id!!.toFederationId()
             username = user.username
             nickname = user.nickname
@@ -39,8 +39,8 @@ class UserMapperImpl : UserMapper {
         }
     }
 
-    override fun mapToPrivateUserInfoV1(user: User): PrivateUserInfo {
-        return privateUserInfo {
+    override fun mapToPrivateUserProfileV1(user: User): PrivateUserProfileV1 {
+        return privateUserProfile {
             createTime = user.createdAt.toProtobufTimestamp()
         }
     }

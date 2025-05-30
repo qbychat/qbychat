@@ -22,8 +22,8 @@ import org.cubewhy.qbychat.application.service.v1.UserServiceV1
 import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.rpc.protocol.v1.RpcRequestMethod
+import org.cubewhy.qbychat.rpc.user.v1.QueryUserRequest
 import org.cubewhy.qbychat.rpc.user.v1.RegisterAccountRequest
-import org.cubewhy.qbychat.rpc.user.v1.RegisterAccountResponse
 import org.cubewhy.qbychat.rpc.user.v1.SyncRequest
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcMapping
 import org.cubewhy.qbychat.shared.annotations.rpc.RpcPermissionFlag
@@ -43,9 +43,14 @@ class UserControllerV1(private val userServiceV1: UserServiceV1) {
         permissions = RpcPermissionFlag.ALLOW_EXPECT_ANONYMOUS
     )
     suspend fun registerAccount(
-        payload: RegisterAccountRequest,
+        request: RegisterAccountRequest,
         connection: ClientConnection<*>
-    ): RegisterAccountResponse {
-        return userServiceV1.registerAccount(payload, connection)
+    ): WebsocketResponse {
+        return websocketResponseOf(userServiceV1.registerAccount(request, connection))
+    }
+
+    @RpcMapping(method = RpcRequestMethod.RPC_REQUEST_METHOD_QUERY_USER_V1)
+    suspend fun queryUser(request: QueryUserRequest): WebsocketResponse {
+        return websocketResponseOf(userServiceV1.queryUser(request))
     }
 }
