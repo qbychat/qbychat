@@ -26,6 +26,7 @@ import org.cubewhy.qbychat.application.service.mapper.UserMapper
 import org.cubewhy.qbychat.application.service.v1.UserServiceV1
 import org.cubewhy.qbychat.domain.model.User
 import org.cubewhy.qbychat.domain.repository.UserRepository
+import org.cubewhy.qbychat.exception.RpcBadRequest
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.rpc.user.v1.*
 import org.cubewhy.qbychat.shared.util.protobuf.QueryUserResponsesV1
@@ -55,8 +56,7 @@ class UserServiceV1Impl(
 
 
     override suspend fun registerAccount(
-        request: RegisterAccountRequest,
-        connection: ClientConnection<*>
+        request: RegisterAccountRequest, connection: ClientConnection<*>
     ): RegisterAccountResponse {
         // check if username available
         if (userRepository.existsByUsernameIgnoreCase(request.username).awaitFirst()) {
@@ -83,8 +83,11 @@ class UserServiceV1Impl(
     override suspend fun queryUser(request: QueryUserRequest): QueryUserResponse {
         // TODO federation query
         // find user
-        val targetUser = userRepository.findById(request.userId.localId.stringId).awaitFirstOrNull()
-            ?: return QueryUserResponsesV1.userNotFound()
+        val targetUser =
+            (if (request.hasUserId()) userRepository.findById(request.userId.localId.stringId).awaitFirstOrNull()
+            else if (request.hasUsername()) userRepository.findByUsernameIgnoreCase(request.username.username)
+                .awaitFirstOrNull()
+            else throw RpcBadRequest("Bad request")) ?: return QueryUserResponsesV1.userNotFound()
 
         val publicUserProfile = userMapper.mapToPublicUserProfileV1(targetUser)
         return QueryUserResponsesV1.success(publicUserProfile)
