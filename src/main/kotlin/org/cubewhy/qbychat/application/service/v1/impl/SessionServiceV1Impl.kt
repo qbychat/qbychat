@@ -30,11 +30,9 @@ import org.cubewhy.qbychat.exception.RpcBadRequest
 import org.cubewhy.qbychat.exception.RpcForbidden
 import org.cubewhy.qbychat.exception.RpcUnauthorized
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
-import org.cubewhy.qbychat.rpc.session.v1.RegisterClientRequest
-import org.cubewhy.qbychat.rpc.session.v1.ResumeClientRequest
-import org.cubewhy.qbychat.rpc.session.v1.registerClientResponse
-import org.cubewhy.qbychat.rpc.session.v1.resumeClientResponse
+import org.cubewhy.qbychat.rpc.session.v1.*
 import org.cubewhy.qbychat.shared.model.WebsocketResponse
+import org.cubewhy.qbychat.shared.model.eventOf
 import org.cubewhy.qbychat.shared.model.websocketResponseOf
 import org.cubewhy.qbychat.shared.util.generateSecureSecret
 import org.cubewhy.qbychat.shared.util.protobuf.toLocalId
@@ -117,10 +115,18 @@ class SessionServiceV1Impl(
             sessionManager.saveSession(connection, userId = account)
         }
 
-        return websocketResponseOf(resumeClientResponse {
-            accountIds.addAll(accounts.map { it.toLocalId() })
-            mainSession?.let { this.mainAccountId = it.userId.toLocalId() }
+        val events = mainSession?.userId?.let { mainUserId ->
+            eventOf(switchMainSessionEvent {
+                mainAccountId = mainUserId.toLocalId()
+            })
+        }
 
-        })
+        return websocketResponseOf(
+            resumeClientResponse {
+                accountIds.addAll(accounts.map { it.toLocalId() })
+                mainSession?.let { this.mainAccountId = it.userId.toLocalId() }
+            },
+            events ?: emptyList()
+        )
     }
 }

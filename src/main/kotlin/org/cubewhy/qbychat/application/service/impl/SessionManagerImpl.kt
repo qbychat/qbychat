@@ -38,6 +38,7 @@ import org.cubewhy.qbychat.domain.repository.SessionRepository
 import org.cubewhy.qbychat.infrastructure.transport.ClientConnection
 import org.cubewhy.qbychat.rpc.protocol.v1.InstanceEvent
 import org.cubewhy.qbychat.rpc.protocol.v1.userEvent
+import org.cubewhy.qbychat.rpc.session.v1.switchMainSessionEvent
 import org.cubewhy.qbychat.shared.util.Const
 import org.cubewhy.qbychat.shared.util.protobuf.toLocalId
 import org.springframework.amqp.rabbit.annotation.RabbitListener
@@ -178,7 +179,7 @@ class SessionManagerImpl(
         connection: ClientConnection<*>,
         updateMainSession: Boolean
     ): Session {
-        val session1 = sessionRepository.save(
+        val savedSession = sessionRepository.save(
             Session(
                 userId = user.id!!,
                 clientId = connection.metadata.clientId!!
@@ -188,12 +189,14 @@ class SessionManagerImpl(
         // get client
         val client = clientRepository.findById(connection.metadata.clientId!!).awaitFirst()
         if (client.mainSessionId == null || updateMainSession) {
-            client.mainSessionId = session1.id
-            // TODO push event to client to notify main session change
+            client.mainSessionId = savedSession.id
+            connection.sendEvent(switchMainSessionEvent {
+                this.mainAccountId = savedSession.userId.toLocalId()
+            }, null)
         }
         clientRepository.save(client).awaitFirst()
         this.saveSession(connection, user.id) // add to Redis session store
-        return sessionRepository.save(session1).awaitFirst()
+        return sessionRepository.save(savedSession).awaitFirst()
     }
 
     override suspend fun removeSession(connection: ClientConnection<*>) {
