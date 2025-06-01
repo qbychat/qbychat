@@ -86,8 +86,8 @@ data class WebsocketEvent(
 
 fun sharedEventOf(vararg events: GeneratedMessage) = events.map { WebsocketEvent(it, true) }
 fun sharedEventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, true) }
-fun eventOf(vararg events: GeneratedMessage) = events.map { WebsocketEvent(it, true) }
-fun eventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, true) }
+fun eventOf(vararg events: GeneratedMessage) = events.map { WebsocketEvent(it, false) }
+fun eventOf(events: List<GeneratedMessage>) = events.map { WebsocketEvent(it, false) }
 
 fun websocketResponseOf(
     payload: ByteArray?,
