@@ -24,6 +24,9 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+.idea/workspace.xml
+.idea/dataSources.local.xml
+.idea/dataSources.xml
 
 ### NetBeans ###
 /nbproject/private/

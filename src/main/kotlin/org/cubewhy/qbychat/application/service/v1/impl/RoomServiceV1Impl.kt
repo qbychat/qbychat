@@ -50,7 +50,7 @@ class RoomServiceV1Impl(
             .awaitFirst()
 
         return syncResponse {
-            this.joinedRooms.addAll(joinedRooms.map { roomMapper.mapToProtobufRoomV1(it, user) });
+            this.joinedRooms.addAll(joinedRooms.map { roomMapper.mapToProtobufRoomV1(it, user) })
         }
     }
 
@@ -63,6 +63,9 @@ class RoomServiceV1Impl(
         val peer = userRepository.findById(request.peerId.localId.stringId).awaitFirstOrNull()
             ?: throw RpcBadRequest("Peer user not found")
         val room = roomService.createPrivateRoom(user, peer)
+        // TODO send message
+
+        // TODO push join room event
 
         return createPrivateRoomResponse {
             this.room = roomMapper.mapToProtobufRoomV1(room, user)
